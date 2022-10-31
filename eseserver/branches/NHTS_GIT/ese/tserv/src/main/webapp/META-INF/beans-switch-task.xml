@@ -1,0 +1,48 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans  xmlns="http://www.springframework.org/schema/beans"
+    xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+    xmlns:task="http://www.springframework.org/schema/task"
+    xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.0.xsd
+                            http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.0.xsd
+                            http://www.springframework.org/schema/task http://www.springframework.org/schema/task/spring-task-4.0.xsd">
+<bean id="webSessionTenantIdentifierResolver"
+		class="com.sourcetrace.eses.multitenancy.WebSessionCurrentTenantIdentifierResolver">
+	</bean>
+
+	<bean id="itcSchedule" class="org.springframework.scheduling.support.CronTrigger">
+		<constructor-arg type="java.lang.String" value="0 30 23 * * *" />
+		<constructor-arg type="java.util.TimeZone" ref="bangladeshTimeZone" />
+	</bean>
+	<bean id="bangladeshTimeZone" class="java.util.TimeZone"
+		factory-method="getTimeZone">
+		<constructor-arg type="java.lang.String" value="UTC+3" />
+		
+	</bean>
+	<!--<task:scheduled-tasks scheduler="stsScheduler" >
+      <task:scheduled ref="validateKRApinSchedulerTask" method="process" trigger="itcSchedule" />
+      </task:scheduled-tasks>
+      
+      <task:scheduler id="stsScheduler" pool-size="20" />
+ 
+	<task:scheduled-tasks scheduler="stsScheduler" >
+      <task:scheduled ref="offlineDistributionSchedulerTask" method="process" fixed-delay="120000" initial-delay="1000" />
+      <task:scheduled ref="offlineProductReturnSchedulerTask" method="process" fixed-delay="120000" initial-delay="120000" />
+      <task:scheduled ref="offlineProcurementSchedulerTask" method="process" fixed-delay="120000" initial-delay="120000" />
+      <task:scheduled ref="offlineTrainingStatusSchedulerTask" method="process" fixed-delay="120000" initial-delay="120000" />
+ 	  <task:scheduled ref="offlineMTNSchedulerTask" method="process" fixed-delay="120000" initial-delay="0" /> 
+      <task:scheduled ref="offlinePaymentSchedulerTask" method="process" fixed-delay="120000" initial-delay="120000" />
+      <task:scheduled ref="offlineProductReturnSchedulerTask" method="process" fixed-delay="300000" initial-delay="0" />
+      <task:scheduled ref="offlineSupplierProcurementSchedulerTask" method="process" fixed-delay="300000" initial-delay="0" />
+      <task:scheduled ref="offlineProcurementTraceabtySche" method="process" fixed-delay="300000" initial-delay="0" />
+      <task:scheduled ref="offlinePMTNRSchedulerTask" method="process" fixed-delay="12000" initial-delay="0" />
+      <task:scheduled ref="offlineTransferTraceabilitySchedulerTask" method="process" fixed-delay="12000" initial-delay="0" />
+      <task:scheduled ref="offlineGinningProcessSchedulerTask" method="process" fixed-delay="120000" initial-delay="0"/>
+      <task:scheduled ref="offlineBaleGenerationSchedulerTask" method="process" fixed-delay="120000" initial-delay="0"/>
+      <task:scheduled ref="offlineTransferSpinningSchedulerTask" method="process" fixed-delay="120000" initial-delay="0"/>
+      <task:scheduled ref="offlineFarmCropCalendarSchedulerTask" method="process" fixed-delay="120000" initial-delay="0"/>
+       <task:scheduled ref="offlineTxnScheduler" method="process" fixed-delay="1200000" initial-delay="0"/>
+    </task:scheduled-tasks> 
+ -->
+     
+	 
+</beans>

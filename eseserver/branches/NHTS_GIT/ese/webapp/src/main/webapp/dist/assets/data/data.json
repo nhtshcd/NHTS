@@ -1,0 +1,38 @@
+{
+  "data": [
+    {
+      "date": "02/08/2020",
+      "country": "Tamil Nadu",
+      "buyname": "Wheat",
+      "emailid": "test@gmail.com",
+      "mobno": "9876543210",
+      "prodct": "Kovai Farm",
+      "variety": "Organic",
+      "grade": "grade 1",
+      "qty": "<p class='avlb'>Avail.<em>1428</em></p><p class='purch'>Purch.<em>21</em></p>",
+      "buy": "<div class='action-col-body'><ul class='list-inline dt-btn-list'><li class='list-inline-item'><a class='btn-action' data-toggle='tooltip' data-placement='top' title='Add to Cart'><i class='fas fa-shopping-cart'></i></a></li></ul></div>",
+      "aprvdqty": "<input class='form-control' type='text' placeholder='Search' value='2' />",
+      "prcperunit": "<input class='form-control' type='text' placeholder='Search' value='60' />",
+      "amt": "120",
+      "amtpaid": "<input class='form-control' type='text' placeholder='Search' value='120' />",
+      "rowcta": "<button class='btn bttn-primary st mr-4'>Approve</button><button class='btn bttn-primary-outline st'>Cancel</button>"
+    },
+    {
+      "date": "02/08/2020",
+      "country": "Maharashtra",
+      "buyname": "Wheat",
+      "emailid": "test@gmail.com",
+      "mobno": "9876543210",
+      "prodct": "Kovai Farm",
+      "variety": "Organic",
+      "grade": "grade 1",
+      "qty": "<p class='avlb'>Avail.<em>1428</em></p><p class='purch'>Purch.<em>21</em></p>",
+      "buy": "<div class='action-col-body'><ul class='list-inline dt-btn-list'><li class='list-inline-item'><a class='btn-action' data-toggle='tooltip' data-placement='top' title='Add to Cart'><i class='fas fa-shopping-cart'></i></a></li></ul></div>",
+      "aprvdqty": "<input class='form-control' type='text' placeholder='Search' value='2' />",
+      "prcperunit": "<input class='form-control' type='text' placeholder='Search' value='60' />",
+      "amt": "120",
+      "amtpaid": "<input class='form-control' type='text' placeholder='Search' value='60' />",
+      "rowcta": "<button class='btn bttn-primary st mr-4'>Approve</button><button class='btn bttn-primary-outline st'>Cancel</button>"
+    }
+  ]
+}

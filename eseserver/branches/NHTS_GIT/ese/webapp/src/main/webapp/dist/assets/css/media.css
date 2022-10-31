@@ -1,0 +1,337 @@
+@media (min-width: 1700px) {
+    /*! login */
+    .pr-login-wrap .pr-login-wrap-width {max-width:1440px;}
+    .pr-login-wrap .login-text .ttl {font-size:72px;line-height:88px;}
+    .pr-login-wrap .login-text .sb-ttl {font-size:24px;line-height:38px;}
+
+    .pr-custcol-wrap .pr-custcol-wrap-body .cust-col-3 {-ms-flex: 0 0 360px;flex: 0 0 360px;max-width: 360px;}
+    .pr-custcol-wrap .pr-custcol-wrap-body .cust-col-9 {-ms-flex: 0 0 calc(100% - 360px);flex: 0 0 calc(100% - 360px);max-width: calc(100% - 360px);}
+}
+@media (max-width: 1599px) {
+
+    /*! Header */
+    .pr-header .pr-navbar {height:70px;padding:12px 20px;}
+    .pr-header .pr-navbar .nav .nav-item .nav-link.btn-link {height:35px;width:35px;line-height:35px;margin:auto 10px;}
+    .pr-header .pr-navbar .nav .nav-item .nav-link.btn-link .ico-wrap > img {height:15px;width:auto;}
+    .pr-searchbar {height:35px;margin:auto 10px;}
+    .pr-search-input {line-height:35px;}
+    .pr-search-icon-wrap {height:35px;width:35px;}
+    .pr-search-icon-wrap > .pr-search-icon > img {height:20px;width:auto;margin-bottom:2px;}
+    .notification-dropdown .dropdown-toggle {height:35px;width:35px;margin-left:10px;}
+    .notification-dropdown .dropdown-toggle .ico-wrap {width:34px;}
+    .notification-dropdown .dropdown-toggle .ico-wrap > img {height:20px;width:auto;}
+
+    /* Sidebar */
+    .pr-sidebar {min-width:260px;max-width:260px;padding:15px 20px;}
+    .pr-sidebar-active .pr-sidebar {min-width:115px;max-width:115px;}
+    .pr-sidebar .logo {height:35px;}
+    .pr-sidebar .user-blk {padding:15px 10px;}
+    .pr-sidebar-active .pr-sidebar .user-blk {padding:12px 17px;margin-top:0;}
+    .pr-sidebar .user-blk .img-blk {width:50px;height:50px;}
+    .pr-sidebar-active .pr-sidebar .user-blk .img-blk {width:40px;height:40px;}
+    .pr-sidebar .user-blk .img-blk .sttng-ico {top:23px;left:30px;transform:scale(0.8);-webkit-transform:scale(0.8);-moz-transform:scale(0.8);-ms-transform:scale(0.8);-o-transform:scale(0.8);}
+    .pr-sidebar-active .pr-sidebar .user-blk .img-blk .sttng-ico {top:22px;left:26px;transform:scale(1);-webkit-transform:scale(1);-moz-transform:scale(1);-ms-transform:scale(1);-o-transform:scale(1);}
+    .pr-sidebar .user-blk .media .media-body .ttl {margin-top:5px;}
+    .pr-sidebar .user-blk .media .media-body .p {font-size:13px;}
+    .pr-sidebar .pr-sidebar-nav .nav-item .nav-link {margin:0px auto 20px;height:75px;width:82px;line-height:30px;}
+    .pr-sidebar .pr-sidebar-nav .nav-item .nav-link .ico {height:18px;margin:12px auto 2px;}
+    .pr-sidebar .pr-sidebar-nav .nav-item .nav-link .lnk {font-size:12px;line-height:16px;}
+    .sidebarcollapse.btn {top:120px;right:-18px;}
+    .sidebarcollapse.btn, .sidebarcollapse.btn span {height:40px;width:40px;}
+
+    /* Sidenav */
+    .pr-sidebar .pr-sidebar-tabcontent {top:70px;}
+    .pr-sidebar .pr-sidebar-tabcontent .tab-content > .tab-pane {height:calc(100vh - 70px);width:260px;padding:20px 25px;}
+    .pr-sidebar .pr-sidebar-tabcontent .tab-content > .tab-pane.active {transform:translateX(115px);-webkit-transform:translateX(115px);-moz-transform:translateX(115px);-ms-transform:translateX(115px);-o-transform:translateX(115px);}
+    .pr-sidebar .pr-sidebar-tabcontent .tab-content > .tab-pane {transform:translateX(-240px);-webkit-transform:translateX(-240px);-moz-transform:translateX(-240px);-ms-transform:translateX(-240px);-o-transform:translateX(-240px);}
+    .pr-sidebar .pr-sidebar-tabcontent .tab-content .tab-content-header .ttl {font-size:16px;}
+    .pr-sidebar .pr-sidebar-tabcontent .tab-content .tab-content-header .bck-bttn {width:25px;height:25px;padding:0;}
+    .pr-sidebar .pr-sidebar-tabcontent .pr-accordion1 .card {margin-bottom:4px;}
+
+    /* Breadcrumbs */
+    .pr-breadcrumbs-sec .pr-breadcrumb {top:12px;}
+    .pr-sidebar-active .pr-breadcrumb {margin-left:96px;}
+
+    /*! Common */
+    .h3, h3 {font-size: 18px;}
+    .h5, h5 {font-size:15px;}
+    .pr-sidebar-active .pr-content {margin-left:115px;}
+    .pr-content {height:calc(100vh - 70px);margin-left:260px;margin-top:70px;}
+    .pr-section {padding: 20px 25px;}
+    .pr-section.pr-title-section .page-ttl, .pr-section.dashboard-sec .pr-tab-content-wrap .dash-ttl {font-size:21px}
+    .pr-accordion-big {padding:20px;}
+    .pr-accordion-big .pr-accordion-big-header button > .ico {height:50px;width:50px;}
+    .pr-accordion-big .pr-accordion-big-header button > .ico > img {max-height:25px;}
+    .pr-accordion-big .pr-accordion-big-header button > span {height:50px;}
+    .pr-accordion-big .pr-accordion-big-body .inner-blk .prselectcustom {min-width:250px !important;}
+    .pr-accordion-big .pr-accordion-big-body .pr-form-control, .pr-accordion-big .pr-accordion-big-body .pr-input-group.date {max-width: 250px;}
+    .pr-accordion2 .card.actv .pr-datatable th.amt {font-size:16px;}
+    table.pr-datatable tbody td, table.pr-datatable tbody th, table.pr-datatable thead td, table.pr-datatable thead th {padding:10px 15px;}
+
+    .bttn-close {height:36px;width:36px;}
+    .bttn-filters {padding:7px 10px 7px 50px;height:45px;line-height:30px;min-width:120px !important;font-weight:600;}
+    .bttn-filters::before {background-size:80%;left:24px;}
+    .btn.bttn-add {font-size: 22px;height: 30px;width: 30px;line-height: 30px;}
+
+    .pr-pills {font-size: 12px;line-height: 20px;padding: 2px 16px;height: 24px;}
+    
+    .maps-info-blk {padding:20px 30px;}
+    .maps-info-blk .maps-info-blk-list .ttl {font-size:20px;}
+    .maps-info-blk .maps-info-blk-list {min-width:150px;}
+    .maps-info-blk .maps-info-blk-list .ico-blk {margin-right:15px;}
+    .maps-info-blk .maps-info-blk-list .ico-blk > img {width:32px;}
+
+    .maps-farmer-info-collapse.open {width:380px;}
+    .maps-farmer-info-collapse .maps-farmer-info-head {padding:16px 0px;margin:0px 20px;}
+    .maps-farmer-info-collapse .maps-farmer-info-body .collapse-content {padding:16px 0px;margin:0px 20px;}
+    .maps-farmer-info-collapse.open .maps-farmer-info-head .farmer-img {height:68px;width:68px;}
+    .maps-farmer-info-collapse.open .maps-farmer-info-head .media-body {margin:auto 16px;}
+    .maps-farmer-info-collapse.open .maps-farmer-info-head .media-body .farmer-name {font-size:20px;line-height:26px;}
+    .maps-farmer-info-collapse .maps-farmer-info-body .collapse-content .f-name > span {font-size:14px;line-height:21px;min-width:130px;}
+    .maps-farmer-info-collapse .maps-farmer-info-body .collapse-content .f-name {font-weight:800;font-size:16px;line-height:20px;margin-bottom:8px;}
+    .maps-farmer-info-collapse .maps-farmer-info-body .collapse-content .sec-ttl {font-size:15px;line-height:24px;}
+
+    .crop-blk {min-height:75px;padding:15px 10px;background-size:auto 70px;background-position-x:90%;}
+    .crop-blk .crop-nm, .crop-blk-horizontal .crop-nm {font-weight:700;font-size:16px;line-height:20px;}
+
+    .crop-graph .qty {font-size:54px;line-height:42px;}
+    .crop-graph .graph-ttl {font-size:14px;line-height:20px;margin-bottom:3px;}
+    .crop-graph .p {font-size:13px;line-height:24px;margin-bottom:4px;white-space:nowrap;}
+    .crop-graph .p > span {margin-right:7px;}
+    .crop-graph .p > span > i {font-size:14px;padding-right:3px;}
+
+    .imgProgress-img {width:80px;height:80px;}
+    .imgProgress-svg {max-height:86px;max-width:86px;}
+    
+    .training-history-wrap {margin:20px auto;background-size:auto 124px;}
+    .training-history-wrap .training-history-ttl {font-size:16px;line-height:20px;}
+    .training-history-wrap .training-history-sbttl {font-size:14px;line-height:20px;}
+    .training-history-wrap .tr-p {font-size:14px;line-height:20px;}
+    .training-history-wrap .tr-ttl {font-size:15px;line-height:22px;}
+
+    .pr-section .inner-wrap {padding:20px 25px;}
+    .pr-section .inner-wrap .inner-wrap-ttl {font-size:16px;margin-bottom:10px;}
+    .pr-dashed-table-wrap {padding:10px 22px;margin-bottom:25px;}
+    .pr-dashed-table > tbody > tr > td {padding:15px 20px;}
+    .pr-dashed-table > tbody > tr > td .main_ttl {font-size:16px;line-height:21px;}
+    .pr-dashed-table > tbody > tr > td .p, .pr-dashed-table > tbody > tr > td .sec_ttl, .pr-dashed-table > tbody > tr > td .main_ttl {max-width:180px;}
+    .pr-modal .modal-body .pr-dashed-table > tbody > tr > td .p, 
+    .pr-modal .modal-body .pr-dashed-table > tbody > tr > td .sec_ttl, 
+    .pr-modal .modal-body .pr-dashed-table > tbody > tr > td .main_ttl {max-width:200px;}
+
+    .actn-wrap .btn:not(:last-of-type) + .btn_txt {margin-right: 20px;font-size: 13px;}
+    .pr-modal.right .modal-header .modal-title {font-weight: 700;font-size: 18px;line-height: 28px;}
+    .btn.bttn-remove, .btn.bttn-edit {height: 35px;width: 35px;min-width: unset;line-height: 35px;}
+
+    .pr-section.pr-title-section {padding-top: 25px;}
+    
+    
+    /*! login */
+    .pr-login-wrap .pr-login-wrap-width {max-width: 1140px;}
+    .pr-login-wrap .login-text .ttl {font-size: 52px;line-height: 58px;}
+    .pr-login-wrap .login-text .sb-ttl {font-size: 18px;line-height: 28px;margin-top: 30px;}
+    .pr-login-wrap .login-form .frm-ttl {margin-bottom: 40px;font-size: 18px;line-height: 30px;}
+    .pr-login-wrap .login-form-wrap {width: 480px;}
+    .pr-login-wrap .login-form-wrap .login-form-outer {padding: 40px 40px 20px;}
+    .pr-login-wrap .login-form .agrmnt {margin-bottom: 10px;}
+    .pr-login-wrap .login-text .crdts {bottom: 30px;font-size: 13px;}
+
+    /*! Farm Listing, Profile, Dashboard */
+    .pr-section.farm-location-sec .map-wrap .pr-map {height:calc(100vh - 70px);}
+    .farmer-dash-wrap {max-height:calc(100vh - 70px);width:920px;}
+    .farmer-dash-wrap .farmer-dash {width:920px;padding:30px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .user-prof-img-wrap {width:180px;background-size:100%;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .media-body {margin:auto 20px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .media-body .farmer-name {font-size:22px;line-height:36px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .media-body .cntc {font-size:13px;line-height:16px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .farmer-dash-intro-list {margin:9px auto 0;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .farmer-dash-intro-list .list-group-item {font-size:13px;line-height:16px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .current-season-blk-wrap .ttl {font-weight:700;font-size:16px;line-height:20px;margin-bottom:0;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .current-season-blk .list-group-horizontal {margin:12px 40px 10px 0;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .current-season-blk .crop-pill.actv {min-width:120px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .current-season-blk .crop-pill {height:54px;width:48px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data {margin-top:20px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .ttl {font-size:18px;line-height:20px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .farmer-dash-data-inner .crop-image > img {position:absolute;height:80%;width:auto;top:50%;left:50%;transform:translate(-50%, -50%);-webkit-transform:translate(-50%, -50%);-moz-transform:translate(-50%, -50%);-ms-transform:translate(-50%, -50%);-o-transform:translate(-50%, -50%);}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .farmer-dash-data-inner .crop-activity-wrap .crop-activity-list-ttl {font-size:12px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .farmer-dash-data-inner .crop-activity-wrap .activity-list li {font-size:13px;line-height:20px;padding:2px 15px 2px 12px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .farmer-dash-data-inner .crop-activity-wrap .activity-list li::before {height:4px;width:4px;top:8px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .pr-chart-wrap {padding:20px 20px 20px 10px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .ttl {font-size:16px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .pr-custom-accordion-wrap-ttl {font-size:18px;line-height:20px;margin-bottom:10px;margin-top:7px;}
+
+    /*! QR Code Page */
+    .qr-code-box {min-width:280px;height:calc(100% - 130px);}
+    .pr-section.qr-code-sec .inner-wrap .prselectcustom {min-width:250px !important;}
+    .pr-section.qr-code-sec .inner-wrap .pr-form-control, .pr-section.qr-code-sec .inner-wrap .pr-input-group.date {max-width:250px;}
+
+
+    /*!  Dashboards  */
+    .pr-nav-tabs .nav-item {-ms-flex: 1 1 0;flex: 1 1 0;}
+    .pr-nav-tabs .nav-item .nav-link {font-size: 14px;line-height: 20px;padding: 7px 20px;white-space: nowrap;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-ttl .ttl {font-size: 16px;}
+    .pr-section.dashboard-sec .dash-table-wrapper .ttl {font-size: 17px;line-height: 22px;margin: 40px 0px 10px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper {padding: 20px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_1 {height: 280px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_3 {height: 240px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_4 {height: 240px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_5 {height: 240px;max-width: 400px;}
+    .pr-chart-wrap.dash_chart_5 .inf-blk {top: 92px;}
+    .pr-chart-wrap .inf-blk p {font-size: 24px;line-height: 28px;margin-bottom: 7px;}
+    .pr-chart-wrap .inf-blk span {font-size: 12px;line-height: 15px;}   
+
+
+    /*!  Master Data Page */
+    .master-data-sec .master-info-blk .media .media-body .m-ttl {font-size: 28px;line-height: 28px;margin-bottom: 2px;}
+    .master-data-sec .master-info-blk .media .media-body .s-ttl {font-size: 14px;}
+    .master-data-sec .master-info-blk .media {padding: 15px 25px 12px;min-width: 150px;margin-right: 20px;}
+
+
+    table.dataTable thead > tr > th.srno_col.sorting_asc, table.dataTable thead > tr > th.srno_col.sorting_desc, table.dataTable thead > tr > th.srno_col.sorting, table.dataTable thead > tr > td.srno_col.sorting_asc, table.dataTable thead > tr > td.srno_col.sorting_desc, table.dataTable thead > tr > td.srno_col.sorting {padding:0;max-width:40px;}
+    table.pr-datatable thead.sec-thead td .bootstrap-select.prselectcustom, table.pr-datatable thead.sec-thead th .bootstrap-select.prselectcustom {min-width:100px !important;}
+    table.pr-datatable thead.sec-thead th .pr-form-control {max-width:56px;padding:7px;}
+    .pr-section.add-training-selec-sec .add-inp-overview-blk .pr-form-control {max-width:120px;}
+    .pr-section.add-training-selec-sec .add-inp-overview-blk .btn {min-width:120px;padding:8px 15px;font-weight:600;font-size:13px;line-height:26px;}
+    
+    /*! Add Farmer screen */
+    .custom-hr-list-wrap .list-group .nav-item .nav-link {padding:0px 20px;font-size:14px;}
+    .custom-hr-list-wrap .list-group .nav-item .nav-link::before {height:20px;width:20px;top:-33px;left:calc(50% + 8px);}
+    .custom-hr-list-wrap .list-group .nav-item:not(:last-child) .nav-link::after {max-width:135px;left:calc(50% + 18px);}
+    .custom-hr-list-wrap .list-group .nav-item.active .nav-link::before, .custom-hr-list-wrap .list-group .nav-item.finished .nav-link::before {background-size:20px;}
+
+    /*! Geocledian Page  */
+    .pr-section.geocledian-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_3 {height: 240px;}
+
+
+}
+@media (max-width: 1399px) and (min-width: 1200px)  {
+
+    /*! Common */
+    .h3, h3 {font-size: 17px;}
+    .pr-accordion-big .pr-accordion-big-body .inner-blk .prselectcustom {min-width:220px !important;}
+    .pr-accordion-big .pr-accordion-big-body .pr-form-control, .pr-accordion-big .pr-accordion-big-body .pr-input-group.date {max-width:220px;}
+    .pr-accordion-big .pr-accordion-big-body .inner-blk .p {min-width:100px;font-size:14px;}
+    table td .tab_img_blk {height:36px;width:36px;}
+    .remarks_input .pr-form-control {max-width:180px;}
+    .pr-dashed-table-wrap {padding:10px 22px;}
+    .pr-dashed-table > tbody > tr > td {padding:10px 20px;}
+    .pr-dashed-table > tbody > tr > td .p {font-size:12px;}
+    .pr-dashed-table > tbody > tr > td .main_ttl {font-size:14px;line-height:19px;}
+    .pr-dashed-table > tbody > tr > td .p, .pr-dashed-table > tbody > tr > td .sec_ttl, .pr-dashed-table > tbody > tr > td .main_ttl {max-width:140px;}
+    table.pr-datatable thead td, table.pr-datatable thead th {font-size: 14px;}
+    table.pr-datatable.pr-datatable-sm tbody td, 
+    table.pr-datatable.pr-datatable-sm tbody th, 
+    table.pr-datatable.pr-datatable-sm thead td, 
+    table.pr-datatable.pr-datatable-sm thead th {height: 52px;}
+    .pr-pills {font-size: 12px}
+    .pr-section.pr-title-section {padding-top: 20px;}
+
+    /*! login */
+    .pr-login-wrap .pr-login-wrap-width {max-width: 960px;}
+    .pr-login-wrap .login-text .ttl {font-size: 40px;line-height: 48px;}
+    .pr-login-wrap .login-text .sb-ttl {font-size: 16px;line-height: 24px;margin-top: 25px;}
+    .pr-login-wrap .login-form .frm-ttl {margin-bottom: 25px;font-size: 15px;line-height: 30px;}
+    .pr-login-wrap .login-form-wrap {width: 420px;}
+    .pr-login-wrap .login-form-wrap .login-form-outer {padding: 30px 30px 20px;}
+    .pr-login-wrap .login-form .agrmnt {margin-bottom: 0;}
+    .pr-login-wrap .login-form .form-group {margin-bottom: 25px;}
+    .pr-login-wrap .login-form .bttn-login {height: 40px;font-size: 13px;}
+    .pr-login-wrap .login-form-wrap .frgt-lnk {padding: 20px 0 0;font-size: 13px;}
+    .pr-login-wrap .login-text .crdts {bottom: 20px;font-size: 12px;}
+
+    /*! pr modal */
+    .pr-modal .modal-content .modal-body .stts-ico {margin-bottom: 20px;}
+    .pr-modal .modal-content .modal-body .stts-ico > img {height: 45px;}
+    .pr-modal .modal-content .modal-body .ttl {font-size: 18px;line-height: 20px;margin-bottom: 12px;}
+    .pr-modal .modal-content .modal-header.no-header {padding: 0;}
+
+    /*! Farm Listing, Profile, Dashboard */
+    .farmer-dash-wrap {width: 820px;}
+    .farmer-dash-wrap .farmer-dash {width: 820px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .farmer-dash-intro-list .list-group-item {padding-right: 0;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .farmer-dash-data-inner {padding: 20px 15px 0;margin: 20px auto;}
+
+    /*! QR Code Page */
+    .qr-code-box {min-width: 180px;min-height: 180px;height: calc(100% - 220px);}
+    .qr-code-box .qr-code-img {height: 120px;}
+    .qr-code-box + .btn {margin-top: 30px;height: 48px;}
+    .pr-section.qr-code-sec .inner-wrap .prselectcustom {min-width: 220px !important;}
+    .pr-section.qr-code-sec .inner-wrap .pr-form-control, .pr-section.qr-code-sec .inner-wrap .pr-input-group.date {max-width: 220px;}
+    .pr-section .inner-wrap .inner-blk .p {font-size: 14px;}
+
+    /*!  Dashboards  */
+    .pr-section.dashboard-sec .dash-table-wrapper .ttl {font-size: 16px;margin: 30px 0px 10px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_1 {height: 260px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_2 {height: 230px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_3 {height: 240px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_4 {height: 240px;}
+    .pr-section.dashboard-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_5 {height: 200px;max-width: 360px;}
+    .pr-section.dashboard-sec .dash-table-wrapper .prselectcustom + .dropdown-toggle {margin-bottom: 10px;}
+    .pr-chart-wrap .inf-blk p {font-size: 22px;line-height: 24px;margin-bottom: 0;}
+    .pr-section.dashboard-sec .dash-table-wrapper .pr-datatable-wrap .pr-datatable-scroll {max-height: 340px;}
+
+    
+    /*!  Master Data Page */
+    .master-data-sec .master-info-blk .media .media-body .m-ttl {font-size: 26px;}
+    .master-data-sec .master-info-blk .media {padding: 15px 15px 12px;min-width: 140px;margin-right: 15px;}
+
+    table.pr-datatable thead.sec-thead th .pr-form-control {max-width: 56px;padding: 7px;display: block;margin: 4px 0;}
+    .pr-section.add-training-selec-sec .add-inp-overview-blk .pr-form-control {max-width: 100px;}
+    .pr-section.add-training-selec-sec .add-inp-overview-blk .btn {min-width: 90px;padding: 5px 12px;font-weight: 600;font-size: 12px;line-height: 22px;}
+
+    /*! Add Farmer Page */
+    .pr-section.add-farmer-section.add-training-selec-sec .common-box {padding: 30px 20px 40px;}
+
+    /*! Geocledian Page  */
+    .pr-section.geocledian-sec .dash-graph-wrapper .pr-chart-wrap.dash_chart_3 {height: 240px;}
+
+}
+
+@media (max-width: 1199px) {
+
+    /*! Common */
+    .pr-accordion-big .pr-accordion-big-body .inner-blk .prselectcustom {min-width:220px !important;}
+    .pr-accordion-big .pr-accordion-big-body .pr-form-control, .pr-accordion-big .pr-accordion-big-body .pr-input-group.date {max-width:220px;}
+    .pr-accordion-big .pr-accordion-big-body .inner-blk .p {min-width:100px;font-size:14px;}
+    table td .tab_img_blk {height:36px;width:36px;}
+    .remarks_input .pr-form-control {max-width:180px;}
+    .pr-dashed-table-wrap {padding:10px 22px;}
+    .pr-dashed-table > tbody > tr > td {padding:10px 20px;}
+    .pr-dashed-table > tbody > tr > td .p {font-size:12px;}
+    .pr-dashed-table > tbody > tr > td .main_ttl {font-size:14px;line-height:19px;}
+    .pr-dashed-table > tbody > tr > td .p, .pr-dashed-table > tbody > tr > td .sec_ttl, .pr-dashed-table > tbody > tr > td .main_ttl {max-width:140px;}   
+
+    /*! login */
+    .pr-login-wrap .pr-login-wrap-width {max-width: 960px;}
+    .pr-login-wrap .login-text .ttl {font-size: 40px;line-height: 48px;}
+    .pr-login-wrap .login-text .sb-ttl {font-size: 16px;line-height: 24px;margin-top: 25px;}
+    .pr-login-wrap .login-form .frm-ttl {margin-bottom: 25px;font-size: 15px;line-height: 30px;}
+    .pr-login-wrap .login-form-wrap {width: 420px;}
+    .pr-login-wrap .login-form-wrap .login-form-outer {padding: 30px 30px 20px;}
+    .pr-login-wrap .login-form .agrmnt {margin-bottom: 0;}
+    .pr-login-wrap .login-form .form-group {margin-bottom: 25px;}
+    .pr-login-wrap .login-form .bttn-login {height: 40px;font-size: 13px;}
+    .pr-login-wrap .login-form-wrap .frgt-lnk {padding: 20px 0 0;font-size: 13px;}
+    .pr-login-wrap .login-text .crdts {bottom: 20px;font-size: 12px;}
+
+    /*! pr modal */
+    .pr-modal .modal-content .modal-body .stts-ico {margin-bottom: 20px;}
+    .pr-modal .modal-content .modal-body .stts-ico > img {height: 45px;}
+    .pr-modal .modal-content .modal-body .ttl {font-size: 18px;line-height: 20px;margin-bottom: 12px;}
+    .pr-modal .modal-content .modal-header.no-header {padding: 0;}
+
+    /*! Farm Listing, Profile, Dashboard */
+    .farmer-dash-wrap {width: 820px;}
+    .farmer-dash-wrap .farmer-dash {width: 820px;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-intro .farmer-dash-intro-list .list-group-item {padding-right: 0;}
+    .farmer-dash-wrap .farmer-dash .farmer-dash-data .farmer-dash-data-inner {padding: 20px 15px 0;margin: 20px auto;}
+
+    /*! QR Code Page */
+    .qr-code-box {min-width: 180px;min-height: 180px;height: calc(100% - 220px);}
+    .qr-code-box .qr-code-img {height: 120px;}
+    .qr-code-box + .btn {margin-top: 30px;height: 48px;}
+    .pr-section.qr-code-sec .inner-wrap .prselectcustom {min-width: 220px !important;}
+    .pr-section.qr-code-sec .inner-wrap .pr-form-control, .pr-section.qr-code-sec .inner-wrap .pr-input-group.date {max-width: 220px;}
+    .pr-section .inner-wrap .inner-blk .p {font-size: 14px;}
+
+}

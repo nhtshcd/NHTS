@@ -1,0 +1,148 @@
+.dataTableTheme {
+	border-collapse: separate;
+	border: solid black 1px;
+	border-radius: 6px;
+	-moz-border-radius: 6px;
+	table-layout: fixed;
+	overflow: scroll;
+}
+
+.dataTableTheme>thead>tr>th {
+	background: #2a3f54;
+	/* background: lightgrey; */
+	color: #fff;
+	/* 	color:black; */
+	margin: 2px;
+}
+
+.dataTableTheme>thead {
+	height: 50px;
+}
+
+.dataTableTheme>tbody>tr:nth-child(odd), .dataTableTheme>tfoot>tr:nth-child(odd),
+	.dataTableTheme>thead>tr:nth-child(odd) {
+	/* background-color: lightgrey; */
+	border: 1px solid #111;
+	background-color: rgba(168, 227, 214, 0.2);
+}
+
+table.dataTable thead th, table.dataTable thead td, table.dataTable tr th,
+	table.dataTable tr td {
+	padding: 5px;
+	border: 1px solid #111;
+	margin-left: 2px;
+}
+
+button.dt-button {
+	/* background: #2a3f54; */
+ background: lightgrey; 
+	border-color: #005bbf;
+/* 	color: #fff; */
+	 color:black; 
+	border-radius: 6px;
+}
+
+.dt-button:hover {
+	background-color: #2a3f54
+}
+
+.dt-button:active {
+	background-color: #2a3f54;
+	/* 	background: lightgrey; */
+	box-shadow: 0 5px #666;
+	transform: translateY(4px);
+}
+
+table td.numeric, table tfoot th.numeric {
+	text-align: right;
+}
+
+.numeric {
+	align: right;
+}
+
+select.form-control {
+	background-color: #fff;
+	border: 1px solid #D5D5D5;
+	border-radius: 2 2 2 2 !important;
+	color: #858585;
+	padding: 5px 6px;
+}
+
+.input-sm {
+	height: 30px;
+	line-height: 30px;
+}
+
+input[type="text"], input[type="password"], input[type="datetime"],
+	input[type="datetime-local"], input[type="date"], input[type="month"],
+	input[type="time"], input[type="week"], input[type="number"], input[type="email"],
+	input[type="url"], input[type="search"], input[type="tel"], input[type="color"]
+	{
+	background-color: #fff;
+	border: 1px solid #d5d5d5;
+	border-radius: 8 8 8 8 !important;
+	color: #858585;
+	font-family: inherit;
+	font-size: 10px;
+	line-height: 0.4;
+	padding: 5px 4px;
+	height: 25px;
+	width: 9%;
+	transition-duration: 1s;
+	box-shadow: none;
+	margin-top: 3px;
+}
+
+.select2-container--default .select2-selection--single .select2-selection__rendered
+	{
+	line-height: 90% !important;
+	word-wrap: break-word !important;
+	text-overflow: ellipsis !important;
+	white-space: normal !important;
+}
+
+.select2-selection__rendered {
+	font-size: 10px;
+}
+
+.colFoot {
+	background-color: grey;
+}
+
+tr.filterTd th {
+  border-top: 0 !important;
+  padding-top: 1px !important;
+}
+
+th.filterTdR {
+  border-bottom: 0 !important;
+}
+tr.filterTd{
+background-color: #ededed !important;
+}
+
+tr.noBorderB{
+ padding-bottom: 1px !important;
+}
+
+#custom td, #custom tr {
+  border: 1px solid #ddd;
+  padding: 8px;
+  font-weight: bold;
+
+}
+
+#calc td, #custom tr {
+  border: 1px solid #ddd;
+  padding: 8px;
+  font-weight: bold;
+
+}
+
+
+
+
+
+
+

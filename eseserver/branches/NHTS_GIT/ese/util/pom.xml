@@ -1,0 +1,89 @@
+<?xml version="1.0"?>
+<project
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd"
+	xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
+	<modelVersion>4.0.0</modelVersion>
+	<parent>
+		<artifactId>ese</artifactId>
+		<groupId>com.sourcetrace.eses</groupId>
+		<version>1.0-SNAPSHOT</version>
+	</parent>
+	<groupId>com.sourcetrace.eses</groupId>
+	<artifactId>util</artifactId>
+	<version>1.0-SNAPSHOT</version>
+	<name>util</name>
+	<url>http://maven.apache.org</url>
+	
+	<properties>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+	</properties>
+	
+	<dependencies>
+		<dependency>
+			<groupId>javax.mail</groupId>
+			<artifactId>mail</artifactId>
+			<version>${javax.mail.version}</version>
+		</dependency>
+		<dependency>
+    <groupId>org.eclipse.persistence</groupId>
+    <artifactId>javax.persistence</artifactId>
+    <version>2.2.1</version>
+</dependency>
+<dependency>
+    <groupId>org.apache.httpcomponents</groupId>
+    <artifactId>httpclient</artifactId>
+    <version>4.3.6</version>
+</dependency>
+	</dependencies>
+	
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>net.sourceforge</groupId>
+				<artifactId>grass</artifactId>
+				<version>${grass.version}</version>
+				<executions>
+					<execution>
+						<id>webapp-config</id>
+						<configuration>
+							<configFile>${project.basedir}/grass/webapp/${client}.xml</configFile>
+							<target>${env}</target>
+							<app>webapp</app>
+							<baseDir>${project.parent.basedir}/</baseDir>
+							<client>${client}</client>
+						</configuration>
+						<phase>install</phase>
+						<goals>
+							<goal>gen-cfg</goal>
+						</goals>
+					</execution>
+					<execution>
+						<id>tserv-config</id>
+						<configuration>
+							<configFile>${project.basedir}/grass/tserv/${client}.xml</configFile>
+							<target>${env}</target>
+							<app>tserv</app>
+							<baseDir>${project.parent.basedir}/</baseDir>
+							<client>${client}</client>
+						</configuration>
+						<phase>install</phase>
+						<goals>
+							<goal>gen-cfg</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+		 <plugin>
+		  <groupId>org.apache.maven.plugins</groupId>
+		  <artifactId>maven-compiler-plugin</artifactId>
+		  <version>${maven-compiler.version}</version>
+		  <configuration>
+		   <source>${java.version}</source>
+		   <target>${java.version}</target>
+		   <encoding>UTF-8</encoding>
+		  </configuration>
+		 </plugin>
+		</plugins>
+	</build>
+
+</project>

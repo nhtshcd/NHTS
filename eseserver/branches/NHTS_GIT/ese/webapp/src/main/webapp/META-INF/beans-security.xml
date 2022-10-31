@@ -1,0 +1,954 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:security="http://www.springframework.org/schema/security"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans 
+	   http://www.springframework.org/schema/beans/spring-beans-4.1.xsd 
+	   http://www.springframework.org/schema/context 
+	   http://www.springframework.org/schema/context/spring-context-4.1.xsd 	
+ 	   http://www.springframework.org/schema/security 
+ 	   http://www.springframework.org/schema/security/spring-security-3.2.xsd">
+
+	<security:http pattern="/login_*" security="none" />
+	<security:http pattern="/licenseAgreement.action"
+		security="none" />
+	<security:http pattern="/license_*.action" security="none" />
+	<security:http pattern="/marketLinkage_*.action"
+		security="none" />
+	<security:http pattern="/error*" security="none" />
+	<security:http pattern="/home_*" security="none" />
+	<security:http pattern="/agroDealers_*" security="none" />
+	<security:http pattern="/generalPop_*" security="none" />
+	<security:http pattern="/dynamicList_*" security="none" />
+	<security:http pattern="/knowledgeRepPublic_*" security="none" />
+	<security:http pattern="/dealerRenewalPublic_*" security="none" />
+	<security:http pattern="/seedMerchantPublic_*" security="none" />
+	<security:http pattern="/seedDealerPub_*" security="none" />
+	<security:http pattern="/changePassword_*" security="none" />
+	<security:http pattern="/seedCertificationService_*"
+		security="none" />
+	<security:http pattern="/merchantRenewal_*" security="none" />
+	<security:http pattern="/breederSeedPub_*" security="none" />
+	<security:http pattern="/varietyInclusionPub_*" security="none" />
+	<security:http pattern="/exporterRegistrationPub_*"
+		security="none" />
+	<security:http pattern="/farmerPub_*" security="none" />
+	<security:http pattern="/traceabilityViewReport_*" security="none" />
+	<security:http entry-point-ref="authenticationEntryPoint"
+		access-decision-manager-ref="customAccessDecisionManager">
+
+
+		<security:intercept-url pattern="/samithiAccessReport_list*"
+			access="report.samithiAccessReport.list" />
+		<security:intercept-url pattern="/samithiAccessReport_detail*"
+			access="report.samithiAccessReport.list" />
+		<security:intercept-url pattern="/samithiAccessReport_populate*"
+			access="report.samithiAccessReport.list" />
+
+
+
+		<security:intercept-url pattern="/samithi_list*"
+			access="profile.samithi.list,profile.samithi.bci.list" />
+		<security:intercept-url pattern="/samithi_data*"
+			access="profile.samithi.list,profile.samithi.bci.list" />
+		<security:intercept-url pattern="/samithi_detail*"
+			access="profile.samithi.list,profile.samithi.bci.list" />
+		<security:intercept-url pattern="/samithi_create*"
+			access="profile.samithi.create,profile.samithi.bci.create" />
+		<security:intercept-url pattern="/samithi_update*"
+			access="profile.samithi.update,profile.samithi.bci.update" />
+		<security:intercept-url pattern="/samithi_delete*"
+			access="profile.samithi.delete,profile.samithi.bci.delet" />
+		<security:intercept-url pattern="/samithi_populate*"
+			access="profile.samithi.list,profile.samithi.bci.list" />
+
+		<security:intercept-url pattern="/fieldStaff_list*"
+			access="profile.agent.list" />
+		<security:intercept-url pattern="/fieldStaff_data*"
+			access="profile.agent.list" />
+		<security:intercept-url pattern="/fieldStaff_detail*"
+			access="profile.agent.list" />
+		<security:intercept-url pattern="/fieldStaff_create*"
+			access="profile.agent.create" />
+		<security:intercept-url pattern="/fieldStaff_update*"
+			access="profile.agent.update" />
+		<security:intercept-url pattern="/fieldStaff_delete*"
+			access="profile.agent.delete" />
+		<security:intercept-url pattern="/fieldStaff_populate*"
+			access="profile.agent.list" />
+		<security:intercept-url pattern="/fieldStaff_processStockTransfer*"
+			access="profile.agent.list" />
+		<security:intercept-url pattern="/fieldStaff_reset*"
+			access="profile.agent.list" />
+
+
+
+		<security:intercept-url pattern="/user_create*"
+			access="profile.user.create" />
+		<security:intercept-url pattern="/user_update*"
+			access="profile.user.update" />
+		<security:intercept-url pattern="/user_delete*"
+			access="profile.user.delete" />
+
+
+		<security:intercept-url pattern="/catalogue_list*"
+			access="profile.catalogue.list,profile.catalogue.survey" />
+		<security:intercept-url pattern="/catalogue_data*"
+			access="profile.catalogue.list,profile.catalogue.survey" />
+		<security:intercept-url pattern="/catalogue_detail*"
+			access="profile.catalogue.list,profile.catalogue.survey" />
+		<security:intercept-url pattern="/catalogue_create*"
+			access="profile.catalogue.create,profile.catalogue.survey" />
+		<security:intercept-url pattern="/catalogue_update*"
+			access="profile.catalogue.update,profile.catalogue.survey" />
+		<security:intercept-url pattern="/catalogue_delete*"
+			access="profile.catalogue.delete,profile.catalogue.survey" />
+
+
+		<security:intercept-url pattern="/device_list*"
+			access="profile.device.list" />
+		<security:intercept-url pattern="/device_detail*"
+			access="profile.device.list" />
+		<security:intercept-url pattern="/device_create*"
+			access="profile.device.create" />
+		<security:intercept-url pattern="/device_update*"
+			access="profile.device.update" />
+		<security:intercept-url pattern="/device_delete*"
+			access="profile.device.delete" />
+		<security:intercept-url pattern="/device_data*"
+			access="profile.device.list" />
+		<security:intercept-url pattern="/device_reset*"
+			access="profile.device.list" />
+		<security:intercept-url pattern="/device_processStockTransfer*"
+			access="profile.device.list" />
+
+		<security:intercept-url pattern="/role_list*"
+			access="profile.role.list" />
+		<security:intercept-url pattern="/role_data*"
+			access="profile.role.list" />
+		<security:intercept-url pattern="/role_detail*"
+			access="profile.role.list" />
+		<security:intercept-url pattern="/role_create*"
+			access="profile.role.create" />
+		<security:intercept-url pattern="/role_update*"
+			access="profile.role.update" />
+		<security:intercept-url pattern="/role_delete*"
+			access="profile.role.delete" />
+
+		<security:intercept-url pattern="/roleMenu_list*"
+			access="profile.role.menu.list" />
+		<security:intercept-url pattern="/roleMenu_data*"
+			access="profile.role.menu.list" />
+		<security:intercept-url pattern="/roleMenu_update*"
+			access="profile.role.menu.update" />
+
+		<security:intercept-url pattern="/roleEntitlement_list*"
+			access="profile.role.entitlement.list" />
+		<security:intercept-url pattern="/roleEntitlement_update*"
+			access="profile.role.entitlement.update" />
+		<security:intercept-url pattern="/roleEntitlement_data*"
+			access="profile.role.entitlement.list" />
+
+
+		<security:intercept-url pattern="/state_list*"
+			access="profile.location.state.list,profile.location.village.list" />
+		<security:intercept-url pattern="/state_data*"
+			access="profile.location.state.list,profile.location.village.list" />
+		<security:intercept-url pattern="/state_detail*"
+			access="profile.location.state.list,profile.location.village.list" />
+		<security:intercept-url pattern="/state_create*"
+			access="profile.location.state.create,profile.location.village.create" />
+		<security:intercept-url pattern="/state_update*"
+			access="profile.location.state.update,profile.location.village.update" />
+		<security:intercept-url pattern="/state_delete*"
+			access="profile.location.state.delete,profile.location.village.delete" />
+
+		<security:intercept-url pattern="/country_list*"
+			access="profile.location.country.list,profile.location.village.list" />
+		<security:intercept-url pattern="/country_data*"
+			access="profile.location.country.list,profile.location.village.list" />
+		<security:intercept-url pattern="/country_detail*"
+			access="profile.location.country.list,profile.location.village.list" />
+		<security:intercept-url pattern="/country_create*"
+			access="profile.location.country.create,profile.location.village.create" />
+		<security:intercept-url pattern="/country_update*"
+			access="profile.location.country.update,profile.location.village.update" />
+		<security:intercept-url pattern="/country_delete*"
+			access="profile.location.country.delete,profile.location.village.delete" />
+
+		<security:intercept-url pattern="/locality_list*"
+			access="profile.location.locality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/locality_data*"
+			access="profile.location.locality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/locality_detail*"
+			access="profile.location.locality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/locality_create*"
+			access="profile.location.locality.create,profile.location.village.create" />
+		<security:intercept-url pattern="/locality_update*"
+			access="profile.location.locality.update,profile.location.village.update" />
+		<security:intercept-url pattern="/locality_delete*"
+			access="profile.location.locality.delete,profile.location.village.delete" />
+		<security:intercept-url pattern="/locality_populateLocation*"
+			access="profile.location.locality.list,profile.location.village.list" />
+
+
+		<security:intercept-url pattern="/gramPanchayat_list*"
+			access="profile.location.gramPanchayat.list,profile.location.village.list" />
+		<security:intercept-url pattern="/gramPanchayat_populate*"
+			access="profile.location.gramPanchayat.list,profile.location.village.list" />
+		<security:intercept-url pattern="/gramPanchayat_data*"
+			access="profile.location.gramPanchayat.list,profile.location.village.list" />
+		<security:intercept-url pattern="/gramPanchayat_detail*"
+			access="profile.location.gramPanchayat.list,profile.location.village.list" />
+		<security:intercept-url pattern="/gramPanchayat_create*"
+			access="profile.location.gramPanchayat.create,profile.location.village.create" />
+		<security:intercept-url pattern="/gramPanchayat_update*"
+			access="profile.location.gramPanchayat.update,profile.location.village.update" />
+		<security:intercept-url pattern="/gramPanchayat_delete*"
+			access="profile.location.gramPanchayat.delete,profile.location.village.delete" />
+
+		<security:intercept-url pattern="/village_list*"
+			access="profile.location.village.list" />
+		<security:intercept-url pattern="/village_populate*"
+			access="profile.location.village.list" />
+		<security:intercept-url pattern="/village_data*"
+			access="profile.location.village.list" />
+		<security:intercept-url pattern="/village_detail*"
+			access="profile.location.village.list" />
+		<security:intercept-url pattern="/village_create*"
+			access="profile.location.village.create" />
+		<security:intercept-url pattern="/village_update*"
+			access="profile.location.village.update" />
+		<security:intercept-url pattern="/village_delete*"
+			access="profile.location.village.delete" />
+
+		<security:intercept-url pattern="/municipality_list*"
+			access="profile.location.municipality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/municipality_populateState*"
+			access="profile.location.municipality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/municipality_populateLocality*"
+			access="profile.location.municipality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/municipality_data*"
+			access="profile.location.municipality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/municipality_detail*"
+			access="profile.location.municipality.list,profile.location.village.list" />
+		<security:intercept-url pattern="/municipality_create*"
+			access="profile.location.municipality.create,profile.location.village.create" />
+		<security:intercept-url pattern="/municipality_update*"
+			access="profile.location.municipality.update,profile.location.village.update" />
+		<security:intercept-url pattern="/municipality_delete*"
+			access="profile.location.municipality.delete,profile.location.village.delete" />
+
+
+		<security:intercept-url pattern="/branchMaster_list*"
+			access="profile.branchMaster.list" />
+		<security:intercept-url pattern="/branchMaster_data*"
+			access="profile.branchMaster.list" />
+		<security:intercept-url pattern="/branchMaster_detail*"
+			access="profile.branchMaster.list" />
+		<security:intercept-url pattern="/branchMaster_create*"
+			access="profile.branchMaster.create" />
+		<security:intercept-url pattern="/branchMaster_update*"
+			access="profile.branchMaster.update" />
+		<security:intercept-url pattern="/branchMaster_delete*"
+			access="profile.branchMaster.delete" />
+
+		<security:intercept-url pattern="/harvestSeason_list*"
+			access="profile.season.list" />
+		<security:intercept-url pattern="/harvestSeason_detail*"
+			access="profile.season.list" />
+		<security:intercept-url pattern="/harvestSeason_create*"
+			access="profile.season.create" />
+		<security:intercept-url pattern="/harvestSeason_update*"
+			access="profile.season.update" />
+		<security:intercept-url pattern="/harvestSeason_delete*"
+			access="profile.season.delete" />
+		<security:intercept-url pattern="/harvestSeason_data*"
+			access="profile.season.list" />
+
+		<security:intercept-url pattern="/agroChemicalRegistration_create*"
+			access="profile.agroChemicalRegistration.create" />
+		<security:intercept-url pattern="/agroChemicalRegistration_update*"
+			access="profile.agroChemicalRegistration.update" />
+		<security:intercept-url pattern="/agroChemicalRegistration_delete*"
+			access="profile.agroChemicalRegistration.delete" />
+		<security:intercept-url pattern="/agroChemicalRegistration_data*"
+			access="profile.agroChemicalRegistration.list" />
+
+		<security:intercept-url pattern="/dynamicViewReportDT_list*"
+			access="report.dynamicReport.list,profile.farmer.list,profile.exporterRegistration.list,service.scouting.list,service.sprayAndFieldManagement.list,service.sitePrepration.list,service.landPreparation.list,service.harvest.list,service.sorting.list,profile.packing.list,service.packhouseIncoming.list,service.recalling.list,service.shipment.list,service.postRecallInspection.list,service.Pcbp .list,report.scouting.list,report.sprayAndFieldManagement.list,report.landPreparation.list,report.harvest.list,report.sorting.list,report.harvestStock.list,report.packhouseIncoming.list,report.packing.list,report.packhouseStock.list,report.PackingStock.list,report.sitePrepration.list,report.shipment.list,report.postRecallInspection.list,report.recalling.list,report.traceabilityView.list,report.psi.list,report.ps2.list,profile.farmer.list,profile.farm.list" />
+		<security:intercept-url pattern="/dynamicViewReportDT_populate*"
+			access="report.dynamicReport.list,profile.farmer.list,profile.exporterRegistration.list,service.scouting.list,service.sprayAndFieldManagement.list,service.sitePrepration.list,service.landPreparation.list,service.harvest.list,service.sorting.list,profile.packing.list,service.packhouseIncoming.list,service.recalling.list,service.shipment.list,service.postRecallInspection.list,service.Pcbp .list,report.scouting.list,report.sprayAndFieldManagement.list,report.landPreparation.list,report.harvest.list,report.sorting.list,report.harvestStock.list,report.packhouseIncoming.list,report.packing.list,report.packhouseStock.list,report.PackingStock.list,report.sitePrepration.list,report.shipment.list,report.postRecallInspection.list,report.recalling.list,report.traceabilityView.list,report.psi.list,report.ps2.list,profile.farmer.list,profile.farm.list" />
+		<security:intercept-url pattern="/dynamicViewReportDT_delete*"
+			access="report.dynamicReport.list,profile.farmer.list,profile.exporterRegistration.list,service.scouting.list,service.sprayAndFieldManagement.list,service.sitePrepration.list,service.landPreparation.list,service.harvest.list,service.sorting.list,profile.packing.list,service.packhouseIncoming.list,service.recalling.list,service.shipment.list,service.postRecallInspection.list,service.Pcbp .list,report.scouting.list,report.sprayAndFieldManagement.list,report.landPreparation.list,report.harvest.list,report.sorting.list,report.harvestStock.list,report.packhouseIncoming.list,report.packing.list,report.packhouseStock.list,report.PackingStock.list,report.sitePrepration.list,report.shipment.list,report.postRecallInspection.list,report.recalling.list,report.traceabilityView.list,report.psi.list,report.ps2.list,profile.farmer.list,profile.farm.list" />
+		<security:intercept-url pattern="/dynamicViewReportDT_data*"
+			access="report.dynamicReport.list,profile.farmer.list,profile.exporterRegistration.list,service.scouting.list,service.sprayAndFieldManagement.list,service.sitePrepration.list,service.landPreparation.list,service.harvest.list,service.sorting.list,profile.packing.list,service.packhouseIncoming.list,service.recalling.list,service.shipment.list,service.postRecallInspection.list,service.Pcbp .list,report.scouting.list,report.sprayAndFieldManagement.list,report.landPreparation.list,report.harvest.list,report.sorting.list,report.harvestStock.list,report.packhouseIncoming.list,report.packing.list,report.packhouseStock.list,report.PackingStock.list,report.sitePrepration.list,report.shipment.list,report.postRecallInspection.list,report.recalling.list,report.traceabilityView.list,report.psi.list,report.ps2.list,profile.farmer.list,profile.farm.list" />
+
+
+		<security:intercept-url pattern="/finalSeedInspectionResult_list*"
+			access="service.finalSeedInspectionResult.list" />
+		<security:intercept-url pattern="/finalSeedInspectionResult_data*"
+			access="service.finalSeedInspectionResult.list" />
+		<security:intercept-url pattern="/finalSeedInspectionResult_detail*"
+			access="service.finalSeedInspectionResult.list" />
+		<security:intercept-url pattern="/finalSeedInspectionResult_create*"
+			access="service.finalSeedInspectionResult.create" />
+		<security:intercept-url pattern="/finalSeedInspectionResult_update*"
+			access="service.finalSeedInspectionResult.update" />
+		<security:intercept-url pattern="/finalSeedInspectionResult_delete*"
+			access="service.finalSeedInspectionResult.delete" />
+
+
+
+		<security:intercept-url pattern="/seedMerchant_list*"
+			access="profile.seedMerchant.list" />
+		<security:intercept-url pattern="/seedMerchant_data*"
+			access="profile.seedMerchant.list" />
+		<security:intercept-url pattern="/seedMerchant_detail*"
+			access="profile.seedMerchant.list" />
+		<security:intercept-url pattern="/seedMerchant_create*"
+			access="profile.seedMerchant.create" />
+		<security:intercept-url pattern="/seedMerchant_update*"
+			access="profile.seedMerchant.update" />
+		<security:intercept-url pattern="/seedMerchant_delete*"
+			access="profile.seedMerchant.delete" />
+
+
+
+
+		<security:intercept-url pattern="/agroChemicalDealer_create*"
+			access="profile.agroChemicalDealer.create" />
+		<security:intercept-url pattern="/agroChemicalDealer_detail*"
+			access="profile.agroChemicalDealer.list" />
+		<security:intercept-url pattern="/agroChemicalDealer_update*"
+			access="profile.agroChemicalDealer.update" />
+		<security:intercept-url pattern="/agroChemicalDealer_delete*"
+			access="profile.agroChemicalDealer.delete" />
+
+
+		<security:intercept-url pattern="/seedCertificationServices_create*"
+			access="service.seedCertificationServices.create" />
+		<security:intercept-url pattern="/seedCertificationServices_detail*"
+			access="service.seedCertificationServices.list" />
+		<security:intercept-url pattern="/seedCertificationServices_update*"
+			access="service.seedCertificationServices.update" />
+		<security:intercept-url pattern="/seedCertificationServices_delete*"
+			access="service.seedCertificationServices.delete" />
+
+
+		<security:intercept-url pattern="/seedAgencyCertification_create*"
+			access="service.seedAgencyCertification.create" />
+		<security:intercept-url pattern="/seedAgencyCertification_detail*"
+			access="service.seedAgencyCertification.list" />
+		<security:intercept-url pattern="/seedAgencyCertification_update*"
+			access="service.seedAgencyCertification.update" />
+		<security:intercept-url pattern="/seedAgencyCertification_delete*"
+			access="service.seedAgencyCertification.delete" />
+
+
+
+		<security:intercept-url pattern="/transferSeedCertification_create*"
+			access="profile.transferSeedCertification.create" />
+		<security:intercept-url pattern="/transferSeedCertification_detail*"
+			access="profile.transferSeedCertification.list" />
+		<security:intercept-url pattern="/transferSeedCertification_update*"
+			access="profile.transferSeedCertification.update" />
+		<security:intercept-url pattern="/transferSeedCertification_delete*"
+			access="profile.transferSeedCertification.delete" />
+		<security:intercept-url pattern="/transferSeedCertification_data*"
+			access="profile.transferSeedCertification.list" />
+		<security:intercept-url pattern="/exitInspection_create*"
+			access="profile.exitInspection.create" />
+		<security:intercept-url pattern="/exitInspection_detail*"
+			access="profile.exitInspection.list" />
+		<security:intercept-url pattern="/exitInspection_update*"
+			access="profile.exitInspection.update" />
+		<security:intercept-url pattern="/exitInspection_delete*"
+			access="profile.exitInspection.delete" />
+		<security:intercept-url pattern="/exitInspection_data*"
+			access="profile.exitInspection.list" />
+
+
+
+
+		<security:intercept-url pattern="/breederSeed_create*"
+			access="profile.breederSeed.create" />
+		<security:intercept-url pattern="/breederSeed_detail*"
+			access="profile.breederSeed.list" />
+		<security:intercept-url pattern="/breederSeed_update*"
+			access="profile.breederSeed.update" />
+		<security:intercept-url pattern="/breederSeed_delete*"
+			access="profile.breederSeed.delete" />
+
+		<security:intercept-url pattern="/premises_create*"
+			access="profile.premises.create" />
+		<security:intercept-url pattern="/premises_detail*"
+			access="profile.premises.list" />
+		<security:intercept-url pattern="/premises_update*"
+			access="profile.premises.update" />
+		<security:intercept-url pattern="/premises_delete*"
+			access="profile.premises.delete" />
+
+
+
+
+		<security:intercept-url pattern="/knowledgeRep_create*"
+			access="service.knowledgeRep.create" />
+		<security:intercept-url pattern="/knowledgeRep_update*"
+			access="service.knowledgeRep.update" />
+		<security:intercept-url pattern="/knowledgeRep_delete*"
+			access="service.knowledgeRep.delete" />
+		<security:intercept-url pattern="/knowledgeRep_data*"
+			access="service.knowledgeRep.list" />
+
+		<security:intercept-url pattern="/seedHarvest_list*"
+			access="profile.seedHarvest.list" />
+		<security:intercept-url pattern="/seedHarvest_data*"
+			access="profile.seedHarvest.list" />
+		<security:intercept-url pattern="/seedHarvest_detail*"
+			access="profile.seedHarvest.list" />
+		<security:intercept-url pattern="/seedHarvest_create*"
+			access="profile.seedHarvest.create" />
+		<security:intercept-url pattern="/seedHarvest_update*"
+			access="profile.seedHarvest.update" />
+		<security:intercept-url pattern="/seedHarvestt_delete*"
+			access="profile.seedHarvest.delete" />
+
+		<security:intercept-url pattern="/bannedProducts_create*"
+			access="profile.bannedProducts.create" />
+		<security:intercept-url pattern="/bannedProducts_update*"
+			access="profile.bannedProducts.update" />
+		<security:intercept-url pattern="/bannedProducts_delete*"
+			access="profile.bannedProducts.delete" />
+		<security:intercept-url pattern="/bannedProducts_data*"
+			access="profile.bannedProducts.list" />
+
+		<security:intercept-url pattern="/changePassword*"
+			access="profile.user.update" />
+		<security:intercept-url pattern="/fumigatorCommercialApplicator_data*"
+			access="profile.fumigatorCommercialApplicator.list" />
+		<security:intercept-url pattern="/fumigatorCommercialApplicator_create*"
+			access="profile.fumigatorCommercialApplicator.create" />
+		<security:intercept-url pattern="/fumigatorCommercialApplicator_detail*"
+			access="profile.fumigatorCommercialApplicator.list" />
+		<security:intercept-url pattern="/fumigatorCommercialApplicator_update*"
+			access="profile.fumigatorCommercialApplicator.update" />
+		<security:intercept-url pattern="/fumigatorCommercialApplicator_delete*"
+			access="profile.fumigatorCommercialApplicator.delete" />
+
+
+		<security:intercept-url pattern="/permitApplication_create*"
+			access="profile.PermitApplication.create" />
+		<security:intercept-url pattern="/permitApplication_list*"
+			access="profile.PermitApplication.list" />
+		<security:intercept-url pattern="/permitApplication_update*"
+			access="profile.PermitApplication.update" />
+		<security:intercept-url pattern="/permitApplication_delete*"
+			access="profile.PermitApplication.delete" />
+
+
+		<security:intercept-url pattern="/fieldInspection_create*"
+			access="profile.FieldInspection.create" />
+		<security:intercept-url pattern="/fieldInspection_list*"
+			access="profile.FieldInspection.list" />
+		<security:intercept-url pattern="/fieldInspection_update*"
+			access="profile.FieldInspection.update" />
+		<security:intercept-url pattern="/fieldInspection_delete*"
+			access="profile.FieldInspection.delete" />
+
+		<security:intercept-url pattern="/seedTransportOrder_create*"
+			access="service.seedTransportOrder.create" />
+		<security:intercept-url pattern="/seedTransportOrder_list*"
+			access="service.seedTransportOrder.list" />
+		<security:intercept-url pattern="/seedTransportOrder_update*"
+			access="service.seedTransportOrder.update" />
+		<security:intercept-url pattern="/seedTransportOrder_delete*"
+			access="service.seedTransportOrder.delete" />
+
+
+		<security:intercept-url pattern="/distribute_create*"
+			access="profile.Distribute.create" />
+		<security:intercept-url pattern="/distribute_list*"
+			access="profile.Distribute.list" />
+		<security:intercept-url pattern="/distribute_update*"
+			access="profile.Distribute.update" />
+		<security:intercept-url pattern="/distribute_delete*"
+			access="profile.Distribute.delete" />
+
+
+		<security:intercept-url pattern="/seedCropInspRequest_create*"
+			access="profile.SeedCropInspRequest.create" />
+		<security:intercept-url pattern="/seedCropInspRequest_list*"
+			access="profile.SeedCropInspRequest.list" />
+		<security:intercept-url pattern="/seedCropInspRequest_update*"
+			access="profile.SeedCropInspRequest.update" />
+		<security:intercept-url pattern="/seedCropInspRequest_delete*"
+			access="profile.SeedCropInspRequest.delete" />
+
+
+		<security:intercept-url pattern="/farmInspectionss_create*"
+			access="service.FarmInspectionss.create" />
+		<security:intercept-url pattern="/farmInspectionss_list*"
+			access="service.FarmInspectionss.list" />
+		<security:intercept-url pattern="/farmInspectionss_update*"
+			access="service.FarmInspectionss.update" />
+		<security:intercept-url pattern="/farmInspectionss_delete*"
+			access="service.FarmInspectionss.delete" />
+
+
+		<security:intercept-url pattern="/exporterRegistration_create*"
+			access="profile.exporterRegistration.create" />
+		<security:intercept-url pattern="/exporterRegistration_list*"
+			access="profile.exporterRegistration.list" />
+		<security:intercept-url pattern="/exporterRegistration_update*"
+			access="profile.exporterRegistration.update" />
+		<security:intercept-url pattern="/exporterRegistration_delete*"
+			access="profile.exporterRegistration.delete" />
+
+		<security:intercept-url pattern="/grower_create*"
+			access="profile.grower.create" />
+		<security:intercept-url pattern="/grower_detail*"
+			access="profile.grower.list" />
+		<security:intercept-url pattern="/grower_update*"
+			access="profile.grower.update" />
+		<security:intercept-url pattern="/grower_delete*"
+			access="profile.grower.delete" />
+		<security:intercept-url pattern="/grower_data*"
+			access="profile.grower.list" />
+
+		<security:intercept-url pattern="/seedSampleRequest_create*"
+			access="profile.seedSampleRequest.create" />
+		<security:intercept-url pattern="/seedSampleRequest_detail*"
+			access="profile.seedSampleRequest.list" />
+		<security:intercept-url pattern="/seedSampleRequest_update*"
+			access="profile.seedSampleRequest.update" />
+		<security:intercept-url pattern="/seedSampleRequest_delete*"
+			access="profile.seedSampleRequest.delete" />
+		<security:intercept-url pattern="/seedSampleRequest_data*"
+			access="profile.seedSampleRequest.list" />
+
+		<security:intercept-url pattern="/seedSampleAnalysisApplication_create*"
+			access="profile.seedSampleAnalysisApplication.create" />
+		<security:intercept-url pattern="/seedSampleAnalysisApplication_detail*"
+			access="profile.seedSampleAnalysisApplication.list" />
+		<security:intercept-url pattern="/seedSampleAnalysisApplication_update*"
+			access="profile.seedSampleAnalysisApplication.update" />
+		<security:intercept-url pattern="/seedSampleAnalysisApplication_delete*"
+			access="profile.seedSampleAnalysisApplication.delete" />
+		<security:intercept-url pattern="/seedSampleAnalysisApplication_data*"
+			access="profile.seedSampleAnalysisApplication.list" />
+
+		<security:intercept-url pattern="/dealerRenewal_create*"
+			access="service.dealerRenewal.create" />
+		<security:intercept-url pattern="/dealerRenewal_detail*"
+			access="service.dealerRenewal.list" />
+		<security:intercept-url pattern="/dealerRenewal_update*"
+			access="service.dealerRenewal.update" />
+		<security:intercept-url pattern="/dealerRenewal_delete*"
+			access="service.dealerRenewal.delete" />
+		<security:intercept-url pattern="/dealerRenewal_data*"
+			access="service.dealerRenewal.list" />
+
+		<security:intercept-url pattern="/dealerRenewal_create*"
+			access="service.agroChemicalRenewal.create" />
+		<security:intercept-url pattern="/dealerRenewal_detail*"
+			access="service.agroChemicalRenewal.list" />
+		<security:intercept-url pattern="/dealerRenewal_update*"
+			access="service.agroChemicalRenewal.update" />
+		<security:intercept-url pattern="/dealerRenewal_delete*"
+			access="service.agroChemicalRenewal.delete" />
+		<security:intercept-url pattern="/dealerRenewal_data*"
+			access="service.agroChemicalRenewal.list" />
+
+		<security:intercept-url pattern="/fieldInsp_create*"
+			access="service.FieldInsp.create" />
+		<security:intercept-url pattern="/fieldInsp_detail*"
+			access="service.FieldInsp.list" />
+		<security:intercept-url pattern="/fieldInsp_update*"
+			access="service.FieldInsp.update" />
+		<security:intercept-url pattern="/fieldInsp_delete*"
+			access="service.FieldInsp.delete" />
+		<security:intercept-url pattern="/fieldInsp_data*"
+			access="service.FieldInsp.list" />
+
+		<security:intercept-url pattern="/borderPtInsp_create*"
+			access="service.borderPtInsp.create" />
+		<security:intercept-url pattern="/borderPtInsp_detail*"
+			access="service.borderPtInsp.list" />
+		<security:intercept-url pattern="/borderPtInsp_update*"
+			access="service.borderPtInsp.update" />
+		<security:intercept-url pattern="/borderPtInsp_delete*"
+			access="service.borderPtInsp.delete" />
+		<security:intercept-url pattern="/borderPtInsp_data*"
+			access="service.borderPtInsp.list" />
+
+		<security:intercept-url pattern="/annualReturn_create*"
+			access="service.annualReturn.create" />
+		<security:intercept-url pattern="/annualReturn_detail*"
+			access="service.annualReturn.list" />
+		<security:intercept-url pattern="/annualReturn_update*"
+			access="service.annualReturn.update" />
+		<security:intercept-url pattern="/annualReturn_delete*"
+			access="service.annualReturn.delete" />
+		<security:intercept-url pattern="/annualReturn_data*"
+			access="service.annualReturn.list" />
+
+		<security:intercept-url pattern="/prefernce_list*"
+			access="system.prefernces.list" />
+		<security:intercept-url pattern="/prefernce_update*"
+			access="system.prefernces.update" />
+		<security:intercept-url pattern="/prefernce_generate*"
+			access="system.prefernces.update" />
+
+
+
+		<security:intercept-url pattern="/seedMerchantRenewal_create*"
+			access="service.seedMerchantRenewal.create"></security:intercept-url>
+		<security:intercept-url pattern="/seedMerchantRenewal_detail*"
+			access="service.seedMerchantRenewal.list"></security:intercept-url>
+		<security:intercept-url pattern="/seedMerchantRenewal_update*"
+			access="service.seedMerchantRenewal.update"></security:intercept-url>
+		<security:intercept-url pattern="/seedMerchantRenewal_delete*"
+			access="service.seedMerchantRenewal.delete"></security:intercept-url>
+		<security:intercept-url pattern="/seedMerchantRenewal_data*"
+			access="service.seedMerchantRenewal.list"></security:intercept-url>
+
+		<security:intercept-url pattern="/prefernce_list*"
+			access="system.prefernces.list" />
+		<security:intercept-url pattern="/prefernce_update*"
+			access="system.prefernces.update" />
+		<security:intercept-url pattern="/prefernce_generate*"
+			access="system.prefernces.update" />
+
+		<security:intercept-url pattern="/seedSampleTestResult_create*"
+			access="service.seedSampleTestResult.create" />
+		<security:intercept-url pattern="/seedSampleTestResult_list*"
+			access="service.seedSampleTestResult.list" />
+		<security:intercept-url pattern="/seedSampleTestResult_update*"
+			access="service.seedSampleTestResult.update" />
+		<security:intercept-url pattern="/seedSampleTestResult_delete*"
+			access="service.seedSampleTestResult.delete" />
+
+
+		<security:intercept-url pattern="/workOrder_create*"
+			access="service.workOrder.create" />
+		<security:intercept-url pattern="/workOrder_list*"
+			access="service.workOrder.list" />
+		<security:intercept-url pattern="/workOrder_update*"
+			access="service.workOrder.update" />
+		<security:intercept-url pattern="/workOrder_delete*"
+			access="service.workOrder.delete" />
+		<!-- ADD SECURITY CONFIGURATION ABOVE -->
+		<security:custom-filter ref="eseAuthenticationProcessingFilter"
+			position="FORM_LOGIN_FILTER" />
+		<security:custom-filter position="CONCURRENT_SESSION_FILTER"
+			ref="concurrencyFilter" />
+		<security:session-management
+			session-authentication-strategy-ref="sas" />
+
+		<security:intercept-url pattern="/importApplication_create*"
+			access="service.importApplication.create" />
+		<security:intercept-url pattern="/importApplication_list*"
+			access="service.importApplication.list" />
+		<security:intercept-url pattern="/importApplication_update*"
+			access="service.importApplication.update" />
+		<security:intercept-url pattern="/importApplication_delete*"
+			access="service.importApplication.delete" />
+
+
+		<security:intercept-url pattern="/scouting_create*"
+			access="service.scouting.create" />
+		<security:intercept-url pattern="/scouting_list*"
+			access="service.scouting.list" />
+		<security:intercept-url pattern="/scouting_update*"
+			access="service.scouting.update" />
+		<security:intercept-url pattern="/scouting_delete*"
+			access="service.scouting.delete" />
+
+
+		<security:intercept-url pattern="/stopSaleOrder_create*"
+			access="service.stopSaleOrder.create" />
+		<security:intercept-url pattern="/stopSaleOrder_list*"
+			access="service.stopSaleOrder.list" />
+		<security:intercept-url pattern="/stopSaleOrder_update*"
+			access="service.stopSaleOrder.update" />
+		<security:intercept-url pattern="/stopSaleOrder_delete*"
+			access="service.stopSaleOrder.delete" />
+
+
+		<security:intercept-url pattern="/seedDealer_create*"
+			access="service.seedDealer.create" />
+		<security:intercept-url pattern="/seedDealer_list*"
+			access="service.seedDealer.list" />
+		<security:intercept-url pattern="/seedDealer_update*"
+			access="service.seedDealer.update" />
+		<security:intercept-url pattern="/seedDealer_delete*"
+			access="service.seedDealer.delete" />
+
+
+		<security:intercept-url pattern="/farmStockApprovalCertificate_create*"
+			access="service.farmStockApprovalCertificate.create" />
+		<security:intercept-url pattern="/farmStockApprovalCertificate_list*"
+			access="service.farmStockApprovalCertificate.list" />
+		<security:intercept-url pattern="/farmStockApprovalCertificate_update*"
+			access="service.farmStockApprovalCertificate.update" />
+		<security:intercept-url pattern="/farmStockApprovalCertificate_delete*"
+			access="service.farmStockApprovalCertificate.delete" />
+
+		<security:intercept-url pattern="/physicalCommodityInspection_create*"
+			access="service.physicalCommodityInspection.create" />
+		<security:intercept-url pattern="/physicalCommodityInspection_list*"
+			access="service.physicalCommodityInspection.list" />
+		<security:intercept-url pattern="/physicalCommodityInspection_update*"
+			access="service.physicalCommodityInspection.update" />
+		<security:intercept-url pattern="/physicalCommodityInspection_delete*"
+			access="service.physicalCommodityInspection.delete" />
+
+		<security:intercept-url pattern="/sprayAndFieldManagement_create*"
+			access="service.sprayAndFieldManagement.create" />
+		<security:intercept-url pattern="/sprayAndFieldManagement_list*"
+			access="service.sprayAndFieldManagement.list" />
+		<security:intercept-url pattern="/sprayAndFieldManagement_update*"
+			access="service.sprayAndFieldManagement.update" />
+		<security:intercept-url pattern="/sprayAndFieldManagement_delete*"
+			access="service.sprayAndFieldManagement.delete" />
+
+		<security:intercept-url pattern="/farm_create*"
+			access="profile.farm.create,profile.farmer.create" />
+		<security:intercept-url pattern="/farm_list*"
+			access="profile.farm.list,profile.farmer.list" />
+		<security:intercept-url pattern="/farm_update*"
+			access="profile.farm.update,profile.farmer.update" />
+		<security:intercept-url pattern="/farm_delete*"
+			access="profile.farm.delete,profile.farmer.delete" />
+			
+			<security:intercept-url pattern="/farmCrops_create*"
+			access="profile.farm.create,profile.farmer.create" />
+		<security:intercept-url pattern="/farmCrops_list*"
+			access="profile.farm.list,profile.farmer.list" />
+		<security:intercept-url pattern="/farmCrops_update*"
+			access="profile.farm.update,profile.farmer.update" />
+		<security:intercept-url pattern="/farmCrops_delete*"
+			access="profile.farm.delete,profile.farmer.delete" />
+		
+
+		<security:intercept-url pattern="/auditRequest_create*"
+			access="service.auditRequest.create" />
+		<security:intercept-url pattern="/auditRequest_list*"
+			access="service.auditRequest.list" />
+		<security:intercept-url pattern="/auditRequest_delete*"
+			access="service.auditRequest.delete" />
+
+		<security:intercept-url pattern="/scouting_create*"
+			access="profile.scouting.create" />
+		<security:intercept-url pattern="/scouting_list*"
+			access="profile.scouting.list" />
+		<security:intercept-url pattern="/scouting_update*"
+			access="profile.scouting.update" />
+		<security:intercept-url pattern="/scouting_delete*"
+			access="profile.scouting.delete" />
+	<security:intercept-url pattern="/sprayAndFieldManagement_create*"
+			access="service.sprayAndFieldManagement.create" />
+		<security:intercept-url pattern="/sprayAndFieldManagement_list*"
+			access="service.sprayAndFieldManagement.list" />
+		<security:intercept-url pattern="/sprayAndFieldManagement_update*"
+			access="service.sprayAndFieldManagement.update" />
+		<security:intercept-url pattern="/sprayAndFieldManagement_delete*"
+			access="service.sprayAndFieldManagement.delete" />
+			
+		<security:intercept-url pattern="/scouting_create*"
+			access="service.scouting.create" />
+		<security:intercept-url pattern="/scouting_list*"
+			access="service.scouting.list" />
+		<security:intercept-url pattern="/scouting_update*"
+			access="service.scouting.update" />
+		<security:intercept-url pattern="/scouting_delete*"
+			access="service.scouting.delete" />	
+		
+		<security:intercept-url pattern="/landPreparation_create*"
+			access="service.landPreparation.create" />
+		<security:intercept-url pattern="/landPreparation_list*"
+			access="service.landPreparation.list" />
+		<security:intercept-url pattern="/landPreparation_update*"
+			access="service.landPreparation.update" />
+		<security:intercept-url pattern="/landPreparation_delete*"
+			access="service.landPreparation.delete" />
+
+		<security:intercept-url pattern="/harvest_create*"
+			access="service.harvest.create" />
+		<security:intercept-url pattern="/harvest_list*"
+			access="service.harvest.list" />
+		<security:intercept-url pattern="/harvest_update*"
+			access="service.harvest.update" />
+		<security:intercept-url pattern="/harvest_delete*"
+			access="service.harvest.delete" />
+
+		<security:intercept-url pattern="/recalling_create*"
+			access="service.recalling.create" />
+		<security:intercept-url pattern="/recalling_list*"
+			access="service.recalling.list" />
+		<security:intercept-url pattern="/recalling_update*"
+			access="service.recalling.update" />
+		<security:intercept-url pattern="/recalling_delete*"
+			access="service.recalling.delete" />
+		
+		<security:intercept-url pattern="/sorting_create*"
+			access="service.sorting.create" />
+		<security:intercept-url pattern="/sorting_list*"
+			access="service.sorting.list" />
+		<security:intercept-url pattern="/sorting_update*"
+			access="service.sorting.update" />
+		<security:intercept-url pattern="/sorting_delete*"
+			access="service.sorting.delete" />
+
+		<security:intercept-url pattern="/packhouseIncoming_create*"
+			access="service.packhouseIncoming.create" />
+		<security:intercept-url pattern="/packhouseIncoming_list*"
+			access="service.packhouseIncoming.list" />
+		<security:intercept-url pattern="/packhouseIncoming_update*"
+			access="service.packhouseIncoming.update" />
+		<security:intercept-url pattern="/packhouseIncoming_delete*"
+			access="service.packhouseIncoming.delete" />
+			
+			<security:intercept-url pattern="/packhouse_list*"
+			access="profile.packhouse.list" />
+		<security:intercept-url pattern="/packhouse_data*"
+			access="profile.packhouse.list" />
+		<security:intercept-url pattern="/packhouse_detail*"
+			access="profile.packhouse.list" />
+		<security:intercept-url pattern="/packhouse_create*"
+			access="profile.packhouse.create" />
+		<security:intercept-url pattern="/packhouse_update*"
+			access="profile.packhouse.update" />
+		<security:intercept-url pattern="/packhouse_delete*"
+			access="profile.packhouse.delete" />
+		<security:intercept-url pattern="/packhouse_populate*"
+			access="profile.packhouse.list" />
+			
+
+		<security:intercept-url pattern="/shipment_create*"
+			access="service.shipment.create" />
+		<security:intercept-url pattern="/shipment_list*"
+			access="service.shipment.list" />
+		<security:intercept-url pattern="/shipment_update*"
+			access="service.shipment.update" />
+		<security:intercept-url pattern="/shipment_delete*"
+			access="service.shipment.delete" />
+			
+			
+		<security:intercept-url pattern="/pcbp_create*"
+			access="service.Pcbp .create" />
+		<security:intercept-url pattern="/pcbp_list*"
+			access="service.Pcbp .list" />
+		<security:intercept-url pattern="/pcbp_update*"
+			access="service.Pcbp .update" />
+		<security:intercept-url pattern="/pcbp_delete*"
+			access="service.Pcbp .delete" />
+			
+			<security:intercept-url pattern="/planting_create*"
+			access="profile.farm.create,profile.farmer.create" />
+		<security:intercept-url pattern="/planting_list*"
+			access="profile.farm.list,profile.farmer.list" />
+		<security:intercept-url pattern="/planting_update*"
+			access="profile.farm.update,profile.farmer.update" />
+		<security:intercept-url pattern="/planting_delete*"
+			access="profile.farm.delete,profile.farmer.delete" />
+			
+		<security:intercept-url pattern="/traceabilityViewReport_list*" access="report.traceabilityView.list" />
+		<security:intercept-url pattern="/traceabilityViewReport_detail*" access="report.traceabilityView.list" />	
+		<security:intercept-url pattern="/traceabilityViewReport_subGridDetail*" access="report.traceabilityView.list" />
+		<security:intercept-url pattern="/traceabilityViewReport_populate*" access="report.traceabilityView.list" />
+			
+		<security:logout invalidate-session="false"
+			logout-url="/logout" success-handler-ref="eseLogoutSuccessHandler" />
+		<!-- <security:logout logout-url="/logout" invalidate-session="false" logout-success-url="/login_execute" 
+			/> -->
+		<security:access-denied-handler
+			error-page="/errorHome.jsp" />
+
+	</security:http>
+
+	<bean id="authenticationEntryPoint"
+		class="org.springframework.security.web.authentication.LoginUrlAuthenticationEntryPoint">
+		<constructor-arg name="loginFormUrl" value="/login_execute" />
+	</bean>
+
+	<bean id="concurrencyFilter"
+		class="org.springframework.security.web.session.ConcurrentSessionFilter">
+		<property name="sessionRegistry" ref="sessionRegistry" />
+		<property name="expiredUrl" value="/login_executeExpired" />
+	</bean>
+
+
+	<bean id="eseAuthenticationProcessingFilter" class="com.sourcetrace.eses.filter.SecurityFilter"
+		autowire="byType">
+		<property name="filterProcessesUrl" value="/j_spring_security_check" />
+		<property name="authenticationManager" ref="authenticationManager" />
+		<property name="authenticationSuccessHandler" ref="authenticationSuccessHandler" />
+		<property name="authenticationFailureHandler" ref="authenticationFailuerHandler" />
+		<property name="sessionAuthenticationStrategy" ref="sas" />
+	</bean>
+
+	<bean id="sas"
+		class="org.springframework.security.web.authentication.session.CompositeSessionAuthenticationStrategy">
+		<constructor-arg>
+			<list>
+				<bean
+					class="com.sourcetrace.eses.filter.CustomSessionControlAuthenticationStrategy">
+					<constructor-arg ref="sessionRegistry" />
+					<property name="maximumSessions" value="1" />
+					<property name="exceptionIfMaximumExceeded" value="false" />
+				</bean>
+				<bean
+					class="org.springframework.security.web.authentication.session.SessionFixationProtectionStrategy">
+				</bean>
+				<bean
+					class="org.springframework.security.web.authentication.session.RegisterSessionAuthenticationStrategy">
+					<constructor-arg ref="sessionRegistry" />
+				</bean>
+			</list>
+		</constructor-arg>
+	</bean>
+	<bean id="authenticationSuccessHandler"
+		class="org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler">
+		<property name="defaultTargetUrl" value="/home_list" />
+	</bean>
+
+
+
+
+	<bean id="authenticationFailuerHandler"
+		class="org.springframework.security.web.authentication.SimpleUrlAuthenticationFailureHandler">
+		<property name="defaultFailureUrl" value="/login_execute" />
+	</bean>
+
+	<security:authentication-manager alias="authenticationManager">
+		<security:authentication-provider
+			user-service-ref="userDetailsAdapter" />
+	</security:authentication-manager>
+
+	<bean id="authenticatedVoter"
+		class="org.springframework.security.access.vote.AuthenticatedVoter" />
+	<bean id="noPrefixRoleVoter" class="org.springframework.security.access.vote.RoleVoter">
+		<property name="rolePrefix" value="" />
+	</bean>
+
+	<bean id="customAccessDecisionManager"
+		class="org.springframework.security.access.vote.AffirmativeBased">
+		<constructor-arg name="decisionVoters">
+			<list>
+				<ref bean="noPrefixRoleVoter" />
+				<ref bean="authenticatedVoter" />
+			</list>
+		</constructor-arg>
+	</bean>
+
+	<bean id="sessionRegistry"
+		class="org.springframework.security.core.session.SessionRegistryImpl" />
+	<bean id="webSecurityExpressionHandler"
+		class="org.springframework.security.web.access.expression.DefaultWebSecurityExpressionHandler" />
+
+
+
+</beans>

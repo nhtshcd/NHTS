@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<grass-cfg>
+	<settings project="dbmodel">
+		<project-dir>dbmodel/</project-dir>
+		<input-dirs>
+			<input-dir>cfg/sql/</input-dir>
+		</input-dirs>
+		<output-dir>target/demo/</output-dir>
+	</settings>
+	<targets>
+		<target id="dev" id-prefs="global" />
+		<target id="test" id-prefs="global" />
+		<target id="prod" id-prefs="global" />
+	</targets>
+	<files>
+		<file src="cfg/sql/db-setup.cmd">
+			<cfg-file exclude="false" id="global" name="db-setup.cmd" />
+		</file>
+		<file src="cfg/sql/db-setup.sh">
+			<cfg-file exclude="false" id="global" name="db-setup.sh" />
+		</file>
+		<file src="cfg/sql/db.sql">
+			<cfg-file exclude="false" id="global" name="sql/db.sql" />
+		</file>
+
+		<file src="cfg/sql/util/data-ddl.sql">
+			<cfg-file exclude="false" id="global" name="sql/util/data-ddl.sql" />
+		</file>
+		<file src="cfg/sql/location/data-ddl.sql">
+			<cfg-file exclude="false" id="global" name="sql/location/data-ddl.sql" />
+		</file>
+		<file src="cfg/sql/role/data-ddl.sql">
+			<cfg-file exclude="false" id="global" name="sql/role/data-ddl.sql" />
+		</file>
+		<file src="cfg/sql/profile/data-ddl.sql">
+			<cfg-file exclude="false" id="global" name="sql/profile/data-ddl.sql" />
+		</file>
+		<file src="cfg/sql/device/data-ddl.sql">
+			<cfg-file exclude="false" id="global" name="sql/device/data-ddl.sql" />
+		</file>
+		<file src="cfg/sql/service/data-ddl.sql">
+			<cfg-file exclude="false" id="global" name="sql/service/data-ddl.sql" />
+		</file>
+		<file src="cfg/sql/txn/data-ddl.sql">
+			<cfg-file exclude="false" id="global" name="sql/txn/data-ddl.sql" />
+		</file>
+
+		<file src="cfg/sql/util/data-dml.sql">
+			<cfg-file exclude="false" id="global" name="sql/util/data-dml.sql" />
+		</file>
+		<file src="cfg/sql/location/data-dml.sql">
+			<cfg-file exclude="false" id="global" name="sql/location/data-dml.sql" />
+		</file>
+		<file src="cfg/sql/role/data-dml.sql">
+			<cfg-file exclude="false" id="global" name="sql/role/data-dml.sql" />
+		</file>
+		<file src="cfg/sql/profile/data-dml.sql">
+			<cfg-file exclude="false" id="global" name="sql/profile/data-dml.sql" />
+		</file>
+		<file src="cfg/sql/device/data-dml.sql">
+			<cfg-file exclude="false" id="global" name="sql/device/data-dml.sql" />
+		</file>
+		<file src="cfg/sql/service/data-dml.sql">
+			<cfg-file exclude="false" id="global" name="sql/service/data-dml.sql" />
+		</file>
+		<file src="cfg/sql/txn/data-dml.sql">
+			<cfg-file exclude="false" id="global" name="sql/txn/data-dml.sql" />
+		</file>
+
+	</files>
+	<tokens>
+		<token name="db.name">
+			<value form="simple" id="global" type="pre-install" use="mandatory">ESES_DEMO</value>
+		</token>
+		<token name="ddl.sql">
+			<value form="simple" id="global" type="pre-install" use="mandatory">
+			<![CDATA[
+				mysql ESES_DEMO --user=root --password=root1234 < sql/util/data-ddl.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/location/data-ddl.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/role/data-ddl.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/profile/data-ddl.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/device/data-ddl.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/service/data-ddl.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/txn/data-ddl.sql
+			]]>
+			</value>
+		</token>
+		<token name="dml.sql">
+			<value form="simple" id="global" type="pre-install" use="mandatory">
+			<![CDATA[
+				mysql ESES_DEMO --user=root --password=root1234 < sql/util/data-dml.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/location/data-dml.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/role/data-dml.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/profile/data-dml.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/device/data-dml.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/service/data-dml.sql
+				mysql ESES_DEMO --user=root --password=root1234 < sql/txn/data-dml.sql
+			]]>
+			</value>
+		</token>
+
+	</tokens>
+</grass-cfg>

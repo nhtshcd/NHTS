@@ -1,0 +1,2 @@
+INSERT INTO `eses_wub`.`locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (null, 'sowingExport', 'en', 'Farmer Name,Group,Village,Total land Holding(ACRES),Estimated Yield(Kg),Season');
+INSERT INTO `eses_wub`.`locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (null, 'sowingSubgrid', 'en', 'Farm Name,Crop Type,Crop,Variety,Estimated yield(Kg),Sowing Date,Cultivation Area');

@@ -1,0 +1,66 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"       
+          "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+	<package name="ese" extends="struts-default">
+	
+			<interceptors>
+			<interceptor name="trimInterceptor" class="com.sourcetrace.eses.interceptor.TrimInterceptor" />
+			<interceptor name="layoutInterceptor"  class="com.sourcetrace.eses.interceptor.PageLayoutInterceptor" />
+			<interceptor-stack name="eseBaseStack">
+				<interceptor-ref name="trimInterceptor" />
+				<interceptor-ref name="defaultStack">
+					<param name="validation.excludeMethods">
+						execute
+					</param>
+				</interceptor-ref>
+				<interceptor-ref name="layoutInterceptor" />
+			</interceptor-stack>
+			
+			<interceptor-stack name="eseStack">
+				<interceptor-ref name="eseBaseStack">
+					<param name="layoutInterceptor.headingEnable">true</param>
+					<param name="layoutInterceptor.breadCrumbEnable">true</param>
+				</interceptor-ref>
+			</interceptor-stack>		
+			
+			 <interceptor-stack name="eseImageUploadStack">
+			   <interceptor-ref name="eseStack">
+				     <param name="eseBaseStack.defaultStack.fileUpload.maximumSize">
+					      51200
+				     </param>
+				     <param name="eseBaseStack.defaultStack.fileUpload.allowedTypes">
+					      image/jpeg,image/png
+				     </param>  
+				     <param name="eseBaseStack.defaultStack.validation.excludeMethods">
+					      execute
+				     </param>
+				     <param name="eseBaseStack.layoutInterceptor.headingEnable">true</param>
+					 <param name="eseBaseStack.layoutInterceptor.breadCrumbEnable">true</param>
+			    </interceptor-ref>
+		   	 </interceptor-stack>
+			
+		</interceptors>
+		<global-results>
+			<result type="redirectAction" name="login">
+				<param name="actionName">login_execute</param>
+			</result>
+			<result type="chain" name="exceptionHandler">
+				<param name="actionName">exception</param>
+			</result>
+		</global-results>
+		<global-exception-mappings>
+			<exception-mapping exception="java.lang.Exception"
+				result="exceptionHandler" />
+		</global-exception-mappings>
+		<action name="exception" class="com.sourcetrace.eses.action.ExceptionHandlerAction">
+			<result name="error">/jsp/exception/exception.jsp</result>
+		</action>
+		<action name="error" class="com.sourcetrace.eses.action.SecurityErrorAction">
+			<result name="error">/jsp/exception/accessDenied.jsp</result>
+		</action>
+		
+			
+	</package>
+</struts>

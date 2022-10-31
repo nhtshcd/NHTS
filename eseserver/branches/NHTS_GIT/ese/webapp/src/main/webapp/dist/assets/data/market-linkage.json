@@ -1,0 +1,28 @@
+{
+  "data": [
+    {
+      "country": "India",
+      "variety": "AR28",
+      "grade": "Grade 1",
+      "avlblqty": "1.0000",
+      "purchordr": "<div class='action-col-body'><ul class='list-inline dt-btn-list'><li class='list-inline-item'><a class='btn-action' data-toggle='tooltip' data-placement='top' title='Add to Cart'><i class='fas fa-shopping-cart'></i></a></li></ul></div>",
+      "buynm": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "cntcno": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "buyeml": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "purchqty": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "rowcta": "<button class='btn bttn-primary st mr-4'>Save</button><button class='btn bttn-primary-outline st'>Cancel</button>"
+    },
+    {
+      "country": "India",
+      "variety": "AR28",
+      "grade": "Grade 1",
+      "avlblqty": "1.0000",
+      "purchordr": "<div class='action-col-body'><ul class='list-inline dt-btn-list'><li class='list-inline-item'><a class='btn-action' data-toggle='tooltip' data-placement='top' title='Add to Cart'><i class='fas fa-shopping-cart'></i></a></li></ul></div>",
+      "buynm": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "cntcno": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "buyeml": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "purchqty": "<input class='form-control' type='text' placeholder='Search' value='Bhiwandi' />",
+      "rowcta": "<button class='btn bttn-primary st mr-4'>Save</button><button class='btn bttn-primary-outline st'>Cancel</button>"
+    }
+  ]
+}

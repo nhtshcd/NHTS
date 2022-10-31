@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans default-init-method="init" 
+	xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd">
+	<bean name="tripleDES" class="com.sourcetrace.eses.util.crypto.TripleDES" init-method="init">
+		<property name="algorithm" value="DESede" />
+		<property name="transformation" value="DESede/ECB/NoPadding" />
+		<property name="key" value="source2010wintraceclient" />
+	</bean>
+	<bean id="deployment" class="com.sourcetrace.eses.util.log.Deployment">
+		<property name="module" value="Web Console" />
+		<property name="version" value="1.0.0" />
+	</bean>
+</beans>

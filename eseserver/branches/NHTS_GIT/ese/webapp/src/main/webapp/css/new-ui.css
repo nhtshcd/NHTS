@@ -1,0 +1,221 @@
+@import url('https://fonts.googleapis.com/css2?family=Nunito+Sans&display=swap');
+
+body {
+	background: #e9e9e9;
+	font-family: 'Nunito Sans', sans-serif;
+	font-size:16px;
+}
+ul.navmenu {    
+    width: 70px;    
+    background: #fff;
+    box-shadow: 10px 13px 26px -16px rgba(0,0,0,0.52);
+	-webkit-box-shadow: 10px 13px 26px -16px rgba(0,0,0,0.52);
+	-moz-box-shadow: 10px 13px 26px -16px rgba(0,0,0,0.52);
+	border-top-right-radius: 40px;
+}
+.header {   
+    width: 100%;
+}
+.inner-logo, .headerBar {    
+    display: flex;
+    align-items: center;
+} 
+.breadCrumb-wrapper {
+	align-self: center;
+}
+.contentArea {    
+    padding-left: 70px;
+}
+.inner-logo, .headerBar {
+    background: #009456;
+    min-height:70px;
+    margin-left:-70px;
+    padding-left: 75px;
+}
+ul.navmenu {
+	padding-top:70px;
+}
+.navmenu li a {
+    height: 70px;
+    width: 70px;
+    color:#656875;
+}
+ul.navmenu li ul.submenu {
+	background: #daf2ac;
+	border-right: 1px solid #656875;
+}
+ul.navmenu li:hover ul.submenu {
+	left:70px;
+	top:70px;	
+}
+.navmenu li:hover a {
+	background: #daf2ac;
+	color: #2a3f54;	
+}
+ul.navmenu li ul.submenu li a {
+    color: #656875;
+    border-bottom: solid 1px #656875;
+    width: 100%;
+}
+ul.navmenu li ul.submenu li:hover a {
+    color: #656875;
+    border-bottom: solid 1px #656875;
+    width: 100%;
+}
+.has-submenu::after {
+    color: #656875;
+}
+ul.navmenu li ul.submenu li a {
+	padding:10px 5px;
+}
+.menuToggle > a {
+    background: transparent;
+    color: #2a3f54 !important;    
+}
+.menuToggle > a:hover {
+  background: transparent !important;
+  color: #2a3f54 !important; 
+}
+.menuToggle.active {
+    background: transparent!important;
+    color: #2a3f54 !important;  
+    border-top-right-radius: 40px;  
+}
+.submenu .menu-title {
+	color:#2a3f54;
+}
+body.showFixedSideMenu ul.navmenu {
+	background: #daf2ac;
+}
+body.showFixedSideMenu .closeMnu {
+	background: #daf2ac;
+}
+body.showFixedSideMenu .closeMnu > i {
+	color:#656875;
+}
+.breadCrumbNavigation li a {
+	color: #fff;
+	font-size: 15px;
+	line-height: 20px;	
+}
+.btn-hi-sts-transparent {
+	background-color:#003c27;
+	color: #fff;
+}
+.appContentWrapper-outline {
+    background: transparent;    
+    padding: 10px;
+    position:relative;
+    min-height:160px;
+}
+.newUIbgImage {
+	background: url('../dist/assets/images/training-history-bg.png') no-repeat!important;
+	background-position: 95% 0 !important; 
+}
+.border-radius {
+	border-radius: 20px;
+}
+.newUI-title {
+	font-size:20px;
+	font-weight:bold;
+	color:#1e2336;
+	margin:0;
+	padding-bottom:20px;	
+}
+.newUI-flexiwrapper {
+	display:flex;
+	align-items:center;
+	justify-content:flex-start;
+}
+.newUI-flexi {
+	padding:20px 20px 10px;
+	background:#fff;	
+	box-shadow: 8px 8px 5px 0px rgba(202,202,202,1);
+	-webkit-box-shadow: 8px 8px 5px 0px rgba(202,202,202,1);
+	-moz-box-shadow: 8px 8px 5px 0px rgba(202,202,202,1);
+	margin-right:15px;
+	border-radius:15px;
+	display:flex;
+	align-items: flex-start;
+	min-width: 150px;
+	
+}
+.newUI-icon {
+	margin-right: 15px;	
+}
+.newUI-metric h1 {
+	font-size:20px;
+	font-weight:bold;
+	color:#1E2336;
+	margin:0;
+}
+.newUI-metric p {
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 18px;
+}
+.newUI-nav-pills {
+	margin-left:25px;
+}
+.newUI-nav-pills li {
+	background:#d9d9d9;
+	border-radius:10px 10px 0 0;
+}
+.newUI-nav-pills > li > a:focus, .newUI-nav-pills > li > a:hover {
+	background:#d9d9d9!important;	
+	color:#1e2336;
+}
+.newUI-nav-pills > li.active > a, 
+.newUI-nav-pills > li.active > a:focus, 
+.newUI-nav-pills > li.active > a:hover, 
+.filterBtn {
+	border-radius:10px 10px 0 0;
+}
+.datatable-wrapper-class {
+	background:#fff;
+}
+.dataTable-btn-cntrls {	
+	/*height:50px;*/	
+	z-index:100;
+	width:100%;
+	display:flex;
+	align-items: flex-start;
+	justify-content: space-between;
+}
+.dataTable-btn-cntrls .newUI-nav-pills li {
+	background:#009456;	
+	border-radius:10px 10px 0px 0px;
+}
+.dataTable-btn-cntrls .newUI-nav-pills li > a {
+	color:#fff;
+}
+.dataTable-btn-cntrls .newUI-nav-pills > li > a:focus, .dataTable-btn-cntrls .newUI-nav-pills > li > a:hover {
+	background:#d9d9d9!important;	
+	color:#1e2336;
+}
+.nav-pills-right {
+	margin-right:25px;
+}
+.tab-pane.active {
+	background:transparent;
+}
+.newUI-nav-pills .fa {
+	margin-right:5px;
+}
+.sorting_1 font {
+	color:#009456;
+}
+.pr-nav-tabs-wrap {
+	margin-bottom:20px;
+}
+
+.summaryBlockItem {
+	background:#64A15E!important;	
+}
+.summaryBlockItem .button {
+	background:none;
+	border:none;
+}
+.showFixedSideMenu ul.navmenu {
+    padding-top: 0px;
+}

@@ -1,0 +1,27 @@
+<decorators defaultdir="/WEB-INF/decorators">
+    <!-- Decorator for pages which need Sidemenu -->
+    <decorator name="loginlayout" page="loginLayout.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+
+    <decorator name="swithlayout" page="switchLayout.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+    
+     <decorator name="publiclayout" page="publicLayout.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+
+    <decorator name="loginheader" page="header.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+	
+    <decorator name="footer" page="footer.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+	
+    <decorator name="menu" page="menu.jsp">
+        <pattern>/*</pattern>
+    </decorator>
+
+</decorators>

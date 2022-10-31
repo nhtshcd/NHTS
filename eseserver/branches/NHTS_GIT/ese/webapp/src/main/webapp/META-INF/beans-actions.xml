@@ -1,0 +1,250 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/util
+	    http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+	<bean name="eseAction" class="com.sourcetrace.eses.action.ESEAction"
+		abstract="true" />
+	<bean name="homeAction" class="com.sourcetrace.eses.action.HomeAction"
+		scope="prototype" parent="eseAction">
+
+
+	</bean>
+
+	<bean name="dashboardAction" class="com.sourcetrace.eses.action.DashboardAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+	<bean name="generalAction" class="com.sourcetrace.eses.action.GeneralAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+
+	<bean name="baseReportAction" class="com.sourcetrace.eses.action.BaseReportAction"
+		abstract="true" />
+
+	<bean name="userAction" class="com.sourcetrace.eses.action.UserAction"
+		scope="prototype" parent="eseAction">
+
+		<property name="reportService" ref="userListService" />
+		<property name="validator" ref="userValidator" />
+	</bean>
+
+	<bean name="userValidator" class="com.sourcetrace.eses.validators.UserValidator">
+	</bean>
+
+	<bean name="catalogueAction" class="com.sourcetrace.eses.action.CatalogueAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="catalogueListService" />
+		<property name="validator" ref="catalogueValidator" />
+		<property name="idGenerator" ref="uniqueIDGenerator" />
+	</bean>
+	<bean name="catalogueValidator" class="com.sourcetrace.eses.validators.CatalogueValidator">
+	</bean>
+	<bean name="villageAction" class="com.sourcetrace.eses.action.VillageAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="villageListService" />
+		<property name="validator" ref="villageValidator" />
+		<property name="idGenerator" ref="uniqueIDGenerator" />
+	</bean>
+
+
+	<bean name="villageValidator" class="com.sourcetrace.eses.validators.VillageValidator">
+	</bean>
+
+
+	<bean name="profileDeviceAction" class="com.sourcetrace.eses.action.ProfileDeviceAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="deviceReportService" />
+		<property name="validator" ref="deviceValidator" />
+		<property name="idGenerator" ref="uniqueIDGenerator" />
+	</bean>
+
+	<bean name="deviceValidator"
+		class="com.sourcetrace.eses.validators.ProfileDeviceValidator">
+	</bean>
+	<bean name="roleAction" class="com.sourcetrace.eses.action.RoleAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="roleListService" />
+		<property name="validator" ref="roleValidator" />
+	</bean>
+	<bean name="roleValidator" class="com.sourcetrace.eses.validators.RoleValidator">
+	</bean>
+	<bean name="roleEntitlementAction" class="com.sourcetrace.eses.action.RoleEntitlementAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+	<bean name="roleMenuAction" class="com.sourcetrace.eses.action.RoleMenuAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+	<bean name="sampleAction" class="com.sourcetrace.eses.action.SampleAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+	<bean name="municipalityAction" class="com.sourcetrace.eses.action.MunicipalityAction"
+		scope="prototype" parent="eseAction">
+
+		<property name="reportService" ref="municipalityListService" />
+		<property name="validator" ref="municipalityValidator" />
+
+	</bean>
+
+	<bean name="municipalityValidator" class="com.sourcetrace.eses.validators.MunicipalityValidator">
+	</bean>
+
+
+	<bean name="localityAction" class="com.sourcetrace.eses.action.LocalityAction"
+		scope="prototype" parent="eseAction">
+
+		<property name="reportService" ref="localityListService" />
+		<property name="validator" ref="localityValidator" />
+		<property name="idGenerator" ref="uniqueIDGenerator" />
+
+	</bean>
+
+	<bean name="localityValidator" class="com.sourcetrace.eses.validators.LocalityValidator">
+	</bean>
+
+
+	<bean name="stateAction" class="com.sourcetrace.eses.action.StateAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="stateListService" />
+		<property name="validator" ref="stateValidator" />
+		<property name="idGenerator" ref="uniqueIDGenerator" />
+
+	</bean>
+
+	<bean name="stateValidator" class="com.sourcetrace.eses.validators.StateValidator">
+	</bean>
+
+
+	<bean name="countryAction" class="com.sourcetrace.eses.action.CountryAction"
+		scope="prototype" parent="eseAction">
+
+		<property name="reportService" ref="countryListService" />
+		<property name="validator" ref="countryValidator" />
+		<property name="idGenerator" ref="uniqueIDGenerator" />
+
+	</bean>
+
+	<bean name="countryValidator" class="com.sourcetrace.eses.validators.CountryValidator">
+
+	</bean>
+
+	<bean name="vendorAction" class="com.sourcetrace.eses.action.VendorAction"
+		scope="prototype" parent="eseAction">
+		<property name="idGenerator" ref="uniqueIDGenerator" />
+		<property name="reportService" ref="vendorListService" />
+		<property name="validator" ref="vendorValidator" />
+	</bean>
+
+	<bean name="vendorValidator" class="com.sourcetrace.eses.validators.VendorValidator">
+	</bean>
+
+
+
+	<bean name="branchMasterAction" class="com.sourcetrace.eses.action.BranchMasterAction"
+		scope="prototype" parent="eseAction">
+
+		<property name="reportService" ref="branchMasterListService" />
+		<property name="validator" ref="branchMasterValidator" />
+
+	</bean>
+
+	<bean name="branchMasterValidator" class="com.sourcetrace.eses.validators.BranchMasterValidator">
+	</bean>
+	<bean name="dynamicViewReportDTAction" class="com.sourcetrace.eses.action.DynamicViewReportDTAction"
+		scope="prototype" parent="baseReportAction">
+		<property name="reportService" ref="dynamicViewReportService" />
+	</bean>
+
+
+	<bean name="harvestSeasonAction" class="com.sourcetrace.eses.action.HarvestSeasonAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="harvestSeasonListService" />
+		<property name="farmerService" ref="farmerService" />
+		<property name="validator" ref="harvestSeasonValidator" />
+	</bean>
+
+	<bean name="harvestSeasonValidator"
+		class="com.sourcetrace.eses.validators.HarvestSeasonValidator">
+	</bean>
+
+
+
+
+	<bean name="prefernceAction" class="com.sourcetrace.eses.action.PreferncesAction"
+		scope="prototype" parent="eseAction">
+		<property name="validator" ref="prefernceValidator" />
+	</bean>
+
+	<bean name="prefernceValidator" class="com.sourcetrace.eses.validators.PreferncesValidator" />
+
+	<bean name="procurementProductEnrollAction"
+		class="com.sourcetrace.eses.action.ProcurementProductEnrollAction"
+		scope="prototype" parent="eseAction">
+		<property name="validator" ref="procurementProductValidator" />
+		<property name="reportService" ref="procurementProductListService" />
+	</bean>
+	<bean name="procurementProductValidator"
+		class="com.sourcetrace.eses.validators.ProcurementProductValidator">
+	</bean>
+
+	<bean name="procurementVarietyAction" class="com.sourcetrace.eses.action.ProcurementVarietyAction"
+		scope="prototype" parent="eseAction">
+		<property name="validator" ref="procurementVarietyValidator" />
+		<property name="reportService" ref="procurementVarietyListService" />
+	</bean>
+	<bean name="procurementVarietyValidator"
+		class="com.sourcetrace.eses.validators.ProcurementVarietyValidator">
+	</bean>
+
+
+	<bean name="procurementGradeAction" class="com.sourcetrace.eses.action.ProcurementGradeAction"
+		scope="prototype" parent="eseAction">
+		<property name="validator" ref="procurementGradeValidator" />
+		<property name="reportService" ref="procurementGradeListService" />
+	</bean>
+	<bean name="procurementGradeValidator"
+		class="com.sourcetrace.eses.validators.ProcurementGradeValidator">
+	</bean>
+
+	<bean name="farmAction" class="com.sourcetrace.eses.action.FarmAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="farmListService" />
+	</bean>
+
+	<bean name="farmCropsAction" class="com.sourcetrace.eses.action.FarmCropsAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="farmCropsListService" />
+	</bean>
+	<!-- <bean name="generalAction" class="com.sourcetrace.eses.action.GeneralAction" 
+		scope="prototype" parent="eseAction"> </bean> -->
+
+
+
+	<bean name="packhouseAction" class="com.sourcetrace.eses.action.PackhouseAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+
+	<bean name="customerAction" class="com.sourcetrace.eses.action.CustomerAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="customerReportDao" />
+	</bean>
+	
+	<bean name="traceabilityViewReportAction" class="com.sourcetrace.eses.action.TraceabilityViewReportAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+
+   <bean name="pcbpAction" class="com.sourcetrace.eses.action.PcbpAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+	
+	<bean name="agrodashboardAction" class="com.sourcetrace.eses.action.AgroDashboardAction"
+		scope="prototype" parent="eseAction">
+	</bean>
+	
+	<bean name="plantingAction" class="com.sourcetrace.eses.action.PlantingAction"
+		scope="prototype" parent="eseAction">
+		<property name="reportService" ref="plantingListService" />
+	</bean>
+
+</beans>
