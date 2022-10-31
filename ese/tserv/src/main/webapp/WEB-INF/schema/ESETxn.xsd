@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<schema xmlns="http://www.w3.org/2001/XMLSchema"
+	targetNamespace="http://www.sourcetrace.com/ese/schemas/ese-switch-txn"
+	xmlns:stxn="http://www.sourcetrace.com/ese/schemas/ese-switch-txn"
+	xmlns:xmime="http://www.w3.org/2005/05/xmlmime" elementFormDefault="qualified">
+
+	<!-- Head -->
+	<complexType name="Head">
+		<sequence>
+			<element name="serialNo" type="string" />
+			<element name="agentId" type="string" />
+			<element name="agentToken" type="string" />
+			<element name="servPointId" type="string" />
+			<element name="txnTime" type="string" />
+			<element name="txnType" type="string" />
+			<element name="operType" type="int" />
+			<element name="resentCount" type="int" />
+			<element name="msgNo" type="long" />
+		</sequence>
+	</complexType>
+
+	<!-- Body -->
+	<complexType name="body">
+		<sequence>
+			<element name="data" type="stxn:data" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<!-- Data -->
+	<complexType name="data">
+		<sequence>
+			<element name="key" type="string" />
+			<choice>
+				<element name="value" type="string" />
+				<element name="intValue" type="int" />
+				<element name="longValue" type="long" />
+				<element name="doubleValue" type="double" />
+				<element name="booleanValue" type="boolean" />
+				<element name="dateValue" type="date" />
+				<element name="timeValue" type="time" />
+				<element name="dateTimeValue" type="dateTime" />
+				<element name="objectValue" type="stxn:Object" />
+				<element name="collectionValue" type="stxn:Collection" />
+				<element name="binaryValue" type="base64Binary"
+					xmime:expectedContentTypes="application/octet-stream" />
+			</choice>
+		</sequence>
+	</complexType>
+
+	<!-- Request -->
+	<element name="Request">
+		<complexType>
+			<sequence>
+				<element name="head" type="stxn:Head" />
+				<element name="body" type="stxn:body" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<!-- Response -->
+	<element name="Response">
+		<complexType>
+			<sequence>
+				<element name="status" type="stxn:Status" minOccurs="1" />
+				<element name="body" type="stxn:body" />
+				<element name="sessionId" type="string" />
+				<element name="binaryType" type="stxn:binaryType"
+					xmime:expectedContentTypes="application/octet-stream" />
+			</sequence>
+		</complexType>
+	</element>
+
+	<!-- Status -->
+	<complexType name="Status">
+		<sequence>
+			<element name="code" type="string" />
+			<element name="message" type="string" />
+		</sequence>
+	</complexType>
+
+	<complexType name="binaryType">
+		<sequence>
+			<element name="binaryData" type="stxn:binaryData" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="binaryData">
+		<sequence>
+			<element name="key" type="string" />
+			<element name="value" type="base64Binary"
+				xmime:expectedContentTypes="application/octet-stream" />
+		</sequence>
+	</complexType>
+
+	<complexType name="Credential">
+		<sequence>
+			<element name="user" type="string" />
+			<element name="token" type="string" />
+			<element name="card" type="string" />
+			<element name="pin" type="string" />
+			<element name="fprint" type="base64Binary"
+				xmime:expectedContentTypes="application/octet-stream" />
+		</sequence>
+	</complexType>
+
+	<complexType name="Collection">
+		<sequence>
+			<element name="object" type="stxn:Object" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+
+	<complexType name="Object">
+		<sequence>
+			<element name="data" type="stxn:data" maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	<!-- list of errors -->
+	<element name="errors" type="stxn:Errors" />
+	<complexType name="Errors">
+		<sequence>
+			<element name="error" type="stxn:Error" minOccurs="1"
+				maxOccurs="unbounded" />
+		</sequence>
+	</complexType>
+	<complexType name="Error">
+		<sequence>
+			<element name="code" type="string" />
+			<element name="message" type="string" />
+		</sequence>
+	</complexType>
+
+</schema>

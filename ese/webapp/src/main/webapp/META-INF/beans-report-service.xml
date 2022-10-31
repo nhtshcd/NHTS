@@ -1,0 +1,123 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:util="http://www.springframework.org/schema/util"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
+		http://www.springframework.org/schema/util
+	    http://www.springframework.org/schema/util/spring-util-2.5.xsd">
+
+
+	<bean id="agentListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="agentReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Agent" />
+	</bean>
+	<bean id="catalogueListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="catalogueReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.FarmCatalogue" />
+	</bean>
+
+	<bean id="userListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="userReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.User" />
+	</bean>
+
+	<bean id="deviceReportService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="deviceReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Device" />
+
+	</bean>
+	
+	<bean id="roleListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="roleReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Role" />
+	</bean>
+
+	<bean id="villageListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="villageListReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Village" />
+	</bean>
+
+	<bean id="municipalityListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="municipalityReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Municipality" />
+	</bean>
+
+	<bean id="localityListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="localityReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Locality" />
+	</bean>
+
+	<bean id="stateListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="stateReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.State" />
+	</bean>
+
+	<bean id="countryListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="countryReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Country" />
+	</bean>
+
+	<bean id="vendorListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="vendorReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Vendor" />
+	</bean>
+
+
+	<bean id="branchMasterListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="branchMasterReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.BranchMaster" />
+	</bean>
+	<bean id="dynamicViewReportService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="dynamicViewReportDAO" />
+	</bean>
+	<bean id="harvestSeasonListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="harvestSeasonListReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.HarvestSeason" />
+	</bean>
+
+	<bean id="procurementProductListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="procurementProductReportDAO" />
+		<property name="reportEntity"
+			value="com.sourcetrace.eses.entity.ProcurementProduct" />
+
+	</bean>
+	
+	<bean id="procurementVarietyListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="procurementVarietyReportDAO" />
+		<property name="reportEntity"
+			value="com.sourcetrace.eses.entity.ProcurementVariety" />
+
+	</bean>
+	
+	<bean id="procurementGradeListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="procurementGradeReportDAO" />
+		<property name="reportEntity"
+			value="com.sourcetrace.eses.entity.ProcurementGrade" />
+
+	</bean>
+	
+	<bean id="farmListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="farmReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Farm" />
+
+	</bean>
+
+	<bean id="farmCropsListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="farmCropsReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.FarmCrops" />
+
+	</bean>
+	
+	<bean id="customerReportDao" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="customerReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Customer" />
+
+	</bean>
+	
+		<bean id="plantingListService" class="com.sourcetrace.eses.service.ReportService">
+		<property name="reportDAO" ref="plantingReportDAO" />
+		<property name="reportEntity" value="com.sourcetrace.eses.entity.Planting" />
+
+	</bean>
+
+</beans>
+

@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:mvc="http://www.springframework.org/schema/mvc"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+	<!-- DispatcherServlet Context: defines this servlet's request-processing 
+		infrastructure -->
+
+	<!-- Enables the Spring MVC @Controller programming model -->
+	<mvc:annotation-driven />
+
+	<!-- Configures Interceptors -->
+	<mvc:interceptors>
+
+		<!-- This XML will intercept all URIs -->
+		<beans:bean class="com.sourcetrace.eses.interceptors.ApiInterceptors"></beans:bean>
+
+		<!-- This XML will apply interceptor to only configured URIs -->
+		<!-- <mvc:interceptor> <mvc:mapping path="/users"></mvc:mapping> <bean 
+			class="com.howtodoinjava.interceptor.DemoInterceptor"></bean> <mvc:interceptor> -->
+	</mvc:interceptors>
+	<!-- Configure to plugin JSON as request and response in method handler -->
+	<beans:bean
+		class="org.springframework.web.servlet.mvc.method.annotation.RequestMappingHandlerAdapter">
+		<beans:property name="messageConverters">
+			<beans:list>
+				<beans:ref bean="jsonMessageConverter" />
+			</beans:list>
+		</beans:property>
+	</beans:bean>
+
+	<!-- Configure bean to convert JSON to POJO and vice versa -->
+	<beans:bean id="jsonMessageConverter"
+		class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+
+	</beans:bean>
+	<beans:bean
+		class="org.springframework.web.servlet.mvc.method.annotation.ExceptionHandlerExceptionResolver">
+		<beans:property name="messageConverters">
+			<beans:array>
+				<beans:bean
+					class="org.springframework.http.converter.json.MappingJackson2HttpMessageConverter">
+					<beans:property name="supportedMediaTypes">
+						<beans:list>
+							<beans:value>application/json;charset=UTF-8</beans:value>
+						</beans:list>
+					</beans:property>
+				</beans:bean>
+			</beans:array>
+		</beans:property>
+	</beans:bean>
+	<beans:bean id="txnProcessServiceImpl"
+		class="com.sourcetrace.eses.service.TxnProcessServiceImpl">
+		<beans:property name="txnAdapterMap">
+			<beans:map>
+				<beans:entry key="301" value-ref="agentLogin" />
+				<beans:entry key="322" value-ref="syncLogin" />
+				<beans:entry key="315" value-ref="farmerDownload" />
+				<beans:entry key="385" value-ref="farmDownload" />
+				<beans:entry key="386" value-ref="farmCropsDownload" />
+			</beans:map>
+		</beans:property>
+	</beans:bean>
+	<beans:bean id="syncLogin" class="com.sourcetrace.eses.adapter.core.SyncLogin">
+		<beans:property name="txnMap">
+			<beans:map>
+				<beans:entry key="data0" value-ref="productsDownload" />
+				<beans:entry key="data1" value-ref="seasonDownload" />
+				<beans:entry key="data2" value-ref="locationDownloadAdapter" />
+				<beans:entry key="data6" value-ref="procurementProductDownload" />
+				<beans:entry key="data8" value-ref="catalogueDownload" />
+				<beans:entry key="data9" value-ref="coOperativeDownload" />
+			</beans:map>
+		</beans:property>
+	</beans:bean>
+	<context:component-scan base-package="com.sourcetrace.eses" />
+
+</beans:beans>

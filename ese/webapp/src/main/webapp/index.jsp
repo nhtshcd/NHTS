@@ -1,0 +1,1 @@
+<%response.sendRedirect("home_list.action");%>

@@ -1,0 +1,150 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE struts PUBLIC
+          "-//Apache Software Foundation//DTD Struts Configuration 2.0//EN"       
+          "http://struts.apache.org/dtds/struts-2.0.dtd">
+<struts>
+<constant name="struts.multipart.maxSize" value="104857600" />
+	<package name="ese_tenants" namespace="/" extends="ese">
+		<default-interceptor-ref name="eseStack" />
+		
+	<action name="wilmar_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">wilmar</param>
+		</action>
+		
+		<action name="pratibha_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">pratibha</param>
+		</action>
+		
+		<action name="agro_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">agro</param>
+		</action>
+		
+		<action name="kpf_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">kpf</param>
+		</action>
+		
+		<action name="chetna_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">chetna</param>
+		</action>
+		
+		
+		<action name="crs_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">crsdemo</param>
+		</action>
+		
+		
+		<action name="iccoa_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">iccoa</param>
+		</action>
+		
+		
+		<action name="afasa_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">afasa</param>
+		</action>
+		
+		
+		<action name="gar_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">gar</param>
+		</action>
+		
+		<action name="efk_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">efk</param>
+		</action>
+		
+		
+		<action name="componesa_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">componesa</param>
+		</action>
+		
+		<action name="worldvision_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">worldvision</param>
+		</action>
+		
+		<action name="fruitmaster_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">fruitmaster</param>
+		</action>
+		<action name="griffith_Farmapp" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">griffith</param>
+		</action>
+		
+		<action name="login_execute_kashtkaar" method="execute" class="loginAction">
+			<result name="input">/jsp/login.jsp</result>
+			<result name="emptyTenant">/jsp/404.jsp</result>
+			<result name="pageExpired">/jsp/expired.jsp</result>
+			<result name="redirect" type="redirectAction">dashboard_list</result>
+			<result name="red_url" type="redirectAction">${url}</result>
+			<param name="tenantId">galaxyrice</param>
+		</action>
+		
+	</package>
+</struts>

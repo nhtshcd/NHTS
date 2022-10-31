@@ -1,0 +1,260 @@
+/*$box-shadow : -10px 10px 45px rgba(0, 0, 0, 0.32);*/
+body {
+  background: #e1f0ec !important; }
+
+.sts-input:focus {
+  border-bottom: solid 1px #254441 !important; }
+
+select, input {
+  border: 1px solid #008000 !important; }
+
+.input-icon > input:focus + [class*="fa-"],
+.input-icon > input:focus + [class*="clip-"] {
+  color: #254441; }
+
+.sts {
+  color: #254441; }
+
+a.sts:hover, a.sts:focus {
+  color: #254441; }
+
+.btn-sts {
+  background-color: #254441;
+  border-color: #008000;
+  color: #fff; }
+
+.btn-sts:hover,
+.btn-sts:focus,
+.btn-sts:active,
+.btn-sts.active {
+  background-color: #008000 !important;
+  border-color: #008000 !important;
+  color: #fff; }
+
+.btn-hi-sts {
+  background-color: #008000;
+  border-color: #254441;
+  color: #fff; }
+
+.btn-hi-sts:hover,
+.btn-hi-sts:focus,
+.btn-hi-sts:active,
+.btn-hi-sts.active {
+  background-color: #254441 !important;
+  border-color: #254441 !important;
+  color: #fff; }
+
+.navmenu li a {
+  color: #e1f0ec; }
+
+.navmenu li.active a {
+  color: #254441; }
+
+ul.navmenu {
+  background: #254441; }
+
+body.showFixedSideMenu ul.navmenu {
+  background: #b1dad0; }
+
+.navmenu li:hover > a {
+  background: #b1dad0;
+  color: #254441; }
+
+ul.navmenu li ul.submenu {
+  background: #b1dad0; }
+
+ul.navmenu li ul li a {
+  color: #254441;
+  border-bottom: solid 1px #254441; }
+
+ul.navmenu li ul li:hover a {
+  color: #254441; }
+
+ul.navmenu li ul li a {
+  color: #254441;
+  border-bottom: solid 1px #254441; }
+
+ul.navmenu li ul.submenu li a {
+  color: #254441;
+  border-bottom: solid 1px #254441;
+  width: 100%; }
+
+ul.navmenu li ul.submenu li:hover a {
+  color: #254441;
+  border-bottom: solid 1px #254441; }
+
+ul.navmenu li ul.submenu {
+  border-right: 5px solid #008000; }
+
+.has-submenu:after {
+  color: #008000; }
+
+.has-submenu.open:after {
+  color: #008000; }
+
+.active {
+  background: #e1f0ec;
+  color: #254441; }
+
+ul.sub-submenu li a {
+  color: #254441 !important;
+  background: #8ecabb !important; }
+
+.submenu .menu-title {
+  color: #254441; }
+
+.sub-submenu li:hover a {
+  color: #008000 !important; }
+
+.breadCrumbNavigation li a {
+  color: #498680; }
+
+.breadCrumbNavigation li a:hover {
+  color: white; }
+
+.breadCrumbNavigation li.active a, .breadCrumbNavigation li.active {
+  color: #008000;
+  background: transparent; }
+
+.styleOptionsWrapper {
+  background: #fff; }
+
+.summaryBlockItem {
+  background: #254441; }
+
+.summaryBlockItem span.strong {
+  color: #e1f0ec; }
+
+/*Grid*/
+.dropdown-menu {
+  border-radius: 0;
+  padding: 0;
+  background: #e1f0ec;
+  border: solid 1px #008000; }
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:focus,
+.dropdown-menu > .active > a:hover {
+  background: #008000;
+  color: #e1f0ec; }
+
+.table > tbody > tr.active > td,
+.table > tbody > tr.active > th,
+.table > tbody > tr > td.active,
+.table > tbody > tr > th.active,
+.table > tfoot > tr.active > td,
+.table > tfoot > tr.active > th,
+.table > tfoot > tr > td.active,
+.table > tfoot > tr > th.active,
+.table > thead > tr.active > td,
+.table > thead > tr.active > th,
+.table > thead > tr > td.active,
+.table > thead > tr > th.active {
+  background-color: #e1f0ec; }
+
+.table > tbody > tr.success > td,
+.table > tbody > tr.success > th,
+.table > tbody > tr > td.success,
+.table > tbody > tr > th.success,
+.table > tfoot > tr.success > td,
+.table > tfoot > tr.success > th,
+.table > tfoot > tr > td.success,
+.table > tfoot > tr > th.success,
+.table > thead > tr.success > td,
+.table > thead > tr.success > th,
+.table > thead > tr > td.success,
+.table > thead > tr > th.success {
+  background-color: #8da8a0;
+  color: white; }
+
+.table > tbody > tr:nth-child(odd),
+.table > tfoot > tr:nth-child(odd),
+.table > thead > tr:nth-child(odd) {
+  background-color: #e1f0ec; }
+
+.ui-jqgrid-labels {
+  background-color: #c7d4d0 !important; }
+
+/*Flex Forms*/
+.formContainerWrapper h2 {
+  background: #c7d4d0; }
+
+.flexform-item {
+  /*background: lighten($swansdown-secondary,60%);*/ }
+
+/*dateDropper*/
+div.datedropper.custom-datedropper {
+  border-radius: 8px;
+  width: 175px; }
+
+div.datedropper.custom-datedropper .picker {
+  border-radius: 8px;
+  box-shadow: 0 0 22px 0px rgba(0, 0, 0, 0.17); }
+
+div.datedropper.custom-datedropper .pick-l {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px; }
+
+div.datedropper.custom-datedropper:before,
+div.datedropper.custom-datedropper .pick-submit,
+div.datedropper.custom-datedropper .pick-lg-b .pick-sl:before,
+div.datedropper.custom-datedropper .pick-m,
+div.datedropper.custom-datedropper .pick-lg-h {
+  background-color: #254441; }
+
+div.datedropper.custom-datedropper .pick-y.pick-jump,
+div.datedropper.custom-datedropper .pick li span,
+div.datedropper.custom-datedropper .pick-lg-b .pick-wke,
+div.datedropper.custom-datedropper .pick-btn {
+  color: #254441; }
+
+div.datedropper.custom-datedropper .picker,
+div.datedropper.custom-datedropper .pick-l {
+  background-color: #f2f9f7; }
+
+div.datedropper.custom-datedropper .picker,
+div.datedropper.custom-datedropper .pick-arw,
+div.datedropper.custom-datedropper .pick-l {
+  color: #254441; }
+
+div.datedropper.custom-datedropper .pick-m,
+div.datedropper.custom-datedropper .pick-m .pick-arw,
+div.datedropper.custom-datedropper .pick-lg-h,
+div.datedropper.custom-datedropper .pick-lg-b .pick-sl,
+div.datedropper.custom-datedropper .pick-submit {
+  color: #e1f0ec; }
+
+div.datedropper.custom-datedropper.picker-tiny:before,
+div.datedropper.custom-datedropper.picker-tiny .pick-m {
+  background-color: #e1f0ec; }
+
+div.datedropper.custom-datedropper.picker-tiny .pick-m,
+div.datedropper.custom-datedropper.picker-tiny .pick-m .pick-arw {
+  color: #254441; }
+
+div.datedropper.custom-datedropper.picker-lkd .pick-submit {
+  background-color: #e1f0ec;
+  color: #254441; }
+
+body.showFixedSideMenu .closeMnu {
+  background-color: #254441; }
+
+.filter-background {
+  background: #b3ffb3;
+  border: solid 1px green; }
+
+.headerBar {
+  background: #254441; }
+
+.menuToggle > a {
+  background: #008000;
+  color: #254441 !important; }
+
+.menuToggle > a:hover {
+  background: #254441 !important;
+  color: #008000 !important; }
+
+.inner-logo {
+  background: #e1f0ec; }
+
+/*# sourceMappingURL=swansdown.css.map */

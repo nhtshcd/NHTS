@@ -1,0 +1,309 @@
+/* green*/
+/* green*/
+/* blue*/
+/* blue*/
+body {
+  background: #ffff !important; }
+
+.sts-input:focus {
+  border-bottom: solid 1px #2a3f54 !important; }
+
+select, input {
+  border: 1px solid #A8E3D6 !important; }
+
+.input-icon > input:focus + [class*="fa-"],
+.input-icon > input:focus + [class*="clip-"] {
+  color: #2a3f54; }
+
+.sts {
+  color: #2a3f54; }
+
+a.sts:hover, a.sts:focus {
+  color: #2a3f54; }
+
+.btn-sts {
+  background-color: #192632;
+  border-color: #fff;
+  color: #fff; }
+
+.btn-sts:hover,
+.btn-sts:focus,
+.btn-sts:active,
+.btn-sts.active {
+  background-color: #A8E3D6 !important;
+  border-color: #A8E3D6 !important;
+  color: #2a3f54; }
+
+.btn-hi-sts {
+  background-color: #A8E3D6;
+  border-color: #81d7c4;
+  color: #2a3f54; }
+
+.btn-hi-sts:hover,
+.btn-hi-sts:focus,
+.btn-hi-sts:active,
+.btn-hi-sts.active {
+  background-color: #2a3f54 !important;
+  border-color: #2a3f54 !important;
+  color: #fff; }
+
+.btn-hi-sts-transparent {
+  background-color: #2a3f54;
+  border-color: #2a3f54;
+  color: #fff; }
+
+.btn-hi-sts-transparent:hover,
+.btn-hi-sts-transparent:focus,
+.btn-hi-sts-transparent:active,
+.btn-hi-sts-transparent.active {
+  background-color: #223243 !important;
+  border-color: #223243 !important;
+  color: #fff; }
+
+.navmenu li a {
+  color: #ededed; }
+
+.navmenu li.active a {
+  color: #2a3f54; }
+
+ul.navmenu {
+  background: #2a3f54; }
+
+body.showFixedSideMenu ul.navmenu {
+  background: #2A3F54; }
+
+.navmenu li:hover > a {
+  background: #A8E3D6;
+  color: #2a3f54; }
+
+ul.navmenu li ul.submenu {
+  background: #2A3F54;
+  border-right: 5px solid #3bb79c; }
+
+ul.navmenu li ul li a {
+  color: #2a3f54;
+  border-bottom: solid 1px #2a3f54; }
+
+ul.navmenu li ul li:hover a {
+  color: #fff; }
+
+ul.navmenu li ul li a {
+  color: white;
+  border-bottom: solid 1px #2a3f54; }
+
+ul.navmenu li ul.submenu li a {
+  color: white;
+  border-bottom: solid 1px #2a3f54;
+  width: 100%; }
+
+ul.navmenu li ul.submenu li:hover a {
+  color: #A8E3D6;
+  border-bottom: solid 1px #A8E3D6; }
+
+.active {
+  background: #ededed;
+  color: #2a3f54; }
+
+ul.sub-submenu li a {
+  color: #ededed !important;
+  background: #192632 !important; }
+
+.sub-submenu li:hover a {
+  color: #A8E3D6 !important; }
+
+.submenu .menu-title {
+  color: #A8E3D6; }
+
+.has-submenu:after {
+  color: #A8E3D6; }
+
+.has-submenu.open:after {
+  color: #A8E3D6; }
+
+.breadCrumbNavigation li a {
+  color: #5bcab2; }
+
+.breadCrumbNavigation li a:hover {
+  color: white; }
+
+.breadCrumbNavigation li.active a, .breadCrumbNavigation li.active {
+  color: #cbd8e5;
+  background: transparent; }
+
+.styleOptionsWrapper {
+  background: #fff; }
+
+.summaryBlockItem {
+  background: #2a3f54; }
+
+.summaryBlockItem span.strong {
+  color: #ededed; }
+
+/*Grid*/
+.dropdown-menu {
+  border-radius: 0;
+  padding: 0;
+  background: #ededed;
+  border: solid 1px #A8E3D6; }
+
+.dropdown-menu > .active > a,
+.dropdown-menu > .active > a:focus,
+.dropdown-menu > .active > a:hover {
+  background: #A8E3D6;
+  color: #ededed; }
+
+.table > tbody > tr > td,
+.table > tbody > tr > th,
+.table > tbody > tr > td,
+.table > tbody > tr > th,
+.table > tfoot > tr > td,
+.table > tfoot > tr > th,
+.table > tfoot > tr > td,
+.table > tfoot > tr > th,
+.table > thead > tr > td,
+.table > thead > tr > th,
+.table > thead > tr > td,
+.table > thead > tr > th {
+  color: black; }
+
+.table > tbody > tr.active > td,
+.table > tbody > tr.active > th,
+.table > tbody > tr > td.active,
+.table > tbody > tr > th.active,
+.table > tfoot > tr.active > td,
+.table > tfoot > tr.active > th,
+.table > tfoot > tr > td.active,
+.table > tfoot > tr > th.active,
+.table > thead > tr.active > td,
+.table > thead > tr.active > th,
+.table > thead > tr > td.active,
+.table > thead > tr > th.active {
+  /*background-color:$bluewood-primary;*/
+  background-color: #ededed; }
+
+.table > tbody > tr.success > td,
+.table > tbody > tr.success > th,
+.table > tbody > tr > td.success,
+.table > tbody > tr > th.success,
+.table > tfoot > tr.success > td,
+.table > tfoot > tr.success > th,
+.table > tfoot > tr > td.success,
+.table > tfoot > tr > th.success,
+.table > thead > tr.success > td,
+.table > thead > tr.success > th,
+.table > thead > tr > td.success,
+.table > thead > tr > th.success {
+  background-color: #bababa;
+  /*color:lighten($bluewood-primary,10%);*/ }
+
+.table > tbody > tr:nth-child(odd),
+.table > tfoot > tr:nth-child(odd),
+  /*background-color:$bluewood-highlight;*/
+  background-color: white; }
+
+.table > thead > tr:nth-child(odd) {
+  /*background-color:$bluewood-highlight;*/
+  background-color: #ededed; }
+
+.ui-jqgrid-labels {
+  background-color: #ededed !important; }
+
+/*Flex Forms*/
+.formContainerWrapper h2 {
+  background: #A8E3D6; }
+
+.flexform-item {
+  /*background: lighten($bluewood-secondary,60%);*/ }
+
+/*dateDropper*/
+div.datedropper.custom-datedropper {
+  border-radius: 8px;
+  width: 175px; }
+
+div.datedropper.custom-datedropper .picker {
+  border-radius: 8px;
+  box-shadow: 0 0 22px 0px rgba(0, 0, 0, 0.17); }
+
+div.datedropper.custom-datedropper .pick-l {
+  border-bottom-left-radius: 8px;
+  border-bottom-right-radius: 8px; }
+
+div.datedropper.custom-datedropper:before,
+div.datedropper.custom-datedropper .pick-submit,
+div.datedropper.custom-datedropper .pick-lg-b .pick-sl:before,
+div.datedropper.custom-datedropper .pick-m,
+div.datedropper.custom-datedropper .pick-lg-h {
+  background-color: #2a3f54; }
+
+div.datedropper.custom-datedropper .pick-y.pick-jump,
+div.datedropper.custom-datedropper .pick li span,
+div.datedropper.custom-datedropper .pick-lg-b .pick-wke,
+div.datedropper.custom-datedropper .pick-btn {
+  color: #2a3f54; }
+
+div.datedropper.custom-datedropper .picker,
+div.datedropper.custom-datedropper .pick-l {
+  background-color: #fafafa; }
+
+div.datedropper.custom-datedropper .picker,
+div.datedropper.custom-datedropper .pick-arw,
+div.datedropper.custom-datedropper .pick-l {
+  color: #2a3f54; }
+
+div.datedropper.custom-datedropper .pick-m,
+div.datedropper.custom-datedropper .pick-m .pick-arw,
+div.datedropper.custom-datedropper .pick-lg-h,
+div.datedropper.custom-datedropper .pick-lg-b .pick-sl,
+div.datedropper.custom-datedropper .pick-submit {
+  color: #ededed; }
+
+div.datedropper.custom-datedropper.picker-tiny:before,
+div.datedropper.custom-datedropper.picker-tiny .pick-m {
+  background-color: #ededed; }
+
+div.datedropper.custom-datedropper.picker-tiny .pick-m,
+div.datedropper.custom-datedropper.picker-tiny .pick-m .pick-arw {
+  color: #2a3f54; }
+
+div.datedropper.custom-datedropper.picker-lkd .pick-submit {
+  background-color: #ededed;
+  color: #2a3f54; }
+
+body.showFixedSideMenu .closeMnu {
+  background-color: #2a3f54; }
+
+.filter-background {
+  background: white;
+  border: solid 1px #A8E3D6; }
+
+.copyright {
+  color: #ededed; }
+
+.headerBar {
+  background: #2a3f54; }
+
+.menuToggle > a {
+  background: #A8E3D6;
+  color: #2a3f54 !important; }
+
+.menuToggle > a:hover {
+  background: #2a3f54 !important;
+  color: #A8E3D6 !important; }
+
+.bluewoodLogin {
+  background: #2a3f54 !important; }
+
+.inner-logo {
+  background: #ededed; }
+
+/*# sourceMappingURL=bluewood.css.map */
+
+
+.xlsIcon {
+	width: 60px;
+	height: 30px;
+	background: url("../img/new-xls-icn.png") no-repeat;
+	border: none;
+	text-indent: -2000px;
+	cursor: pointer;
+}

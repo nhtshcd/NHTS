@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    
+    <title>eServices Everywhere</title>
+    
+    <link href="css/font-awesome.min.css" rel="stylesheet">
+    <link href="css/bootstrap.min.css" rel="stylesheet">
+    <link href="css/main.css" rel="stylesheet">
+	<script src="../js/moment.js"></script>
+ 	<script src="js/jquery.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+    <script src="js/main.js"></script>
+<script src="../plugins/jquery_ui/jquery-ui.min.js" type="text/javascript"></script>
+ 
+  </head>
+  <style>
+
+.sticky-container{
+    padding:0px;
+    margin:0px;
+    position:absolute;
+    right:-1px;
+    top:259px;
+    width:75px;
+    z-index: 1100;
+    
+}
+.sticky li{
+    list-style-type:none;
+    background-color:#fff;
+    color:#efefef;
+    height:43px;
+    padding:0px;
+    margin:0px 0px 1px 0px;
+    -webkit-transition:all 0.25s ease-in-out;
+    -moz-transition:all 0.25s ease-in-out;
+    -o-transition:all 0.25s ease-in-out;
+    transition:all 0.25s ease-in-out;
+    cursor:pointer;
+}
+.sticky li{
+    display: flex;
+    align-items: center;
+}
+.sticky li:hover{
+    margin-left:-115px;
+}
+.sticky li img{
+    float:left;
+    margin:5px 4px;
+    margin-right:5px;
+}
+.sticky li p{
+       padding-top: 1px;
+    margin: 0px;
+    line-height: 16px;
+    font-size: 12px;
+    font-weight: bolder;
+    font-style: italic;
+    color:black;
+}
+.sticky li p a{
+    text-decoration:none;
+    color:#2C3539;
+}
+.sticky li p a:hover{
+    text-decoration:underline;
+}
+
+.chartIcnWrapper1 {
+    padding: 10px;
+    background: #a8e3d6;
+    position: absolute;
+    top: 15%;
+    right: 0;
+    z-index: 99999;
+    transition: all .3s ease-in-out;
+}
+</style>
+ <script type="text/javascript">
+ var myParam = location.search.split('traceDetails=')[1]
+ var tenant = document.URL.split('%')[2];
+ var ftId = myParam.split('%')[1];
+ var today = moment().format("YYYY-MM-DD HH:mm:ss");
+ var host = window.location.hostname;
+ var full = location.protocol+'//'+'192.168.1.190';
+ var url =full+":9006/agrotxn/rsk/processTxnRequest";
+ var rqst;
+ var fLat="0.00";
+ var fLon="0.00";
+ var procLat="0.00";
+ var procLon="0.00";
+ var gLat="0.00";
+ var gLon="0.00";
+ var sLat="0.00";
+ var sLon="0.00";
+ var frmrName="";
+ var procName="";
+ var ginName="";
+ var spinName="";
+ var map;
+ var markersArray = new Array();
+ function initMap() {
+	 map = new google.maps.Map(document.getElementById('map'), {
+			center : {
+				lat : 11.0168,
+				lng : 76.9558
+			},
+			zoom : 3,
+			mapTypeId: google.maps.MapTypeId.HYBRID,
+		});
+	}
+
+ $(document).ready(function() {
+	 var dataArr = new Array();
+	 
+	 var head = { 
+			 "tenantId": tenant,
+		      "txnType": "3002",
+		      "serialNo": "",
+		      "msgNo": "0",
+		      "branchId": "",
+		      "versionNo": "17|26|26",
+		      "servPointId": "",
+		      "agentToken": "",
+		      "agentId": "",
+		      "resentCount": "0",
+		      "operType": "01",
+		      "mode": "01",
+		      "txnTime": today
+		      };
+var body={
+		"data":[{
+			 "value": ftId,
+	          "key": "ID"
+			}]
+		};
+
+rqst ={
+		"Request":{
+			"head" : head,
+			"body" : body
+		}
+}
+console.log(JSON.stringify(rqst)); 
+
+$(function () {
+	 $.ajax({
+		  type: "POST",
+		  url: url,		  
+		  data: JSON.stringify(rqst),			  
+		  contentType: "application/json;charset=UTF-8",
+		  dataType:"json",		
+	        success: function( data ) {
+	        	 var stringData = JSON.stringify(data);	       
+	        	var trData=stringData.trim();
+	        	 var json = JSON.parse(trData);	        	
+	        	$.each(json.Response.body.data, function(index, value) {
+	        		if(value.key=="FarmerName"){
+						var farmerDet=value.value;
+	        			document.getElementById("farmerName").innerHTML=farmerDet.split("~")[0];
+	        			frmrName=farmerDet.split("~")[0];
+	        			fLat=farmerDet.split("~")[1];
+						fLon=farmerDet.split("~")[2];
+					}
+					if(value.key=="VillageName"){
+						document.getElementById("villageName").innerHTML=value.value;
+					}
+					if(value.key=="ics"){
+						document.getElementById("ics").innerHTML=value.value;
+					}
+					if(value.key=="shg"){
+						document.getElementById("shg").innerHTML=value.value;
+					}
+					if(value.key=="lotNo"){
+						document.getElementById("lotNo").innerHTML=value.value;
+					}
+					if(value.key=="procurementCenter"){
+						var procCen=value.value;
+						document.getElementById("procurementCenter").innerHTML=procCen.split("~")[0];
+						procLat=procCen.split("~")[1];
+						procLon=procCen.split("~")[2];
+						procName=procCen.split("~")[0];
+					}
+					/* if(value.key=="farmerLoc"){
+						var fLoc=value.value;
+						fLat=fLoc.split("~")[0];
+						fLon=fLoc.split("~")[1];
+					} */
+					if(value.key=="ginning"){
+						var ginData=value.value;
+						document.getElementById("ginning").innerHTML=ginData.split("~")[0];
+						gLat=ginData.split("~")[1];
+						gLon=ginData.split("~")[2];
+						ginName=ginData.split("~")[0];
+					}
+					if(value.key=="spinning"){
+						var spinData=value.value;
+						document.getElementById("spinning").innerHTML=spinData.split("~")[0];
+						sLat=spinData.split("~")[1];
+						sLon=spinData.split("~")[2];
+						spinName=spinData.split("~")[0];
+					}	
+				}); 
+	        		if(fLat!='' && fLon!=''){
+	        		dataArr.push({
+	        			fLati : parseFloat(fLat),
+	        			fLong : parseFloat(fLon),
+	        			fName: frmrName
+	        		});
+	        	}
+	        	if(procLat!='' && procLon!=''){
+	        	  dataArr.push({
+	        		pLat : parseFloat(procLat),
+	        		pLong : parseFloat(procLon),
+	        		pName:procName
+	        	  });
+	        	}
+	        	if(gLat!='' && gLon!=''){
+	        		dataArr.push({
+	        		gLati : parseFloat(gLat),
+        			gLong : parseFloat(gLon),
+        			gName : ginName
+	        	});
+	        	}
+	        	if(sLat!='' && sLon!='' && sLat!='null' && sLon!='null'){
+	        		dataArr.push({	
+	        			sLati : parseFloat(sLat),
+	        			sLong : parseFloat(sLon),
+	        			sName : spinName
+	        		});
+	        	}
+	        	 if(fLat!='' && fLon!='' && fLat!='0.00' && fLon!='0.00' && fLat!=null && fLon!=null && fLat!=undefined && fLon!=undefined){
+	        		
+	        		loadMap(dataArr);
+	        	} 
+	        },
+		
+		 error: function( error ) {
+            console.log( error );
+        } 
+});
+ });
+ });
+ function loadMap(dataArr) {
+	 setMapOnAll(null);   
+	var url = window.location.href;
+	var temp = url;
+	for(var i = 0 ; i < 2 ; i++) {
+		  temp = temp.substring(0, temp.lastIndexOf('/'));
+	 }
+	var iconImage=temp + '/img/green_placemarker.png';
+	$(dataArr).each(function(k, v) {
+		if(v.fLati!=NaN && v.fLati !=undefined && v.fLong!=NaN && v.fLong !=undefined){
+			marker = new google.maps.Marker({
+		position : new google.maps.LatLng(v.fLati,
+					v.fLong),
+			title: v.fName,
+			icon:iconImage,			
+			map : map
+		});
+			map.setCenter({
+				lat : v.fLati,
+				lng : v.fLong
+			});
+			markersArray.push(new google.maps.LatLng(v.fLati,v.fLong));
+		}
+		
+		 
+		if(v.pLat!=NaN && v.pLat !=undefined && v.pLong!=NaN && v.pLong !=undefined){
+			
+			marker = new google.maps.Marker({
+				position : new google.maps.LatLng(v.pLat,v.pLong),
+				title: v.pName,
+				icon:iconImage,
+				map:map
+			});
+			markersArray.push(new google.maps.LatLng(v.pLat,v.pLong));
+		}
+		 if(v.gLati!=NaN && v.gLati !=undefined && v.gLong!=NaN && v.gLong !=undefined){
+		
+		marker = new google.maps.Marker({
+			position : new google.maps.LatLng(v.gLati,v.gLong),
+			title:v.gName,
+			icon:iconImage,
+			map:map
+		});
+		markersArray.push(new google.maps.LatLng(v.gLati,v.gLong));
+		}
+		if(v.sLati!=NaN && v.sLati !=undefined && v.sLong!=NaN && v.sLong !=undefined){
+		marker = new google.maps.Marker({
+			position : new google.maps.LatLng(v.sLati,
+						v.sLong),
+			title:v.sName,
+				icon:iconImage,
+				map : map
+			});
+		markersArray.push(new google.maps.LatLng(v.sLati,v.sLong));
+		}
+	/* 	if(v.fLati!=NaN && v.fLati !=undefined && v.fLong!=NaN && v.fLong !=undefined){
+		map.setCenter({
+			lat : v.fLati,
+			lng : v.fLong
+		});
+		} */
+
+	});
+	 for (var i = 0, n = markersArray.length; i <= n; i++) {
+
+	        var coordinates = new Array();
+	        for (var j = i; j < i+2 && j < n; j++) {
+	            coordinates[j-i] = markersArray[j];
+	        }
+	        var symbolTwo = {
+	                path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW,
+	                strokeColor: '#FFFF00',
+	                fillColor: '#FFFF00',
+	                fillOpacity: 1
+	                //rotation: 45
+	              };
+	        var polyline = new google.maps.Polyline({
+	            path: coordinates,
+	            strokeColor: '#DC143C',
+	            strokeOpacity: 1.0,
+	            strokeWeight: 2,
+	            geodesic: true,
+	            icons: [{
+	                icon: {path: google.maps.SymbolPath.FORWARD_CLOSED_ARROW},
+	                offset: '100%'
+	            },
+	            {
+	            	icon: symbolTwo,
+	                offset: '50%'
+	            }
+	            ]
+	        });
+	         polyline.setMap(map);
+	       /*  var marker = new google.maps.Marker({
+	            position: polyline.getCenter(),
+	            map: map
+	        });  */
+	       // polylines.push(polyline);
+
+	    }
+	
+	
+	  
+	  
+ }
+ function setMapOnAll(map) {
+	    for (var i = 0; i < markersArray.length; i++) {
+	    	markersArray[i].setMap(map);
+	    }
+	    markersArray = new Array();
+	}
+ </script>
+ <body> 
+<div class="container-fluid">
+	<div class="row">
+    	<div class="col-md-3 colLeft">
+        	<div class="row">
+            	<div class="logo">
+                        <img src="img/sts-logo-active.svg"/>
+                </div>
+                <div class="details">
+                        <h4>Farmer Details</h4>
+                        <p>
+                            <span class="">Farmer Name</span>
+                            <span class="" id="farmerName"></span>
+                        </p>
+                        <p>
+                            <span class="">Village Name</span>
+                            <span class="" id='villageName'></span>
+                        </p>
+                        <p>
+                            <span class="">ICS</span>
+                            <span class="" id='ics'></span>
+                        </p>
+                        <p>
+                        	<span class="">SHG</span>
+                        	<span class="" id='shg'></span>
+                        </p>
+                        <p>
+                        	<span class="">Lot No</span>
+                        	<span class="" id='lotNo'></span>
+                        </p>
+                        <p>
+                        	<span class="">Procurement Center</span>
+                        	<span class="" id='procurementCenter'></span>
+                        </p>
+                        <p>
+                        	<span class="">Ginning</span>
+                        	<span class="" id='ginning'></span>
+                        </p>
+                        <p>
+                        	<span class="">Spinning</span>
+                        	<span class="" id='spinning'></span>
+                        </p>
+                    </div>    
+                    
+                      <div class="r_flex_expand_child">
+                      <div id="map" class="map-container row3"></div>                      
+                      </div>
+            </div>
+            <div class="details white">
+  				 <h6>Copyright © 2019 <a href="http://www.sourcetrace.com/">SourceTrace System India Pvt Ltd</a></h5>
+			</div>
+        </div>
+    </div>
+ </div>
+ <script async defer src="https://maps.googleapis.com/maps/api/js?client=gme-sourcetrace&v=3.28&callback=initMap"></script>
+ </body>
+</html>

@@ -1,0 +1,131 @@
+* {
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    box-sizing: border-box;
+    -webkit-text-size-adjust: 100%;
+    -moz-text-size-adjust: 100%;
+    -ms-text-size-adjust: 100%;
+}
+*:focus {
+    outline: none;
+}
+@font-face {
+    font-family: 'robotoregular';
+    src:url('../fonts/roboto-regular-webfont.eot');
+    src:url('../fonts/roboto-regular-webfont.eot?#iefix') format('embedded-opentype'),
+        url('../fonts/roboto-regular-webfont.woff2') format('woff2'),
+        url('../fonts/roboto-regular-webfont.woff') format('woff'),
+        url('../fonts/roboto-regular-webfont.ttf') format('truetype'),
+        url('../fonts/roboto-regular-webfont.svg#robotoregular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+}
+*, *:before, *:after {
+	-moz-box-sizing: border-box;
+	-webkit-box-sizing: border-box;
+	box-sizing: border-box;
+}
+
+html, body {
+    width: 100%;
+    height: 100%;    
+    margin: 0;
+    padding: 0;
+    font-family: 'Open Sans', sans-serif;
+    font-size:15px/1.8;
+    color: #333;
+    background: #fff;  
+}
+.colRight {
+    background:#2a3f54;
+    height:auto;
+}
+.colLeft {
+    background:#a8e3d6;
+    height:auto;
+}
+.farmerImg{
+
+	text-align:center;
+}
+.farmerImg img {
+    width:auto;
+	height:250px;
+	margin:0 auto;
+	}
+.logo {
+    padding:25px;
+    text-align: center;   
+    background: #fff;
+}
+
+.flexContainer {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: solid 1px #ccc;
+}
+
+.r_flex_container{
+    height: 100%;
+    display: flex;
+    flex-direction: column;  
+    align-items: stretch;
+    justify-content: center;
+}
+.r_flex_container {
+	display:flex;
+	flex-flow: column nowrap;	
+}
+
+.r_flex_fixed_child {
+	flex:none;
+
+}
+.r_flex_expand_child {
+    flex:auto;	
+    align-self: stretch;	
+    position:relative;
+    overflow:hidden;
+}
+
+.flexColumn {
+    
+}
+
+.details {
+    padding: 10px;
+}
+.details.white {
+    color:#fff;
+}
+.details h4 {
+    font-size:20px;
+    font-weight:bold;
+    border-bottom: solid 1px #000;
+    padding-bottom: 10px;
+}
+.details.white h4 {
+    border-bottom: solid 1px #fff;
+}
+.details p>span {
+    display: block;
+    font-size:16px;
+    line-height: 24px;
+}
+.details p>span:nth-child(even) {
+    font-weight:bold;
+}
+
+.map-container {
+    background: #ccc;
+ 
+  height:509px !Important;
+}
+
+.border-right {
+    border-right:solid 1px #ccc;
+} 
+.border-left {
+    border-left:solid 1px #ccc;
+}

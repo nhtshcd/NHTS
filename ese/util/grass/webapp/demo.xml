@@ -1,0 +1,81 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+<grass-cfg>
+	<settings project="util">
+		<project-dir>util/</project-dir>
+		<input-dirs>
+			<input-dir>src/cfg/</input-dir>
+		</input-dirs>
+		<output-dir>src/main</output-dir>
+	</settings>
+	<targets>
+		<target id="dev" id-prefs="global" />
+	</targets>
+	<files>
+		<file src="src/cfg/beans/dao.xml">
+			<cfg-file exclude="false" id="global" name="webapp/META-INF/beans-dao.xml" />
+		</file>
+		<file src="src/cfg/beans/datasources.xml">
+			<cfg-file exclude="false" id="global" name="webapp/META-INF/beans-datasources.xml" />
+		</file>
+		<file src="src/cfg/beans/database.properties">
+			<cfg-file exclude="false" id="global" name="webapp/META-INF/database.properties" />
+		</file>	
+		<file src="src/cfg/beans/util.xml">
+			<cfg-file exclude="false" id="global" name="webapp/META-INF/beans-util.xml" />
+		</file>
+		<file src="src/cfg/beans/action-service.xml">
+			<cfg-file exclude="false" id="global" name="webapp/META-INF/beans-action-service.xml" />
+		</file>
+		<file src="src/cfg/beans/log4j.xml">
+			<cfg-file exclude="false" id="global" name="resources/log4j.xml" />
+		</file>		
+	</files>
+	<tokens>
+		<token name="deploy.module">
+			<value form="simple" id="global" type="pre-install" use="mandatory">Web Console2</value>
+		</token>
+		<token name="deploy.version">
+			<value form="simple" id="global" type="pre-install" use="mandatory">1.0.0</value>
+		</token>
+		<token name="db.name">
+			<value form="simple" id="global" type="pre-install" use="mandatory">ESES_DEMO</value>
+		</token>
+		<token name="db.user">
+			<value form="simple" id="global" type="pre-install" use="mandatory">root</value>
+		</token>
+		<token name="db.password">
+			<value form="simple" id="global" type="pre-install" use="mandatory">root1234</value>
+		</token>
+		<token name="show.sql">
+			<value form="simple" id="global" type="pre-install" use="mandatory">true</value>
+		</token>
+		<token name="log.path">
+			<value form="simple" id="global" type="pre-install" use="mandatory">/var/log/ese/ese-webapp-demo.log</value>
+		</token>
+		
+		<token name="email.protocol">
+			<value form="simple" id="global" type="pre-install" use="mandatory">smtps</value>
+		</token>
+		<token name="email.server">
+			<value form="simple" id="global" type="pre-install" use="mandatory">smtp.gmail.com</value>
+		</token>
+		<token name="email.port">
+			<value form="simple" id="global" type="pre-install" use="mandatory">465</value>
+		</token>
+		<token name="email.user">
+			<value form="simple" id="global" type="pre-install" use="mandatory">eseserver@sourcetrace.com</value>
+		</token>
+		<token name="email.password">
+			<value form="simple" id="global" type="pre-install" use="mandatory">eseserver123</value>
+		</token>
+		<token name="email.smtps.auth">
+			<value form="simple" id="global" type="pre-install" use="mandatory">true</value>
+		</token>
+		<token name="email.from">
+			<value form="simple" id="global" type="pre-install" use="mandatory"><![CDATA[ESE Server<eseserver@sourcetrace.com>]]></value>
+		</token>
+		<token name="service.dailyClosing">
+			<value form="simple" id="global" type="pre-install" use="mandatory"><![CDATA[<property name="dailyClosingService" ref="dailyClosingService" />]]></value>
+		</token>
+	</tokens>
+</grass-cfg>
