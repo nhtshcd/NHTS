@@ -220,10 +220,24 @@ function addFarm(){
 														&nbsp;
 													</p>
 												</div>
+
 												<div class="dynamic-flexItem">
 													<p class="flexItem">
 														<s:property
 															value="%{getLocaleProperty('farmer.category')}" />
+													</p>
+													<p class="flexItem">
+														<s:if test="farmer.fCat!=null && farmer.fCat!=''">
+															<s:property
+																value='%{getLocaleProperty("fcat"+farmer.fCat)}' />
+														</s:if>
+
+													</p>
+												</div>
+
+												<div class="dynamic-flexItem">
+													<p class="flexItem">
+														<s:property value="%{getLocaleProperty('Farm Ownership')}" />
 													</p>
 													<p class="flexItem">
 														<s:property
@@ -231,6 +245,7 @@ function addFarm(){
 
 													</p>
 												</div>
+
 												<div class="dynamic-flexItem">
 													<p class="flexItem">
 														<s:property
@@ -308,10 +323,11 @@ function addFarm(){
 														</s:if>
 													</p>
 												</div>
-												
+
 												<div class="dynamic-flexItem">
 													<p class="flexItem">
-														<s:property value="%{getLocaleProperty('farmer.dateOfBirth')}" />
+														<s:property
+															value="%{getLocaleProperty('farmer.dateOfBirth')}" />
 													</p>
 													<p class="flexItem">
 														<s:property value='dateOfBirth' />
@@ -377,6 +393,16 @@ function addFarm(){
 													</p>
 													<p class="flexItem">
 														<s:property value="farmer.CropName" />
+													</p>
+												</div>
+
+												<div class="dynamic-flexItem">
+													<p class="flexItem ">
+														<s:property
+															value="%{getLocaleProperty('export.cropvariety')}" />
+													</p>
+													<p class="flexItem">
+														<s:property value="farmer.cropVariety" />
 													</p>
 												</div>
 
@@ -611,7 +637,48 @@ function addFarm(){
 												</div>
 											</div>
 
+
+
 										</div>
+										<s:if test='#session.isAdmin =="true"'>
+											<s:iterator value="ex" var="innerList">
+												<div class="aPanel audit_history">
+													<div class="aTitle">
+														<h2>
+
+															<s:if
+																test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+																<s:property value="#innerList[0].createdUser" />
+															</s:if>
+															<s:else>
+																<s:property value="#innerList[0].updatedUser" />
+															</s:else>
+															-
+
+															<s:date name="#innerList[1].revisionDate"
+																format="dd/MM/yyyy hh:mm:ss" />
+															-
+															<s:property
+																value="%{getLocaleProperty('default'+#innerList[2])}" />
+															<div class="pull-right">
+																<a class="aCollapse "
+																	href="#<s:property value="#innerList[1].id" />
+										"><i
+																	class="fa fa-chevron-right"></i></a>
+															</div>
+														</h2>
+													</div>
+													<div class="aContent dynamic-form-con"
+														id="<s:property value="#innerList[1].id" />">
+
+														<jsp:include page='/jsp/jsp/auditFarmerDetail.jsp' />
+
+													</div>
+
+
+												</div>
+											</s:iterator>
+										</s:if>
 										<div class="margin-top-10">
 
 											<span id="cancel" class=""><span class="first-child"><button
@@ -642,7 +709,7 @@ function addFarm(){
 
 
 
-				<s:form id="fileDownload" action="user_populateDownload">
+				<s:form id="fileDownload" action="farmer_populateDownload">
 					<s:hidden id="loadId" name="idd" />
 
 
@@ -747,7 +814,7 @@ function addFarm(){
 								<th width="20%" id="blName" class="hd"><s:text
 										name="blockName" /></th>
 
-								
+
 								<%-- <th width="20%" id="plId" class="hd"><s:property
 										value='%{getLocaleProperty("plantingId")}' /></th>
 
@@ -775,7 +842,7 @@ function addFarm(){
 
 			</div>
 		</div>
-		
+
 		<div id="tabs-4" class="tab-pane fade">
 			<div class="error">
 				<s:actionerror />
@@ -795,7 +862,11 @@ function addFarm(){
 			</div>
 
 
-			<div class="appContentWrapper marginBottom">
+			<!-- <div class="appContentWrapper marginBottom"> -->
+			<div class="appContentWrapper border-radius datatable-wrapper-class"
+				style="overflow: auto;">
+
+
 
 
 				<div id="baseDiv" style="width: 100%">
@@ -818,6 +889,8 @@ function addFarm(){
 								<th width="20%" id="grade" class="hd"><s:text name="grade" /></th>
 								<th width="20%" id="area" class="hd"><s:property
 										value='%{getLocaleProperty("plantingAreas")}' /></th>
+								<th width="20%" id="fieldType" class="hd"><s:property
+										value='%{getLocaleProperty("planting.fieldType")}' /></th>
 								<sec:authorize ifAllGranted="profile.farmer.update">
 									<th width="20%" id="edit" class="hd noexp"><s:text
 											name="Edit" /></th>

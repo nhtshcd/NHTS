@@ -9,16 +9,16 @@
  */
 package com.sourcetrace.eses.util;
 
-import java.math.BigInteger;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
+import com.sourcetrace.eses.entity.*;
+import com.sourcetrace.eses.multitenancy.*;
 
+import java.beans.*;
+import java.lang.reflect.*;
+import java.math.BigInteger;
+import java.util.*;
+import java.util.stream.*;
+
+import javax.persistence.*;
 import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
@@ -110,9 +110,10 @@ public class ObjectUtil {
 		return strings.stream().filter(u -> u != null).map(u -> Long.parseLong(u.trim())).collect(Collectors.toList());
 
 	}
+
 	public static List<Long> convertStringList(String strings) {
-		return Arrays.asList(strings.split(",")).stream().filter(u -> u != null).map(u -> Long.parseLong(u.trim())).collect(Collectors.toList());
-		
+		return Arrays.asList(strings.split(",")).stream().filter(u -> u != null).map(u -> Long.parseLong(u.trim()))
+				.collect(Collectors.toList());
 
 	}
 
@@ -354,5 +355,336 @@ public class ObjectUtil {
 			floatArr[i] = Float.parseFloat(sArr[i]);
 		}
 		return floatArr;
+	}
+
+	public static boolean isEquals(Object obj1, Object obj2) {
+		// If both objects are null, consider them equal
+		if (obj1 == obj2) {
+			return true;
+		}
+
+		if (obj1 instanceof String || obj1 instanceof Long || obj1 instanceof Double || obj1 instanceof Integer) {
+
+			return obj1.equals(obj2);
+
+		}
+
+		if (obj1 == null || obj2 == null || obj1.getClass() != obj2.getClass()) {
+			return false;
+		}
+
+		if (obj1.getClass().isArray()) {
+
+			return deepEqualsWithExclusion((Object[]) obj1, (Object[]) obj2,
+					new HashSet<>(Arrays.asList(0, 1, 2, 3, 4)));
+
+		}
+		/*
+		 * if (obj1 instanceof Farmer) { // Skip the field comparison for Farmer
+		 * objects ((Farmer) obj1).getFarms().clear(); return true; }
+		 */
+		// If the objects have different classes, consider them not equal
+		if (!obj1.getClass().equals(obj2.getClass())) {
+			return false;
+		}
+		// Create a stack to store the fields of the objects
+		Deque<Field> fieldStack = new ArrayDeque<>();
+		fieldStack.addAll(Arrays.asList(obj1.getClass().getDeclaredFields()));
+		// fieldStack.addAll(Arrays.asList(obj1.getClass().getSuperclass().getDeclaredFields()));
+
+		// Compare the fields of the objects
+		while (!fieldStack.isEmpty()) {
+			Field field = fieldStack.pop();
+			// Enable access to private fields
+			field.setAccessible(true);
+
+			if (java.lang.reflect.Modifier.isFinal(field.getModifiers())
+					|| java.lang.reflect.Modifier.isStatic(field.getModifiers())) {
+				continue;
+			}
+
+			if (field.isAnnotationPresent(Column.class) || field.isAnnotationPresent(ManyToOne.class)
+					|| field.isAnnotationPresent(OneToMany.class) ||
+
+					isGetterMethodAnnotatedWithColumn(obj1.getClass(), field.getName(), Column.class)
+					|| isGetterMethodAnnotatedWithColumn(obj1.getClass(), field.getName(), ManyToOne.class)
+
+					|| isGetterMethodAnnotatedWithColumn(obj1.getClass(), field.getName(), OneToMany.class)) {
+				if (field.getName().equalsIgnoreCase("updatedUser") || field.getName().equalsIgnoreCase("updatedDate")
+						|| field.getName().equalsIgnoreCase("createdUser")
+						|| field.getName().equalsIgnoreCase("createdDate")) {
+					System.out.println(field.getName());
+					return true;
+				} else {
+					try {
+						// Get the field values of the objects
+						Object fieldValue1 = ReflectUtil.getFieldValue(obj1, field.getName());
+						Object fieldValue2 = ReflectUtil.getFieldValue(obj2, field.getName());
+
+						// If the field values are not equal, consider the
+						// objects not equal
+						if (!isEquals(fieldValue1, fieldValue2)) {
+							return false;
+						}
+
+						// If the field values are objects, push their fields
+						// onto the stack for comparison
+						if (fieldValue1 != null && fieldValue2 != null && !field.getType().isPrimitive()) {
+							fieldStack.addAll(Arrays.asList(field.getType().getDeclaredFields()));
+						}
+					} catch (Exception e) {
+						// Handle exception if unable to access field value
+						e.printStackTrace();
+					}
+				}
+
+			}
+		}
+
+		// All fields are equal
+		return true;
+	}
+
+	public static boolean deepEqualsWithExclusion(Object[] array1, Object[] array2, Set<Integer> excludedIndexes) {
+		if (array1.length != array2.length) {
+			return false;
+		}
+
+		for (int i = 0; i < array1.length; i++) {
+			if (excludedIndexes.contains(i)) {
+				continue; // Skip the excluded index
+			}
+
+			if (!Objects.deepEquals(array1[i], array2[i])) {
+				return false;
+			}
+		}
+
+		return true;
+	}
+
+	public static boolean deepCompare(Object[] array1, Object[] array2) {
+		if (array1 == null && array2 == null) {
+			return true;
+		}
+		if (array1 == null || array2 == null) {
+			return false;
+		}
+		return Arrays.deepEquals(array1, array2);
+	}
+
+	private static boolean isGetterMethodAnnotatedWithColumn(Class<?> clazz, String fieldName, Class ccd) {
+		try {
+			PropertyDescriptor propertyDescriptor = new PropertyDescriptor(fieldName, clazz);
+			Method getterMethod = propertyDescriptor.getReadMethod();
+			return getterMethod != null && getterMethod.isAnnotationPresent(ccd);
+		} catch (Exception e) {
+
+			return false;
+		}
+	}
+
+	/*
+	 * public static boolean deepEquals(Object obj1, Object obj2, Set<Object>
+	 * visited) { Deque<Object> stack = new ArrayDeque<>();
+	 * 
+	 * stack.push(obj1); stack.push(obj2);
+	 * 
+	 * while (!stack.isEmpty()) { Object o2 = stack.pop(); Object o1 =
+	 * stack.pop();
+	 * 
+	 * if (o1 == o2) { continue; } if (o1 == null || o2 == null) { return false;
+	 * }
+	 * 
+	 * Class<?> clazz = o1.getClass(); if (o1.getClass() == Farmer.class) {
+	 * 
+	 * System.out.println("ddd"); } if (clazz.isArray()) { if
+	 * (!deepEqualsArray(o1, o2, visited)) { return false; } } else if (o1
+	 * instanceof Collection && o2 instanceof Collection) { if
+	 * (!deepEqualsCollection((Collection<?>) o1, (Collection<?>) o2, visited))
+	 * { return false; } } else if (o1 instanceof Map && o2 instanceof Map) { if
+	 * (!deepEqualsMap((Map<?, ?>) o1, (Map<?, ?>) o2, visited)) { return false;
+	 * } } else if (clazz == Farmer.class) { // Skip the "farms" field for the
+	 * Farmer object continue; } else if (!isEquals(o1, o2)) { return false; }
+	 * 
+	 * visited.add(o1); visited.add(o2);
+	 * 
+	 * if (clazz.isArray()) { int length = Array.getLength(o1); for (int i = 0;
+	 * i < length; i++) { stack.push(Array.get(o1, i)); stack.push(Array.get(o2,
+	 * i)); } } else { Field[] fields = clazz.getDeclaredFields(); for (Field
+	 * field : fields) { if (field != null) { field.setAccessible(true); try {
+	 * stack.push(field.get(o1) != null ? field.get(o1) : "");
+	 * stack.push(field.get(o2) != null ? field.get(o2) : ""); } catch
+	 * (IllegalAccessException e) { e.printStackTrace(); } } } } }
+	 * 
+	 * return true; }
+	 */
+
+	private static boolean deepEqualsArray(Object array1, Object array2, Set<Object> visited) {
+		int length1 = Array.getLength(array1);
+		int length2 = Array.getLength(array2);
+
+		if (length1 != length2) {
+			return false;
+		}
+
+		for (int i = 0; i < length1; i++) {
+			Object element1 = Array.get(array1, i);
+			Object element2 = Array.get(array2, i);
+
+			if (!visited.contains(element1) || !visited.contains(element2)) {
+				visited.add(element1);
+				visited.add(element2);
+
+				if (!deepEquals(element1, element2, visited)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static boolean deepEqualsCollection(Collection<?> coll1, Collection<?> coll2, Set<Object> visited) {
+		if (coll1.size() != coll2.size()) {
+			return false;
+		}
+
+		Iterator<?> iter1 = coll1.iterator();
+		Iterator<?> iter2 = coll2.iterator();
+
+		while (iter1.hasNext() && iter2.hasNext()) {
+			Object element1 = iter1.next();
+			Object element2 = iter2.next();
+
+			if (!visited.contains(element1) || !visited.contains(element2)) {
+				visited.add(element1);
+				visited.add(element2);
+
+				if (!deepEquals(element1, element2, visited)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static boolean deepEqualsMap(Map<?, ?> map1, Map<?, ?> map2, Set<Object> visited) {
+		if (map1.size() != map2.size()) {
+			return false;
+		}
+
+		for (Map.Entry<?, ?> entry : map1.entrySet()) {
+			Object key1 = entry.getKey();
+			Object value1 = entry.getValue();
+			Object value2 = map2.get(key1);
+
+			if (!visited.contains(value1) || !visited.contains(value2)) {
+				visited.add(value1);
+				visited.add(value2);
+
+				if (!deepEquals(value1, value2, visited)) {
+					return false;
+				}
+			}
+		}
+
+		return true;
+	}
+
+	public static boolean deepEquals(Object obj1, Object obj2, Set<Object> visited) {
+		Deque<Object> stack = new ArrayDeque<>();
+		if (obj1 == null || obj2 == null) {
+			return false;
+		}
+		stack.push(obj1);
+		stack.push(obj2);
+
+		while (!stack.isEmpty()) {
+			Object o2 = stack.pop();
+			Object o1 = stack.pop();
+
+			if (o1 == o2) {
+				continue;
+			}
+			if (o1 == null || o2 == null) {
+				return false;
+			}
+
+			Class<?> clazz = o1.getClass();
+
+			// Check if objects have been visited before
+			if (visited.contains(o1) && visited.contains(o2)) {
+				continue;
+			}
+
+			if (clazz.isArray()) {
+				if (!deepEqualsArray(o1, o2, visited)) {
+					return false;
+				}
+			} else if (o1 instanceof Collection && o2 instanceof Collection) {
+				if (!deepEqualsCollection((Collection<?>) o1, (Collection<?>) o2, visited)) {
+					return false;
+				}
+			} else if (o1 instanceof Map && o2 instanceof Map) {
+				if (!deepEqualsMap((Map<?, ?>) o1, (Map<?, ?>) o2, visited)) {
+					return false;
+				}
+			} else if (!isEquals(o1, o2)) {
+				return false;
+			}
+
+			visited.add(o1);
+			visited.add(o2);
+
+			if (clazz.isArray()) {
+				int length = Array.getLength(o1);
+				for (int i = 0; i < length; i++) {
+					stack.push(Array.get(o1, i));
+					stack.push(Array.get(o2, i));
+				}
+			} else {
+				Field[] fields = clazz.getDeclaredFields();
+				for (Field field : fields) {
+					if (field != null) {
+						field.setAccessible(true);
+						try {
+							if (clazz != Farmer.class || !field.getName().equals("farms")) {
+								if (clazz != Farm.class || !field.getName().equals("farmCrops")) {
+									if (clazz != FarmCrops.class || !field.getName().equals("planting")) {
+										stack.push(field.get(o1) != null ? field.get(o1) : "");
+										stack.push(field.get(o2) != null ? field.get(o2) : "");
+									}
+								}
+							}
+						} catch (IllegalAccessException e) {
+							e.printStackTrace();
+						}
+					}
+				}
+			}
+		}
+
+		return true;
+	}
+
+	private static boolean compareFieldsExceptFarms(Farmer farmer1, Farmer farmer2, Set<Object> visited) {
+		Field[] fields = farmer1.getClass().getDeclaredFields();
+		for (Field field : fields) {
+			if (field != null && !field.getName().equals("farms")) {
+				field.setAccessible(true);
+				try {
+					Object fieldValue1 = field.get(farmer1);
+					Object fieldValue2 = field.get(farmer2);
+					if (!deepEquals(fieldValue1, fieldValue2, visited)) {
+						return false;
+					}
+				} catch (IllegalAccessException e) {
+					e.printStackTrace();
+				}
+			}
+		}
+		return true;
 	}
 }

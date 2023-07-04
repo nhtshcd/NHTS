@@ -18,6 +18,7 @@ import javax.servlet.http.HttpServletRequest;
 
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
+import org.hibernate.envers.*;
 import org.springframework.web.context.request.RequestContextHolder;
 import org.springframework.web.context.request.ServletRequestAttributes;
 
@@ -28,7 +29,8 @@ import lombok.Setter;
 
 @Getter
 @Setter
-@MappedSuperclass 
+@MappedSuperclass
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class ParentEntity implements java.io.Serializable {
 
 	private static final long serialVersionUID = 2786505040793265508L;

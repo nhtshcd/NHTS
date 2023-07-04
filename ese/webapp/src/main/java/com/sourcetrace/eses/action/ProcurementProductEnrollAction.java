@@ -14,6 +14,7 @@ import java.util.Map;
 import java.util.Set;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Scope;
@@ -130,6 +131,10 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 	private List<FarmCatalogue> subUomList = new ArrayList<FarmCatalogue>();
 	private Map<String, String> cropCatList = new HashMap<String, String>();
 
+	@Getter
+	@Setter
+	private String crop1;
+
 	/**
 	 * @see com.sourcetrace.esesw.view.SwitchAction#data()
 	 */
@@ -178,22 +183,29 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 		if (product.getSpeciesName() != null && !StringUtil.isEmpty(product.getSpeciesName())) {
 			jsonObject.put("speciesName", getCatlogueValueByCode(product.getSpeciesName()).getName());
 			jsonObject.put("speciesCode", product.getSpeciesName());
-		}else{
+		} else {
 			jsonObject.put("speciesName", "");
 		}
-		//jsonObject.put("unit", getCatalgueNameByCode(product.getUnit()));
+		// jsonObject.put("unit", getCatalgueNameByCode(product.getUnit()));
 		actionOnj.put("code", product.getCode());
 		actionOnj.put("name", product.getName());
 		if (product.getSpeciesName() != null && !StringUtil.isEmpty(product.getSpeciesName())) {
 			actionOnj.put("speciesName", getCatlogueValueByCode(product.getSpeciesName()).getName());
 			actionOnj.put("speciesCode", product.getSpeciesName());
-		}else{
+		} else {
 			actionOnj.put("speciesName", "");
 			actionOnj.put("speciesCode", "");
 		}
-		//actionOnj.put("speciesName", product.getSpeciesName());
+		// actionOnj.put("speciesName", product.getSpeciesName());
 		actionOnj.put("id", product.getId());
-		//actionOnj.put("unit", product.getUnit());
+		// actionOnj.put("unit", product.getUnit());
+		if (request.getSession().getAttribute("roleId") != null
+				&& request.getSession().getAttribute("roleId").equals(2L)) {
+			jsonObject.put("audit", "<button class='fa fa-info' aria-hidden='true' onclick='detailPopup(\""
+					+ product.getId() + "\")'></button>");
+		} else {
+			jsonObject.put("audit", "No Access");
+		}
 		jsonObject.put("edit",
 				"<a href='#' onclick='ediFunction(\"" + StringEscapeUtils.escapeJavaScript(actionOnj.toString())
 						+ "\")' class='fa fa-edit' title='Edit' ></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='#' onclick='deletProd(\""
@@ -213,8 +225,8 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 	@SuppressWarnings("unchecked")
 	public void create() throws Exception {
 		getJsonObject().clear();
-		//if (!StringUtil.isEmpty(cropName) && !StringUtil.isEmpty(unit))
-			if (!StringUtil.isEmpty(cropName)) {
+		// if (!StringUtil.isEmpty(cropName) && !StringUtil.isEmpty(unit))
+		if (!StringUtil.isEmpty(cropName)) {
 			procurementProduct = new ProcurementProduct();
 			if (!getCurrentTenantId().equalsIgnoreCase("indong")) {
 				// procurementProduct.setCode(idGenerator.getProductEnrollIdSeq());
@@ -222,7 +234,7 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 			}
 			procurementProduct.setName(cropName);
 			procurementProduct.setSpeciesName(speciesName);
-			//procurementProduct.setUnit(unit);
+			// procurementProduct.setUnit(unit);
 			procurementProduct.setBranchId(getBranchId());
 			procurementProduct.setCreatedUser(getUsername());
 			procurementProduct.setCreatedDate(new Date());
@@ -265,15 +277,15 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 
 			if (!StringUtil.isEmpty(cropName)) {
 				ProcurementProduct epp = utilService.findProcurementProductByName(cropName);
-				if (epp != null && temp!=null && temp.getId()!=epp.getId()
-						
-						) {
+				if (epp != null && temp != null && temp.getId() != epp.getId()
+
+				) {
 					getJsonObject().put("msg", getText("cropCat.exist"));
 					getJsonObject().put("title", getText("title.error"));
-				}else{
+				} else {
 					temp.setName(cropName);
-				    temp.setSpeciesName(speciesName);
-				//	temp.setUnit(unit);
+					temp.setSpeciesName(speciesName);
+					// temp.setUnit(unit);
 					temp.setUpdatedUser(getUsername());
 					temp.setUpdatedDate(new Date());
 					utilService.editProcurementProduct(temp);
@@ -281,7 +293,7 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 					getJsonObject().put("msg", getText("msg.cropUpdated"));
 					getJsonObject().put("title", getText("title.success"));
 				}
-				
+
 			} else {
 				getJsonObject().put("msg", getText("Please Enter Crop Name"));
 				getJsonObject().put("title", getText("Error"));
@@ -292,33 +304,30 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 		}
 
 	}
-/*	@SuppressWarnings("unchecked")
-	public void update() throws Exception {
-		if (!StringUtil.isEmpty(id)) {
-			ProcurementProduct temp = utilService.findProcurementProductById(Long.valueOf(id));
-			
-			if (!StringUtil.isEmpty(cropName)) {
-				
-				temp.setName(cropName);
-				temp.setSpeciesName(speciesName);
-				//	temp.setUnit(unit);
-				temp.setUpdatedUser(getUsername());
-				temp.setUpdatedDate(new Date());
-				utilService.editProcurementProduct(temp);
-				
-				getJsonObject().put("msg", getText("msg.cropUpdated"));
-				getJsonObject().put("title", getText("title.success"));
-			} else {
-				getJsonObject().put("msg", getText("Please Enter Crop Name"));
-				getJsonObject().put("title", getText("Error"));
-			}
-			
-			sendAjaxResponse(getJsonObject());
-			
-		}
-		
-	}
-*/
+
+	/*
+	 * @SuppressWarnings("unchecked") public void update() throws Exception { if
+	 * (!StringUtil.isEmpty(id)) { ProcurementProduct temp =
+	 * utilService.findProcurementProductById(Long.valueOf(id));
+	 * 
+	 * if (!StringUtil.isEmpty(cropName)) {
+	 * 
+	 * temp.setName(cropName); temp.setSpeciesName(speciesName); //
+	 * temp.setUnit(unit); temp.setUpdatedUser(getUsername());
+	 * temp.setUpdatedDate(new Date());
+	 * utilService.editProcurementProduct(temp);
+	 * 
+	 * getJsonObject().put("msg", getText("msg.cropUpdated"));
+	 * getJsonObject().put("title", getText("title.success")); } else {
+	 * getJsonObject().put("msg", getText("Please Enter Crop Name"));
+	 * getJsonObject().put("title", getText("Error")); }
+	 * 
+	 * sendAjaxResponse(getJsonObject());
+	 * 
+	 * }
+	 * 
+	 * }
+	 */
 	@SuppressWarnings("unchecked")
 	public void populateDelete() throws Exception {
 		if (id != null) {
@@ -471,6 +480,38 @@ public class ProcurementProductEnrollAction extends SwitchValidatorAction {
 		jsonObject.put("id", id);
 		jsonObject.put("name", name);
 		return jsonObject;
+	}
+
+	public String populateDetail() {
+		if (id != null) {
+			crop1 = "cropcategory";
+			List<Object[]> Datas = farmerService.findProcurementProductDetailById(Long.valueOf(id), crop1);
+			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+
+			JSONObject jsonObj = new JSONObject();
+			previousObje = null;
+			Datas.stream().forEach(da -> {
+				JSONArray jsonArr = new JSONArray();
+
+				if (previousObje == null || !ObjectUtil.isEquals(da, previousObje)) {
+
+					for (i = 0; i < da.length; i++) {
+						if (da[i] != null) {
+							jsonArr.add(i, da[i].toString());
+						} else {
+							jsonArr.add(i, "");
+						}
+					}
+					jsonObj.put(j, jsonArr);
+					j++;
+					previousObje = da;
+				}
+
+			});
+			printAjaxResponse(jsonObj, "text/html");
+
+		}
+		return null;
 	}
 
 }

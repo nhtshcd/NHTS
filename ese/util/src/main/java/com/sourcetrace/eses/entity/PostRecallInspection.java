@@ -14,12 +14,13 @@ import org.hibernate.annotations.ParamDef;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "post_recall_inspection")
 @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))
 @Filters(@org.hibernate.annotations.Filter(name = "branchFilter", condition = "branch_id in ( :branchIdParam )"))
-
+@Audited
 @Getter
 @Setter
 public class PostRecallInspection extends ParentEntity {
@@ -35,7 +36,7 @@ public class PostRecallInspection extends ParentEntity {
 	@Column(name = "INSPECTION_DATE")
 	private Date inspectionDate;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "RECALL_ID")
 	private Recalling recall;
 

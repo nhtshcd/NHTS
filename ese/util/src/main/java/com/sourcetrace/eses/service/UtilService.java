@@ -13,12 +13,14 @@ import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpSession;
 
 import org.apache.log4j.Logger;
+import org.apache.poi.ss.formula.functions.T;
 import org.codehaus.jettison.json.JSONArray;
 import org.codehaus.jettison.json.JSONObject;
 import org.eclipse.persistence.oxm.annotations.XmlInverseReference;
@@ -83,6 +85,8 @@ import com.sourcetrace.eses.entity.ProcurementGrade;
 import com.sourcetrace.eses.entity.ProcurementProduct;
 import com.sourcetrace.eses.entity.ProcurementVariety;
 import com.sourcetrace.eses.entity.Product;
+import com.sourcetrace.eses.entity.ProductTransfer;
+import com.sourcetrace.eses.entity.ProductTransferDetail;
 import com.sourcetrace.eses.entity.Profile;
 import com.sourcetrace.eses.entity.Role;
 import com.sourcetrace.eses.entity.Scouting;
@@ -170,7 +174,7 @@ public class UtilService implements IUtilService {
 
 		} catch (IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException
 				| SecurityException e) {
-			
+
 		}
 
 		return obj;
@@ -3130,9 +3134,9 @@ public class UtilService implements IUtilService {
 
 		List<PackhouseIncoming> products = utilDAO.listWarehouseProductByCityCode(cityCode);
 		if (products != null) {
-		for (PackhouseIncoming product : products) {
-			utilDAO.delete(product);
-		}
+			for (PackhouseIncoming product : products) {
+				utilDAO.delete(product);
+			}
 		}
 	}
 
@@ -3877,7 +3881,7 @@ public class UtilService implements IUtilService {
 	public Object[] findIfFarmerExist(String phno, String nid) {
 		return utilDAO.findIfFarmerExist(phno, nid);
 	}
-	
+
 	@Override
 	public Object[] findIfFarmerExistForFarmer(String nid) {
 		return utilDAO.findIfFarmerExistForFarmer(nid);
@@ -3898,7 +3902,7 @@ public class UtilService implements IUtilService {
 	public List<FarmCrops> listFarmCropByFarmId(Long farmid) {
 		return utilDAO.listFarmCropByFarmId(farmid);
 	}
-	
+
 	@Override
 	public List<Planting> listOfPlantingByBlockId(Long blockId) {
 		return utilDAO.listOfPlantingByBlockId(blockId);
@@ -3986,25 +3990,26 @@ public class UtilService implements IUtilService {
 						cityWarehouse.getSortedWeight() + sorting.getQtyNet(), "SORTING", null);
 				cityWarehouseDetail.setCityWarehouse(cityWarehouse);
 				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
-
+				// save(cityWarehouseDetail);
 				cityWarehouse.setHarvestedWeight(
 						cityWarehouse.getHarvestedWeight() - sorting.getQtyRejected() - sorting.getQtyNet());
 				cityWarehouse.setLossWeight(cityWarehouse.getLossWeight() + sorting.getQtyRejected());
 				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() + sorting.getQtyNet());
 				cityWarehouse.setBranchId(sorting.getBranchId());
 				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-				//cityWarehouse.setQrCodeId(sorting.getQrCodeId());
-				saveOrUpdate(cityWarehouse);
+				// cityWarehouse.setQrCodeId(sorting.getQrCodeId());
+				saveOrUpdatecitywarehouse(cityWarehouse);
+
 			}
-			
+
 			if (sorting != null)
 				save(sorting);
-			
+
 			CityWarehouse incominCW = new CityWarehouse();
 
 			incominCW = new CityWarehouse();
 			incominCW.setPlanting(sorting.getPlanting());
-			incominCW.setFarmcrops(sorting.getFarmCrops());
+			// incominCW.setFarmcrops(sorting.getFarmCrops());
 			incominCW.setSortedWeight(sorting.getQtyNet());
 			incominCW.setLossWeight(sorting.getQtyRejected());
 			incominCW.setHarvestedWeight(sorting.getQtyHarvested());
@@ -4016,19 +4021,18 @@ public class UtilService implements IUtilService {
 			incominCW.setBranchId(sorting.getBranchId());
 			incominCW.setIsDelete(0);
 
-			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-					sorting.getCreatedDate(), 1, sorting.getId(), 0l, incominCW.getLossWeight(),
-					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l,
-					sorting.getQtyHarvested(), sorting.getQtyRejected(), sorting.getQtyNet(), 0l,
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW, sorting.getCreatedDate(),
+					1, sorting.getId(), 0l, incominCW.getLossWeight(), incominCW.getHarvestedWeight(),
+					incominCW.getSortedWeight(), 0l, sorting.getQtyHarvested(), sorting.getQtyRejected(),
+					sorting.getQtyNet(), 0l,
 					incominCW.getHarvestedWeight() - sorting.getQtyRejected() - sorting.getQtyNet(),
 					incominCW.getLossWeight() + sorting.getQtyRejected(),
 					incominCW.getSortedWeight() + sorting.getQtyNet(), "SORTING", null);
 			incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
 			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-			
-			saveOrUpdate(incominCW);
-			
-			
+
+			saveOrUpdatecitywarehouse(incominCW);
+
 		}
 
 	}
@@ -4043,7 +4047,7 @@ public class UtilService implements IUtilService {
 	public void updateSorting(Sorting sorting, Sorting oldSort) {
 
 		CityWarehouse cityWarehouse = (CityWarehouse) findCityWarehouseByFarmCrops(sorting.getPlanting().getId());
-		
+
 		/*
 		 * oldSort.setQtyNet(sorting.getQtyNet() - oldSort.getQtyNet());
 		 * oldSort.setQtyRejected(sorting.getQtyRejected() -
@@ -4067,21 +4071,21 @@ public class UtilService implements IUtilService {
 			cityWarehouse.setLossWeight(cityWarehouseDetail.getTotalLoss());
 			cityWarehouse.setSortedWeight(cityWarehouseDetail.getTotalSorted());
 			cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-			update(cityWarehouse);
+			saveOrUpdatecitywarehouse(cityWarehouse);
 		}
 		update(sorting);
-		
+
 		CityWarehouse incominCW = new CityWarehouse();
 		incominCW = (CityWarehouse) farmerService.findObjectById(
 				"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
-				new Object[] { sorting.getQrCodeId(),
-						CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(), sorting.getPlanting().getId() });
+				new Object[] { sorting.getQrCodeId(), CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(),
+						sorting.getPlanting().getId() });
 		if (incominCW != null) {
-			
-			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-					sorting.getCreatedDate(), 1, sorting.getId(), 0l, incominCW.getLossWeight(),
-					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, sorting.getQtyHarvested(),
-					oldSort.getQtyRejected(), sorting.getQtyNet(), 0l,
+
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW, sorting.getCreatedDate(),
+					1, sorting.getId(), 0l, incominCW.getLossWeight(), incominCW.getHarvestedWeight(),
+					incominCW.getSortedWeight(), 0l, sorting.getQtyHarvested(), oldSort.getQtyRejected(),
+					sorting.getQtyNet(), 0l,
 					incominCW.getHarvestedWeight() - sorting.getQtyRejected() - sorting.getQtyNet(),
 					incominCW.getLossWeight() + sorting.getQtyRejected(),
 					incominCW.getSortedWeight() + sorting.getQtyNet(), "SORTING EDIT", null);
@@ -4093,13 +4097,14 @@ public class UtilService implements IUtilService {
 			incominCW.setCreatedDate(sorting.getCreatedDate());
 
 		} else {
-			
+
 			incominCW = new CityWarehouse();
 			incominCW.setPlanting(sorting.getPlanting());
-			incominCW.setFarmcrops(sorting.getFarmCrops());
+			// incominCW.setFarmcrops(sorting.getFarmCrops());
 			incominCW.setSortedWeight(sorting.getQtyNet());
 			incominCW.setLossWeight(sorting.getQtyRejected());
-			incominCW.setHarvestedWeight(cityWarehouse.getHarvestedWeight() - sorting.getQtyRejected() - sorting.getQtyNet());
+			incominCW.setHarvestedWeight(
+					cityWarehouse.getHarvestedWeight() - sorting.getQtyRejected() - sorting.getQtyNet());
 			incominCW.setCreatedDate(sorting.getCreatedDate());
 			incominCW.setCityWarehouseDetails(new HashSet<>());
 			incominCW.setCreatedUser(sorting.getCreatedUser());
@@ -4108,10 +4113,10 @@ public class UtilService implements IUtilService {
 			incominCW.setBranchId(sorting.getBranchId());
 			incominCW.setIsDelete(0);
 
-			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-					sorting.getCreatedDate(), 1, sorting.getId(), 0l, incominCW.getLossWeight(),
-					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l,
-					sorting.getQtyHarvested(), sorting.getQtyRejected(), sorting.getQtyNet(), 0l,
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW, sorting.getCreatedDate(),
+					1, sorting.getId(), 0l, incominCW.getLossWeight(), incominCW.getHarvestedWeight(),
+					incominCW.getSortedWeight(), 0l, sorting.getQtyHarvested(), sorting.getQtyRejected(),
+					sorting.getQtyNet(), 0l,
 					incominCW.getHarvestedWeight() - sorting.getQtyRejected() - sorting.getQtyNet(),
 					incominCW.getLossWeight() + sorting.getQtyRejected(),
 					incominCW.getSortedWeight() + sorting.getQtyNet(), "SORTING", null);
@@ -4119,7 +4124,7 @@ public class UtilService implements IUtilService {
 			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
 
 		}
-		saveOrUpdate(incominCW);
+		saveOrUpdatecitywarehouse(incominCW);
 
 	}
 
@@ -4140,7 +4145,8 @@ public class UtilService implements IUtilService {
 				cityWarehouse.setLastHarvestDate(harvest.getDate());
 			}
 			cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-			update(cityWarehouse);
+			// update(cityWarehouse);
+			saveOrUpdatecitywarehouse(cityWarehouse);
 		} else {
 			cityWarehouse = new CityWarehouse();
 			cityWarehouse.setLossWeight(0d);
@@ -4166,7 +4172,8 @@ public class UtilService implements IUtilService {
 			cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
 			cityWarehouse.setStockType(0);
 			cityWarehouse.setBranchId(harvest.getBranchId());
-			save(cityWarehouse);
+			// save(cityWarehouse);
+			saveOrUpdatecitywarehouse(cityWarehouse);
 		}
 		save(harvest);
 	}
@@ -4247,16 +4254,78 @@ public class UtilService implements IUtilService {
 		return utilDAO.listFarmCrops();
 	}
 
+	/*
+	 * @Override public void saveIncomings(PackhouseIncoming packhouseIncoming)
+	 * { saveOrUpdate(packhouseIncoming);
+	 * packhouseIncoming.getPackhouseIncomingDetails().stream().filter(uu ->
+	 * uu.getPackhouseIncoming().getStatus() != null &&
+	 * !uu.getPackhouseIncoming().equals(4)).forEach(uu -> { CityWarehouse
+	 * cityWarehouse = (CityWarehouse) farmerService.findObjectById(
+	 * "from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=?"
+	 * , new Object[] { uu.getQrCodeId(),
+	 * CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(),
+	 * uu.getPlanting().getId() }); if (cityWarehouse != null) {
+	 * 
+	 * CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null,
+	 * cityWarehouse, packhouseIncoming.getCreatedDate(), 2,
+	 * packhouseIncoming.getId(), 0l, cityWarehouse.getLossWeight(),
+	 * cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l,
+	 * 0d, 0d, uu.getReceivedWeight(), 0l, cityWarehouse.getHarvestedWeight(),
+	 * cityWarehouse.getLossWeight(), cityWarehouse.getSortedWeight() -
+	 * uu.getTransferWeight(), "INCOMING", null);
+	 * cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+	 * cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() -
+	 * uu.getTransferWeight());
+	 * //cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
+	 * cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+	 * update(cityWarehouse); }
+	 * 
+	 * CityWarehouse incominCW = new CityWarehouse();
+	 * 
+	 * incominCW = new CityWarehouse(); incominCW.setPlanting(uu.getPlanting());
+	 * incominCW.setFarmcrops(uu.getPlanting().getFarmCrops());
+	 * incominCW.setSortedWeight(uu.getReceivedWeight());
+	 * incominCW.setLossWeight(uu.getTotalWeight());
+	 * incominCW.setHarvestedWeight(uu.getTransferWeight());
+	 * incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
+	 * incominCW.setCityWarehouseDetails(new HashSet<>());
+	 * incominCW.setCreatedUser(packhouseIncoming.getCreatedUser());
+	 * incominCW.setCoOperative(packhouseIncoming.getPackhouse());
+	 * incominCW.setBranchId(packhouseIncoming.getBranchId());
+	 * incominCW.setBranchId(packhouseIncoming.getBranchId());
+	 * incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal()
+	 * ); incominCW.setCoOperative(packhouseIncoming.getPackhouse());
+	 * incominCW.setBatchNo(packhouseIncoming.getBatchNo());
+	 * incominCW.setQrCodeId(uu.getQrCodeId());
+	 * incominCW.setBranchId(packhouseIncoming.getBranchId());
+	 * incominCW.setIsDelete(0);
+	 * 
+	 * CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null,
+	 * incominCW, packhouseIncoming.getCreatedDate(), 2,
+	 * packhouseIncoming.getId(), 0l, incominCW.getLossWeight(),
+	 * incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d,
+	 * uu.getReceivedWeight(), 0l, incominCW.getHarvestedWeight(),
+	 * incominCW.getLossWeight(), incominCW.getSortedWeight() +
+	 * uu.getReceivedWeight(), "INCOMING", null);
+	 * incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+	 * incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+	 * saveOrUpdate(incominCW); });
+	 * 
+	 * }
+	 */
+
 	@Override
 	public void saveIncoming(PackhouseIncoming packhouseIncoming) {
 		saveOrUpdate(packhouseIncoming);
-		packhouseIncoming.getPackhouseIncomingDetails().stream().filter(uu -> uu.getPackhouseIncoming().getStatus() != null && !uu.getPackhouseIncoming().equals(4)).forEach(uu -> {
+		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
+		packhouseIncoming.getPackhouseIncomingDetails().stream().forEach(uu -> {
 			CityWarehouse cityWarehouse = (CityWarehouse) farmerService.findObjectById(
-						"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=?",
-						new Object[] { uu.getQrCodeId(),
-								CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(), uu.getPlanting().getId() });
+					"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=?",
+					new Object[] { uu.getQrCodeId(), CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(),
+							uu.getPlanting().getId() });
+
 			if (cityWarehouse != null) {
-				
+
 				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
 						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
 						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
@@ -4265,175 +4334,28 @@ public class UtilService implements IUtilService {
 						cityWarehouse.getSortedWeight() - uu.getTransferWeight(), "INCOMING", null);
 				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
 				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - uu.getTransferWeight());
-				//cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
+				// cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
 				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-				update(cityWarehouse);
+				// update(cityWarehouse);
+				saveOrUpdatecitywarehouse(cityWarehouse);
 			}
 
 			CityWarehouse incominCW = new CityWarehouse();
-			
-			incominCW = new CityWarehouse();
-			incominCW.setPlanting(uu.getPlanting());
-			incominCW.setFarmcrops(uu.getPlanting().getFarmCrops());
-			incominCW.setSortedWeight(uu.getReceivedWeight());
-			incominCW.setLossWeight(uu.getTotalWeight());
-			incominCW.setHarvestedWeight(uu.getTransferWeight());
-			incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
-			incominCW.setCityWarehouseDetails(new HashSet<>());
-			incominCW.setCreatedUser(packhouseIncoming.getCreatedUser());
-			incominCW.setCoOperative(packhouseIncoming.getPackhouse());
-			incominCW.setBranchId(packhouseIncoming.getBranchId());
-			incominCW.setBranchId(packhouseIncoming.getBranchId());
-			incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal());
-			incominCW.setCoOperative(packhouseIncoming.getPackhouse());
-			incominCW.setBatchNo(packhouseIncoming.getBatchNo());
-			incominCW.setQrCodeId(uu.getQrCodeId());
-			incominCW.setBranchId(packhouseIncoming.getBranchId());
-			incominCW.setIsDelete(0);
+			if (ctmap.containsKey(uu.getPlanting().getId())) {
+				incominCW = ctmap.get(uu.getPlanting().getId());
+				// incominCW.setSortedWeight(incominCW.getSortedWeight() +
+				// uu.getQuantity());
+				incominCW.setSortedWeight(incominCW.getSortedWeight() + uu.getReceivedWeight());
+				incominCW.setLossWeight(incominCW.getLossWeight() + uu.getTotalWeight());
 
-			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-					packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l, incominCW.getLossWeight(),
-					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
-					incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
-					incominCW.getSortedWeight() + uu.getReceivedWeight(), "INCOMING", null);
-			incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-			saveOrUpdate(incominCW);
-		});
+			} else {
 
-	}
-
-	@Override
-	public void updateIncoming(PackhouseIncoming packhouseIncoming) {
-		
-		packhouseIncoming.getPackhouseIncomingDetails().stream().filter(uu -> uu.getPackhouseIncoming().getStatus() != null && !uu.getPackhouseIncoming().equals(4)).forEach(uu -> {
-			CityWarehouse cityWarehouse = (CityWarehouse) farmerService.findObjectById(
-						"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=?",
-						new Object[] { uu.getQrCodeId(),
-								CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(), uu.getPlanting().getId() });
-			if (cityWarehouse != null) {
-				
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
-						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
-						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
-						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
-						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
-						cityWarehouse.getSortedWeight() - uu.getTransferWeight(), "INCOMING", null);
-				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
-				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - uu.getTransferWeight());
-				//cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
-				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-				update(cityWarehouse);
-			}
-
-			CityWarehouse incominCW = new CityWarehouse();
-			incominCW = (CityWarehouse) farmerService.findObjectById(
-					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? and ct.qrCodeId=?",
-					new Object[] { uu.getPackhouseIncoming().getPackhouse().getId(), uu.getPackhouseIncoming().getBatchNo(),
-							CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(), uu.getPlanting().getId(),uu.getQrCodeId() });
-			
-			if (incominCW != null) {
-				incominCW.setSortedWeight(0d);
-				incominCW.setLossWeight(0d);
-				incominCW.setHarvestedWeight(0d);
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
-						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
-						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
-						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
-						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
-						cityWarehouse.getSortedWeight() - uu.getTransferWeight(), "INCOMING", null);
-				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+				incominCW = new CityWarehouse();
+				incominCW.setPlanting(uu.getPlanting());
+				incominCW.setFarmcrops(uu.getPlanting().getFarmCrops());
 				incominCW.setSortedWeight(uu.getReceivedWeight());
 				incominCW.setLossWeight(uu.getTotalWeight());
 				incominCW.setHarvestedWeight(uu.getTransferWeight());
-				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-				incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
-				if (incominCW.getSortedWeight() <= 0) {
-					incominCW.setIsDelete(1);
-				}else{
-					incominCW.setIsDelete(0);
-				}
-
-			}else{
-			
-			incominCW = new CityWarehouse();
-			incominCW.setPlanting(uu.getPlanting());
-			incominCW.setFarmcrops(uu.getPlanting().getFarmCrops());
-			incominCW.setSortedWeight(uu.getReceivedWeight());
-			incominCW.setLossWeight(uu.getTotalWeight());
-			incominCW.setHarvestedWeight(uu.getTransferWeight());
-			incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
-			incominCW.setCityWarehouseDetails(new HashSet<>());
-			incominCW.setCreatedUser(packhouseIncoming.getCreatedUser());
-			incominCW.setCoOperative(packhouseIncoming.getPackhouse());
-			incominCW.setBranchId(packhouseIncoming.getBranchId());
-			incominCW.setBranchId(packhouseIncoming.getBranchId());
-			incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal());
-			incominCW.setCoOperative(packhouseIncoming.getPackhouse());
-			incominCW.setBatchNo(packhouseIncoming.getBatchNo());
-			incominCW.setQrCodeId(uu.getQrCodeId());
-			incominCW.setBranchId(packhouseIncoming.getBranchId());
-			incominCW.setIsDelete(0);
-
-			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-					packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l, incominCW.getLossWeight(),
-					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
-					incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
-					incominCW.getSortedWeight() + uu.getReceivedWeight(), "INCOMING", null);
-			incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-			}
-			saveOrUpdate(incominCW);
-		});
-
-		/*existingstock.entrySet().stream().forEach(uu -> {
-			CityWarehouse cityWarehouse = uu.getKey();
-			if (cityWarehouse != null) {
-				//cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() + uu.getValue());
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
-						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
-						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
-						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
-						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
-						cityWarehouse.getSortedWeight() - uu.getValue(), "INCOMING REDUCTION", null);
-				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
-				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - uu.getValue());
-				//cityWarehouse.setLossWeight(0d);
-				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-				update(cityWarehouse);
-			}
-
-			CityWarehouse incominCW = new CityWarehouse();
-			incominCW = (CityWarehouse) farmerService.findObjectById(
-					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=?",
-					new Object[] { packhouseIncoming.getPackhouse().getId(), packhouseIncoming.getBatchNo(),
-							CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(), cityWarehouse.getPlanting().getId() });
-			if (incominCW != null) {
-				incominCW.setSortedWeight(incominCW.getSortedWeight() + uu.getValue());
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l, incominCW.getLossWeight(),
-						incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
-						incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
-						incominCW.getSortedWeight() + uu.getValue(), "INCOMING", null);
-				//cityWarehouse.setLossWeight(0d);
-				incominCW.setLossWeight(incominCW.getHarvestedWeight() - incominCW.getSortedWeight());
-				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-				incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
-				if (incominCW.getSortedWeight() <= 0) {
-					incominCW.setIsDelete(1);
-				}
-
-			} else {
-				incominCW = new CityWarehouse();
-				incominCW.setLossWeight(0d);
-				incominCW.setSortedWeight(0d);
-				incominCW.setPlanting(cityWarehouse.getPlanting());
-				incominCW.setFarmcrops(cityWarehouse.getPlanting().getFarmCrops());
-				incominCW.setLossWeight(cityWarehouse.getSortedWeight() - uu.getValue());
-				incominCW.setHarvestedWeight(cityWarehouse.getSortedWeight());
-				incominCW.setSortedWeight(uu.getValue());
 				incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
 				incominCW.setCityWarehouseDetails(new HashSet<>());
 				incominCW.setCreatedUser(packhouseIncoming.getCreatedUser());
@@ -4443,21 +4365,174 @@ public class UtilService implements IUtilService {
 				incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal());
 				incominCW.setCoOperative(packhouseIncoming.getPackhouse());
 				incominCW.setBatchNo(packhouseIncoming.getBatchNo());
+				incominCW.setQrCodeId(uu.getQrCodeId());
 				incominCW.setBranchId(packhouseIncoming.getBranchId());
 				incominCW.setIsDelete(0);
-
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l, incominCW.getLossWeight(),
-						incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
-						incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
-						incominCW.getSortedWeight() + uu.getValue(), "INCOMING", null);
-				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-
 			}
-			saveOrUpdate(incominCW);
 
-		});*/
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+					packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l, incominCW.getLossWeight(),
+					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
+					incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
+					incominCW.getSortedWeight() + uu.getReceivedWeight(), "INCOMING", null);
+			incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+			ctmap.put(uu.getPlanting().getId(), incominCW);
+		});
+
+		ctmap.entrySet().forEach(uu -> {
+			// saveOrUpdate(uu.getValue());
+			saveOrUpdatecitywarehouse(uu.getValue());
+		});
+
+	}
+
+	@Override
+	public void updateIncoming(PackhouseIncoming packhouseIncoming) {
+		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
+		packhouseIncoming.getPackhouseIncomingDetails().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = (CityWarehouse) farmerService.findObjectById(
+					"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=?",
+					new Object[] { uu.getQrCodeId(), CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(),
+							uu.getPlanting().getId() });
+
+			if (cityWarehouse != null) {
+
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
+						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
+						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+						cityWarehouse.getSortedWeight() - uu.getTransferWeight(), "INCOMING", null);
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - uu.getTransferWeight());
+				// cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				// update(cityWarehouse);
+				saveOrUpdatecitywarehouse(cityWarehouse);
+			}
+
+			CityWarehouse incominCW = new CityWarehouse();
+			if (ctmap.containsKey(uu.getPlanting().getId())) {
+				incominCW = ctmap.get(uu.getPlanting().getId());
+				// incominCW.setSortedWeight(incominCW.getSortedWeight() +
+				// uu.getQuantity());
+				incominCW.setSortedWeight(incominCW.getSortedWeight() + uu.getReceivedWeight());
+				incominCW.setLossWeight(incominCW.getLossWeight() + uu.getTotalWeight());
+
+			} else {
+
+				incominCW = new CityWarehouse();
+				incominCW.setPlanting(uu.getPlanting());
+				incominCW.setFarmcrops(uu.getPlanting().getFarmCrops());
+				incominCW.setSortedWeight(uu.getReceivedWeight());
+				incominCW.setLossWeight(uu.getTotalWeight());
+				incominCW.setHarvestedWeight(uu.getTransferWeight());
+				incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
+				incominCW.setCityWarehouseDetails(new HashSet<>());
+				incominCW.setCreatedUser(packhouseIncoming.getCreatedUser());
+				incominCW.setCoOperative(packhouseIncoming.getPackhouse());
+				incominCW.setBranchId(packhouseIncoming.getBranchId());
+				incominCW.setBranchId(packhouseIncoming.getBranchId());
+				incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal());
+				incominCW.setCoOperative(packhouseIncoming.getPackhouse());
+				incominCW.setBatchNo(packhouseIncoming.getBatchNo());
+				incominCW.setQrCodeId(uu.getQrCodeId());
+				incominCW.setBranchId(packhouseIncoming.getBranchId());
+				incominCW.setIsDelete(0);
+			}
+
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+					packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l, incominCW.getLossWeight(),
+					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
+					incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
+					incominCW.getSortedWeight() + uu.getReceivedWeight(), "INCOMING", null);
+			incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+			ctmap.put(uu.getPlanting().getId(), incominCW);
+		});
+
+		ctmap.entrySet().forEach(uu -> {
+			// saveOrUpdate(uu.getValue());
+			saveOrUpdatecitywarehouse(uu.getValue());
+		});
+
+		/*
+		 * existingstock.entrySet().stream().forEach(uu -> { CityWarehouse
+		 * cityWarehouse = uu.getKey(); if (cityWarehouse != null) {
+		 * //cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() +
+		 * uu.getValue()); CityWarehouseDetail cityWarehouseDetail = new
+		 * CityWarehouseDetail(null, cityWarehouse,
+		 * packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
+		 * cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
+		 * cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
+		 * cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+		 * cityWarehouse.getSortedWeight() - uu.getValue(),
+		 * "INCOMING REDUCTION", null);
+		 * cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+		 * cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() -
+		 * uu.getValue()); //cityWarehouse.setLossWeight(0d);
+		 * cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+		 * update(cityWarehouse); }
+		 * 
+		 * CityWarehouse incominCW = new CityWarehouse(); incominCW =
+		 * (CityWarehouse) farmerService.findObjectById(
+		 * "from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=?"
+		 * , new Object[] { packhouseIncoming.getPackhouse().getId(),
+		 * packhouseIncoming.getBatchNo(),
+		 * CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(),
+		 * cityWarehouse.getPlanting().getId() }); if (incominCW != null) {
+		 * incominCW.setSortedWeight(incominCW.getSortedWeight() +
+		 * uu.getValue()); CityWarehouseDetail cityWarehouseDetail = new
+		 * CityWarehouseDetail(null, incominCW,
+		 * packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
+		 * incominCW.getLossWeight(), incominCW.getHarvestedWeight(),
+		 * incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
+		 * incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
+		 * incominCW.getSortedWeight() + uu.getValue(), "INCOMING", null);
+		 * //cityWarehouse.setLossWeight(0d);
+		 * incominCW.setLossWeight(incominCW.getHarvestedWeight() -
+		 * incominCW.getSortedWeight());
+		 * incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+		 * incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+		 * incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate()); if
+		 * (incominCW.getSortedWeight() <= 0) { incominCW.setIsDelete(1); }
+		 * 
+		 * } else { incominCW = new CityWarehouse();
+		 * incominCW.setLossWeight(0d); incominCW.setSortedWeight(0d);
+		 * incominCW.setPlanting(cityWarehouse.getPlanting());
+		 * incominCW.setFarmcrops(cityWarehouse.getPlanting().getFarmCrops());
+		 * incominCW.setLossWeight(cityWarehouse.getSortedWeight() -
+		 * uu.getValue());
+		 * incominCW.setHarvestedWeight(cityWarehouse.getSortedWeight());
+		 * incominCW.setSortedWeight(uu.getValue());
+		 * incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
+		 * incominCW.setCityWarehouseDetails(new HashSet<>());
+		 * incominCW.setCreatedUser(packhouseIncoming.getCreatedUser());
+		 * incominCW.setCoOperative(packhouseIncoming.getPackhouse());
+		 * incominCW.setBranchId(packhouseIncoming.getBranchId());
+		 * incominCW.setBranchId(packhouseIncoming.getBranchId());
+		 * incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.
+		 * ordinal());
+		 * incominCW.setCoOperative(packhouseIncoming.getPackhouse());
+		 * incominCW.setBatchNo(packhouseIncoming.getBatchNo());
+		 * incominCW.setBranchId(packhouseIncoming.getBranchId());
+		 * incominCW.setIsDelete(0);
+		 * 
+		 * CityWarehouseDetail cityWarehouseDetail = new
+		 * CityWarehouseDetail(null, incominCW,
+		 * packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
+		 * incominCW.getLossWeight(), incominCW.getHarvestedWeight(),
+		 * incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
+		 * incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
+		 * incominCW.getSortedWeight() + uu.getValue(), "INCOMING", null);
+		 * incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+		 * incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+		 * 
+		 * } saveOrUpdate(incominCW);
+		 * 
+		 * });
+		 */
 	}
 
 	@Override
@@ -4475,22 +4550,25 @@ public class UtilService implements IUtilService {
 						uu.getQuantity(), 0l, cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
 						cityWarehouse.getSortedWeight() - uu.getQuantity(), "PACKING", cityWarehouse.getBatchNo());
 				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
-				//cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - uu.getQuantity());
+				// cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight()
+				// - uu.getQuantity());
 				Double sortedwt = uu.getQuantity() + uu.getRejectWt();
 				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - sortedwt);
-				
+
 				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
 				update(cityWarehouse);
 
 			}
+
 			CityWarehouse incominCW = new CityWarehouse();
-			/*if (ctmap.containsKey(uu.getCtt().getId())) {
-				incominCW = ctmap.get(uu.getCtt().getId());
-				//incominCW.setSortedWeight(incominCW.getSortedWeight() + uu.getQuantity());
+			if (ctmap.containsKey(uu.getPlanting().getId())) {
+				incominCW = ctmap.get(uu.getPlanting().getId());
+				// incominCW.setSortedWeight(incominCW.getSortedWeight() +
+				// uu.getQuantity());
 				incominCW.setSortedWeight(incominCW.getSortedWeight() + uu.getQuantity());
 				incominCW.setLossWeight(incominCW.getLossWeight() + uu.getRejectWt());
 
-			} else {*/
+			} else {
 
 				incominCW.setLossWeight(0d);
 				incominCW.setSortedWeight(0d);
@@ -4511,7 +4589,7 @@ public class UtilService implements IUtilService {
 				incominCW.setBatchNo(packing.getBatchNo());
 				incominCW.setBranchId(packing.getBranchId());
 				incominCW.setIsDelete(0);
-			
+			}
 
 			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW, packing.getCreatedDate(),
 					2, packing.getId(), 0l, incominCW.getLossWeight(), incominCW.getHarvestedWeight(),
@@ -4519,164 +4597,57 @@ public class UtilService implements IUtilService {
 					incominCW.getLossWeight(), incominCW.getSortedWeight() + uu.getQuantity(), "INCOMING", null);
 			incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
 			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-			ctmap.put(uu.getCtt().getId(), incominCW);
-			
-			saveOrUpdate(incominCW);
+			ctmap.put(uu.getPlanting().getId(), incominCW);
+		});
+
+		ctmap.entrySet().forEach(uu -> {
+			saveOrUpdate(uu.getValue());
 		});
 
 	}
 
 	@Override
-	public void updatePacking(Packing packing, Map<CityWarehouse, Double> existingstock,Set<PackingDetail> pdSet) {
-		
+	public void updatePacking(Packing packing, Map<CityWarehouse, Double> existingstock, Set<PackingDetail> pdSet) {
+
 		saveOrUpdate(packing);
 		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
 
 		existingstock.entrySet().stream().forEach(uu -> {
 			CityWarehouse cityWarehouse = uu.getKey();
 			if (cityWarehouse != null) {
-				//cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() + uu.getValue());
+				// cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight()
+				// + uu.getValue());
 				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
 						packing.getCreatedDate(), 2, packing.getId(), 0l, cityWarehouse.getLossWeight(),
 						cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(),
 						0l, cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
-						cityWarehouse.getSortedWeight() - (uu.getValue()+cityWarehouse.getLossWeight()), "INCOMING REDUCTION", null);
+						cityWarehouse.getSortedWeight() - uu.getValue(), "INCOMING REDUCTION", null);
 				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
 				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - (uu.getValue()));
-				//cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
+				// cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
 				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-				update(cityWarehouse);
+				// update(cityWarehouse);
+				saveOrUpdatecitywarehouse(cityWarehouse);
 			}
 
 			CityWarehouse incominCW = (CityWarehouse) farmerService.findObjectById(
 					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
 					new Object[] { packing.getPackHouse().getId(), packing.getBatchNo(),
-							CityWarehouse.Stock_type.PACKING_STOCK.ordinal(),
-							uu.getKey().getPlanting().getId() });
-			if (incominCW != null) {
-				incominCW.setSortedWeight(0d);
-				incominCW.setLossWeight(0d);
-				//ctmap.put(incominCW.getId(), incominCW);
-				incominCW.setIsDelete(2);
-				update(incominCW);
-			}
-		
-		});
-		Map<CityWarehouse, Double> stockwe =pdSet.stream().collect(Collectors.groupingBy(PackingDetail::getCtt,Collectors.summingDouble(PackingDetail::getQuantity)));
-		
-		Map<CityWarehouse, Double> rejQt =pdSet.stream().collect(Collectors.groupingBy(PackingDetail::getCtt,Collectors.summingDouble(PackingDetail::getRejectWt)));
-		stockwe.entrySet().stream().forEach(str ->{
-			Double rejwt =rejQt.containsKey(str.getKey()) ? rejQt.get(str.getKey()) :0d;
-			CityWarehouse incominCW = new CityWarehouse();
-			if (ctmap.containsKey(str.getKey().getId())) {
-				incominCW = ctmap.get(str.getKey().getId());
-			} else {
-				incominCW = (CityWarehouse) farmerService.findObjectById(
-						"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=2",
-						new Object[] { packing.getPackHouse().getId(), packing.getBatchNo(),
-								CityWarehouse.Stock_type.PACKING_STOCK.ordinal(),
-								str.getKey().getId() });
-			}
-				
-				if (incominCW != null) {
-					incominCW.setSortedWeight(incominCW.getSortedWeight()+str.getValue());
-					incominCW.setLossWeight(incominCW.getLossWeight()+rejwt);
-
-					CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-							packing.getCreatedDate(), 2, packing.getId(), 0l, incominCW.getLossWeight(),
-							incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
-							incominCW.getHarvestedWeight(), incominCW.getLossWeight()+rejwt,
-							incominCW.getSortedWeight() +str.getValue(), "INCOMING", null);
-					incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-					incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-					if (incominCW.getSortedWeight() <= 0) {
-						incominCW.setIsDelete(1);
-					}else{
-						incominCW.setIsDelete(0);
-					}
-					
-				}else{
-					incominCW = new CityWarehouse();
-					incominCW.setLossWeight(0d);
-					incominCW.setSortedWeight(0d);
-
-					incominCW.setFarmcrops(str.getKey().getFarmcrops());
-					incominCW.setPlanting(str.getKey().getPlanting());
-					incominCW.setSortedWeight(incominCW.getSortedWeight() +str.getValue());
-				//	incominCW.setLossWeight(0d);
-					incominCW.setLossWeight(rejwt);
-					incominCW.setHarvestedWeight(0d);
-					incominCW.setCreatedDate(packing.getPackingDate());
-					incominCW.setCityWarehouseDetails(new HashSet<>());
-					incominCW.setCreatedUser(packing.getCreatedUser());
-					incominCW.setCoOperative(packing.getPackHouse());
-					incominCW.setBranchId(packing.getBranchId());
-					incominCW.setBranchId(packing.getBranchId());
-					incominCW.setStockType(CityWarehouse.Stock_type.PACKING_STOCK.ordinal());
-					incominCW.setCoOperative(packing.getPackHouse());
-					incominCW.setBatchNo(packing.getBatchNo());
-					incominCW.setBranchId(packing.getBranchId());
-					incominCW.setIsDelete(0);
-
-					CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-							packing.getCreatedDate(), 2, packing.getId(), 0l, incominCW.getLossWeight(),
-							incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d,str.getValue(), 0l,
-							incominCW.getHarvestedWeight(), incominCW.getLossWeight()+rejwt,
-							incominCW.getSortedWeight() + str.getValue(), "INCOMING", null);
-					incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-					incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-				}
-			
-			
-				saveOrUpdate(incominCW);
-		});
-		
-		/*ctmap.entrySet().forEach(uu -> {
-					
-			
-		});*/
-	
-	}
-	
-	@Override
-	public void deletePacking(Packing packing, Map<CityWarehouse, Double> existingstock,Set<PackingDetail> pdSet) {
-		
-		saveOrUpdate(packing);
-		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
-
-		existingstock.entrySet().stream().forEach(uu -> {
-			CityWarehouse cityWarehouse = uu.getKey();
-			if (cityWarehouse != null) {
-				//cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() + uu.getValue());
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
-						packing.getCreatedDate(), 2, packing.getId(), 0l, cityWarehouse.getLossWeight(),
-						cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(),
-						0l, cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
-						cityWarehouse.getSortedWeight() - (uu.getValue()+cityWarehouse.getLossWeight()), "INCOMING REDUCTION", null);
-				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
-				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - (uu.getValue()));
-				//cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
-				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-				update(cityWarehouse);
-			}
-
-			CityWarehouse incominCW = (CityWarehouse) farmerService.findObjectById(
-					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
-					new Object[] { packing.getPackHouse().getId(), packing.getBatchNo(),
-							CityWarehouse.Stock_type.PACKING_STOCK.ordinal(),
-							uu.getKey().getPlanting().getId() });
+							CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), uu.getKey().getPlanting().getId() });
 			if (incominCW != null) {
 				incominCW.setSortedWeight(0d);
 				incominCW.setLossWeight(0d);
 				ctmap.put(incominCW.getPlanting().getId(), incominCW);
 			}
-		
+
 		});
-		Map<Planting, Double> stockwe =pdSet.stream().collect(Collectors.groupingBy(PackingDetail::getPlanting,Collectors.summingDouble(PackingDetail::getQuantity)));
-		
-		Map<Planting, Double> rejQt =pdSet.stream().collect(Collectors.groupingBy(PackingDetail::getPlanting,Collectors.summingDouble(PackingDetail::getRejectWt)));
-		stockwe.entrySet().stream().forEach(str ->{
-			Double rejwt =rejQt.containsKey(str.getKey()) ? rejQt.get(str.getKey()) :0d;
+		Map<Planting, Double> stockwe = pdSet.stream().collect(Collectors.groupingBy(PackingDetail::getPlanting,
+				Collectors.summingDouble(PackingDetail::getQuantity)));
+
+		Map<Planting, Double> rejQt = pdSet.stream().collect(Collectors.groupingBy(PackingDetail::getPlanting,
+				Collectors.summingDouble(PackingDetail::getRejectWt)));
+		stockwe.entrySet().stream().forEach(str -> {
+			Double rejwt = rejQt.containsKey(str.getKey()) ? rejQt.get(str.getKey()) : 0d;
 			CityWarehouse incominCW = new CityWarehouse();
 			if (ctmap.containsKey(str.getKey().getId())) {
 				incominCW = ctmap.get(str.getKey().getId());
@@ -4684,70 +4655,118 @@ public class UtilService implements IUtilService {
 				incominCW = (CityWarehouse) farmerService.findObjectById(
 						"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
 						new Object[] { packing.getPackHouse().getId(), packing.getBatchNo(),
-								CityWarehouse.Stock_type.PACKING_STOCK.ordinal(),
-								str.getKey().getId() });
+								CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), str.getKey().getId() });
 			}
-				
-				if (incominCW != null) {
-					incominCW.setSortedWeight(incominCW.getSortedWeight()+str.getValue());
-					incominCW.setLossWeight(incominCW.getLossWeight()+rejwt);
 
-					CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-							packing.getCreatedDate(), 2, packing.getId(), 0l, incominCW.getLossWeight(),
-							incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
-							incominCW.getHarvestedWeight(), incominCW.getLossWeight()+rejwt,
-							incominCW.getSortedWeight() +str.getValue(), "INCOMING", null);
-					incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-					incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-					if (incominCW.getSortedWeight() <= 0) {
-						incominCW.setIsDelete(1);
-					}
-					
-				}else{
-					incominCW = new CityWarehouse();
-					incominCW.setLossWeight(0d);
-					incominCW.setSortedWeight(0d);
+			if (incominCW != null) {
+				incominCW.setSortedWeight(incominCW.getSortedWeight() + str.getValue());
+				incominCW.setLossWeight(incominCW.getLossWeight() + rejwt);
 
-					incominCW.setFarmcrops(str.getKey().getFarmCrops());
-					incominCW.setPlanting(str.getKey());
-					incominCW.setSortedWeight(incominCW.getSortedWeight() +str.getValue());
-				//	incominCW.setLossWeight(0d);
-					incominCW.setLossWeight(rejwt);
-					incominCW.setHarvestedWeight(0d);
-					incominCW.setCreatedDate(packing.getPackingDate());
-					incominCW.setCityWarehouseDetails(new HashSet<>());
-					incominCW.setCreatedUser(packing.getCreatedUser());
-					incominCW.setCoOperative(packing.getPackHouse());
-					incominCW.setBranchId(packing.getBranchId());
-					incominCW.setBranchId(packing.getBranchId());
-					incominCW.setStockType(CityWarehouse.Stock_type.PACKING_STOCK.ordinal());
-					incominCW.setCoOperative(packing.getPackHouse());
-					incominCW.setBatchNo(packing.getBatchNo());
-					incominCW.setBranchId(packing.getBranchId());
-					incominCW.setIsDelete(0);
-
-					CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-							packing.getCreatedDate(), 2, packing.getId(), 0l, incominCW.getLossWeight(),
-							incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d,str.getValue(), 0l,
-							incominCW.getHarvestedWeight(), incominCW.getLossWeight()+rejwt,
-							incominCW.getSortedWeight() + str.getValue(), "INCOMING", null);
-					incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-					incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+						packing.getCreatedDate(), 2, packing.getId(), 0l, incominCW.getLossWeight(),
+						incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
+						incominCW.getHarvestedWeight(), incominCW.getLossWeight() + rejwt,
+						incominCW.getSortedWeight() + str.getValue(), "INCOMING", null);
+				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+				if (incominCW.getSortedWeight() <= 0) {
+					incominCW.setIsDelete(1);
 				}
-			
-			
-			
+
+			} else {
+				incominCW = new CityWarehouse();
+				incominCW.setLossWeight(0d);
+				incominCW.setSortedWeight(0d);
+
+				incominCW.setFarmcrops(str.getKey().getFarmCrops());
+				incominCW.setPlanting(str.getKey());
+				incominCW.setSortedWeight(incominCW.getSortedWeight() + str.getValue());
+				// incominCW.setLossWeight(0d);
+				incominCW.setLossWeight(rejwt);
+				incominCW.setHarvestedWeight(0d);
+				incominCW.setCreatedDate(packing.getPackingDate());
+				incominCW.setCityWarehouseDetails(new HashSet<>());
+				incominCW.setCreatedUser(packing.getCreatedUser());
+				incominCW.setCoOperative(packing.getPackHouse());
+				incominCW.setBranchId(packing.getBranchId());
+				incominCW.setBranchId(packing.getBranchId());
+				incominCW.setStockType(CityWarehouse.Stock_type.PACKING_STOCK.ordinal());
+				incominCW.setCoOperative(packing.getPackHouse());
+				incominCW.setBatchNo(packing.getBatchNo());
+				incominCW.setBranchId(packing.getBranchId());
+				incominCW.setIsDelete(0);
+
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+						packing.getCreatedDate(), 2, packing.getId(), 0l, incominCW.getLossWeight(),
+						incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
+						incominCW.getHarvestedWeight(), incominCW.getLossWeight() + rejwt,
+						incominCW.getSortedWeight() + str.getValue(), "INCOMING", null);
+				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+			}
+
+			ctmap.put(incominCW.getPlanting().getId(), incominCW);
+
 		});
 
 		ctmap.entrySet().forEach(uu -> {
-			
 			if (uu.getValue().getSortedWeight() <= 0) {
 				uu.getValue().setIsDelete(1);
 			}
-			
-			saveOrUpdate(uu.getValue());
+			// saveOrUpdate(uu.getValue());
+			saveOrUpdatecitywarehouse(uu.getValue());
 		});
-	
+
+	}
+
+	@Override
+	public void deletePacking(Packing packing, Map<CityWarehouse, Double> existingstock, Set<PackingDetail> pdSet) {
+
+		saveOrUpdate(packing);
+		Map<String, CityWarehouse> ctmap = new HashMap<String, CityWarehouse>();
+
+		existingstock.entrySet().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = uu.getKey();
+			if (cityWarehouse != null) {
+				// cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight()
+				// + uu.getValue());
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						packing.getCreatedDate(), 2, packing.getId(), 0l, cityWarehouse.getLossWeight(),
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(),
+						0l, cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+						cityWarehouse.getSortedWeight() - (uu.getValue() + cityWarehouse.getLossWeight()),
+						"INCOMING REDUCTION", null);
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - (uu.getValue()));
+				// cityWarehouse.setLossWeight(cityWarehouse.getLossWeight());
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				// update(cityWarehouse);
+				saveOrUpdatecitywarehouse(cityWarehouse);
+			}
+
+			CityWarehouse incominCW = (CityWarehouse) farmerService.findObjectById(
+					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+					new Object[] { packing.getPackHouse().getId(), packing.getBatchNo(),
+							CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), uu.getKey().getPlanting().getId() });
+
+			if (incominCW != null) {
+				incominCW.setSortedWeight(0d);
+				incominCW.setLossWeight(0d);
+				ctmap.put(incominCW.getQrCodeId(), incominCW);
+			}
+
+		});
+
+		ctmap.entrySet().forEach(uu -> {
+
+			if (uu.getValue().getSortedWeight() <= 0) {
+				uu.getValue().setIsDelete(1);
+			}
+
+			// saveOrUpdate(uu.getValue());
+			saveOrUpdatecitywarehouse(uu.getValue());
+		});
+
 	}
 
 	@Override
@@ -4769,21 +4788,21 @@ public class UtilService implements IUtilService {
 			cityWarehouse.setLossWeight(cityWarehouseDetail.getTotalLoss());
 			cityWarehouse.setSortedWeight(cityWarehouseDetail.getTotalSorted());
 			cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-			update(cityWarehouse);
+			saveOrUpdatecitywarehouse(cityWarehouse);
 		}
 		update(sorting);
-		
+
 		CityWarehouse incominCW = new CityWarehouse();
 		incominCW = (CityWarehouse) farmerService.findObjectById(
 				"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
-				new Object[] { sorting.getQrCodeId(),
-						CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(), sorting.getPlanting().getId() });
+				new Object[] { sorting.getQrCodeId(), CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(),
+						sorting.getPlanting().getId() });
 		if (incominCW != null) {
-			
-			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-					sorting.getCreatedDate(), 1, sorting.getId(), 0l, incominCW.getLossWeight(),
-					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, sorting.getQtyHarvested(),
-					sorting.getQtyRejected(), sorting.getQtyNet(), 0l,
+
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW, sorting.getCreatedDate(),
+					1, sorting.getId(), 0l, incominCW.getLossWeight(), incominCW.getHarvestedWeight(),
+					incominCW.getSortedWeight(), 0l, sorting.getQtyHarvested(), sorting.getQtyRejected(),
+					sorting.getQtyNet(), 0l,
 					incominCW.getHarvestedWeight() + sorting.getQtyRejected() + sorting.getQtyNet(),
 					incominCW.getLossWeight() - sorting.getQtyRejected(),
 					incominCW.getSortedWeight() - sorting.getQtyNet(), "SORTING EDIT", null);
@@ -4796,7 +4815,7 @@ public class UtilService implements IUtilService {
 			if (incominCW.getSortedWeight() <= 0) {
 				incominCW.setIsDelete(1);
 			}
-			saveOrUpdate(incominCW);
+			saveOrUpdatecitywarehouse(incominCW);
 		}
 
 	}
@@ -4815,22 +4834,25 @@ public class UtilService implements IUtilService {
 	@Override
 	public void saveShipment(Shipment shipment) {
 		saveOrUpdate(shipment);
-		shipment.getShipmentDetails().stream().filter(uu-> uu.getShipment().getStatus() != null && !uu.getShipment().getStatus().equals(4)).forEach(uu -> {
-			CityWarehouse cityWarehouse = uu.getCityWarehouse();
-			if (cityWarehouse != null) {
+		shipment.getShipmentDetails().stream()
+				.filter(uu -> uu.getShipment().getStatus() != null && !uu.getShipment().getStatus().equals(4))
+				.forEach(uu -> {
+					CityWarehouse cityWarehouse = uu.getCityWarehouse();
+					if (cityWarehouse != null) {
 
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
-						shipment.getCreatedDate(), 2, shipment.getId(), 0l, cityWarehouse.getLossWeight(),
-						cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d,
-						Double.valueOf(uu.getPackingQty()), 0l, cityWarehouse.getHarvestedWeight(),
-						cityWarehouse.getLossWeight(),
-						cityWarehouse.getSortedWeight() - Double.valueOf(uu.getPackingQty()), "SHIPMENT", null);
-				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
-				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - Double.valueOf(uu.getPackingQty()));
-				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
-				update(cityWarehouse);
-			}
-		});
+						CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+								shipment.getCreatedDate(), 2, shipment.getId(), 0l, cityWarehouse.getLossWeight(),
+								cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d,
+								Double.valueOf(uu.getPackingQty()), 0l, cityWarehouse.getHarvestedWeight(),
+								cityWarehouse.getLossWeight(),
+								cityWarehouse.getSortedWeight() - Double.valueOf(uu.getPackingQty()), "SHIPMENT", null);
+						cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+						cityWarehouse
+								.setSortedWeight(cityWarehouse.getSortedWeight() - Double.valueOf(uu.getPackingQty()));
+						cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+						update(cityWarehouse);
+					}
+				});
 
 	}
 
@@ -4869,39 +4891,42 @@ public class UtilService implements IUtilService {
 	@Override
 	public void deleteIncoming(PackhouseIncoming packhouseIncoming) {
 
-		packhouseIncoming.getPackhouseIncomingDetails().stream().filter(uu -> uu.getPackhouseIncoming().getStatus() != null && !uu.getPackhouseIncoming().equals(4)).forEach(uu -> {
-			//CityWarehouse cityWarehouse = uu.getKey();
-			CityWarehouse cityWarehouse = (CityWarehouse) farmerService.findObjectById(
-					"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=?",
-					new Object[] { uu.getQrCodeId(),
-							CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(), uu.getPlanting().getId() });
+		packhouseIncoming.getPackhouseIncomingDetails().stream()
+				.filter(uu -> uu.getPackhouseIncoming().getStatus() != null && !uu.getPackhouseIncoming().equals(4))
+				.forEach(uu -> {
+					// CityWarehouse cityWarehouse = uu.getKey();
+					CityWarehouse cityWarehouse = (CityWarehouse) farmerService.findObjectById(
+							"from CityWarehouse ct where ct.qrCodeId=? and ct.stockType=? and ct.planting.id=?",
+							new Object[] { uu.getQrCodeId(), CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(),
+									uu.getPlanting().getId() });
 
-			CityWarehouse incominCW = new CityWarehouse();
-			incominCW = (CityWarehouse) farmerService.findObjectById(
-					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? and ct.qrCodeId=?",
-					new Object[] { uu.getPackhouseIncoming().getPackhouse().getId(), uu.getPackhouseIncoming().getBatchNo(),
-							CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(), uu.getPlanting().getId(),uu.getQrCodeId() });
-			if (incominCW != null) {
-				incominCW.setSortedWeight(0d);
-				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
-						packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
-						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
-						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
-						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
-						cityWarehouse.getSortedWeight() - uu.getTransferWeight(), "INCOMING", null);
-				//cityWarehouse.setLossWeight(0d);
-				incominCW.setLossWeight(0d);
-				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
-				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
-				incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
-				if (incominCW.getSortedWeight() <= 0) {
-					incominCW.setIsDelete(1);
-				}
+					CityWarehouse incominCW = new CityWarehouse();
+					incominCW = (CityWarehouse) farmerService.findObjectById(
+							"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+							new Object[] { uu.getPackhouseIncoming().getPackhouse().getId(),
+									uu.getPackhouseIncoming().getBatchNo(),
+									CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(), uu.getPlanting().getId() });
+					if (incominCW != null) {
+						incominCW.setSortedWeight(0d);
+						CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+								packhouseIncoming.getCreatedDate(), 2, packhouseIncoming.getId(), 0l,
+								cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
+								cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
+								cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+								cityWarehouse.getSortedWeight() - uu.getTransferWeight(), "INCOMING", null);
+						// cityWarehouse.setLossWeight(0d);
+						incominCW.setLossWeight(0d);
+						incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+						incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+						incominCW.setCreatedDate(packhouseIncoming.getOffLoadingDate());
+						if (incominCW.getSortedWeight() <= 0) {
+							incominCW.setIsDelete(1);
+						}
 
-			} 
-			saveOrUpdate(incominCW);
+					}
+					saveOrUpdatecitywarehouse(incominCW);
 
-		});
+				});
 	}
 
 	@Override
@@ -4927,7 +4952,7 @@ public class UtilService implements IUtilService {
 			CityWarehouse incominCW = new CityWarehouse();
 
 			incominCW = (CityWarehouse) farmerService.findObjectById(
-					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=?",
+					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
 					new Object[] { packing.getPackHouse().getId(), packing.getBatchNo(),
 							CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), cityWarehouse.getPlanting().getId() });
 			if (incominCW != null) {
@@ -5062,64 +5087,58 @@ public class UtilService implements IUtilService {
 		// TODO Auto-generated method stub
 		return utilDAO.listCustomerIdAndNameByExporter(id);
 	}
-	
+
 	@Override
 	public void processExporterLic(ExporterRegistration expReg, Map<String, String> pref) {
-		
-		ESESystem preference = findPrefernceById("1");
-		//String user = "username=" + preference.getPreferences().get(ESESystem.SMS_USER_NAME);
 
-		String auth_url =  pref.get(ESESystem.AUTH_URL);
-		String auth_username =  pref.get(ESESystem.AUTH_USERNAME);
+		ESESystem preference = findPrefernceById("1");
+		// String user = "username=" +
+		// preference.getPreferences().get(ESESystem.SMS_USER_NAME);
+
+		String auth_url = pref.get(ESESystem.AUTH_URL);
+		String auth_username = pref.get(ESESystem.AUTH_USERNAME);
 		String auth_password = pref.get(ESESystem.AUTH_PASSWORD);
-		String auth_req =  pref.get(ESESystem.AUTH_REQ);
-		String EXP_URL =  pref.get(ESESystem.EXP_URL);
+		String auth_req = pref.get(ESESystem.AUTH_REQ);
+		String EXP_URL = pref.get(ESESystem.EXP_URL);
 		String bytesEncoded = Base64.encode((auth_username + ":" + auth_password).getBytes());
 		String accss_token = null;
 		String Msg;
 		try {
-		OkHttpClient client = new OkHttpClient().newBuilder()
-				  .build();
-				MediaType mediaType = MediaType.parse("application/json");
-				RequestBody body = RequestBody.create(mediaType, auth_req);
-				Request request = new Request.Builder()
-				  .url(auth_url)
-				  .method("POST", body)
-				  .addHeader("Authorization", "Basic " + bytesEncoded)
-				  .addHeader("Content-Type", "application/json")
-				  .build();
-				Response response = client.newCall(request).execute();
-				
-				String respTk = response.body().string().replace("\\/", "/");
-				
-				JSONObject Jobject1 = new JSONObject(respTk);
-				if (Jobject1.has("token")) {
-					accss_token = String.valueOf(Jobject1.get("token"));
-				}
-		}catch (Exception e) {
+			OkHttpClient client = new OkHttpClient().newBuilder().build();
+			MediaType mediaType = MediaType.parse("application/json");
+			RequestBody body = RequestBody.create(mediaType, auth_req);
+			Request request = new Request.Builder().url(auth_url).method("POST", body)
+					.addHeader("Authorization", "Basic " + bytesEncoded).addHeader("Content-Type", "application/json")
+					.build();
+			Response response = client.newCall(request).execute();
+
+			String respTk = response.body().string().replace("\\/", "/");
+
+			JSONObject Jobject1 = new JSONObject(respTk);
+			if (Jobject1.has("token")) {
+				accss_token = String.valueOf(Jobject1.get("token"));
+			}
+		} catch (Exception e) {
 			LOGGER.error("Error....", e);
 		}
-		
-		//System.out.println(accss_token);
+
+		// System.out.println(accss_token);
 		if (accss_token != null && !StringUtil.isEmpty(accss_token)) {
 			try {
-				OkHttpClient client = new OkHttpClient().newBuilder()
-				  .build();
+				OkHttpClient client = new OkHttpClient().newBuilder().build();
 				MediaType mediaType = MediaType.parse("text/plain");
 				RequestBody body = RequestBody.create(mediaType, auth_req);
-				Request request = new Request.Builder()
-				  .url(EXP_URL+expReg.getRegNumber())
-				  .addHeader("Authorization", "Bearer "+accss_token)
-				  .build();
+				Request request = new Request.Builder().url(EXP_URL + expReg.getRegNumber())
+						.addHeader("Authorization", "Bearer " + accss_token).build();
 				Response response = client.newCall(request).execute();
 				String respTk = response.body().string().replace("\\/", "/");
-				
+
 				JSONObject Jobject = new JSONObject(respTk);
 				JSONObject Jobject1 = new JSONObject();
 				if (Jobject.has("success")) {
-					if(Jobject.get("success").equals(true)){
+					if (Jobject.get("success").equals(true)) {
 						Msg = String.valueOf(Jobject.get("message"));
-						
+
 						if (Jobject.has("data")) {
 							Jobject1 = (JSONObject) Jobject.get("data");
 							boolean vad = (boolean) Jobject1.get("valid");
@@ -5127,18 +5146,18 @@ public class UtilService implements IUtilService {
 							boolean exp = (boolean) Jobject1.get("expired");
 							String expDate = (String) Jobject1.get("expiryDate");
 							String licenseNo = (String) Jobject1.get("licenseNo");
-							if(vad == true && app == true && exp == false){
+							if (vad == true && app == true && exp == false) {
 								expReg.setStatusMsg(Msg);
 								expReg.setIsActive(1l);
-							}else if(vad == false){
+							} else if (vad == false) {
 								Msg = "KRA Pin is Invalid";
 								expReg.setStatusMsg(Msg);
 								expReg.setIsActive(0l);
-							}else if(app == false){
+							} else if (app == false) {
 								Msg = "KRA Pin is Not Approved";
 								expReg.setStatusMsg(Msg);
 								expReg.setIsActive(0l);
-							}else if(exp == true){
+							} else if (exp == true) {
 								Msg = "KRA Pin is Expired";
 								expReg.setStatusMsg(Msg);
 								expReg.setIsActive(0l);
@@ -5146,91 +5165,687 @@ public class UtilService implements IUtilService {
 							Date expDateFor = DateUtil.convertStringToDate(expDate, DateUtil.DATABASE_DATE_TIME);
 							expReg.setExpireDate(expDateFor);
 							expReg.setRefLetterNo(licenseNo != null && !StringUtil.isEmpty(licenseNo) ? licenseNo : "");
-						} 
-					}else{
+						}
+					} else {
 						Msg = String.valueOf(Jobject.get("message"));
 						expReg.setStatusMsg(Msg);
 						expReg.setIsActive(0l);
-						
+
 					}
-					update(expReg);
-				}else{
+					saveOrUpdate(expReg);
+				} else {
 					Msg = "Something Went Wrong, Please Try Again";
 					expReg.setStatusMsg(Msg);
 					expReg.setIsActive(0l);
-					update(expReg);
+					saveOrUpdate(expReg);
 				}
-			}catch (Exception e) {
+			} catch (Exception e) {
 				LOGGER.error("Error while Validate licence....", e);
 			}
-			
-		}else{
+
+		} else {
 			Msg = "Something Went Wrong, Please Try Again";
 			expReg.setStatusMsg(Msg);
 			expReg.setIsActive(0l);
-			update(expReg);
+			saveOrUpdate(expReg);
 		}
-		
-		if(expReg.getStatus()==1 && expReg.getIsActive()==1){
+
+		if (expReg.getStatus() == 1 && expReg.getIsActive() == 1) {
 			List<Shipment> sp = (List<Shipment>) farmerService.listObjectById(
 					"FROM Shipment f where f.status = 3 and f.packhouse.exporter.id=?",
 					new Object[] { Long.valueOf(expReg.getId()) });
 			List<Harvest> hs = (List<Harvest>) farmerService.listObjectById(
 					"FROM Harvest f where f.status = 3 and f.farmCrops.exporter.id=?",
 					new Object[] { Long.valueOf(expReg.getId()) });
-			if(sp != null){
-				processShipmentInactive(1,sp);
+			if (sp != null) {
+				processShipmentInactive(1, sp);
 			}
-			if(hs != null){
-				processHarvestInactive(1,hs);
+			if (hs != null) {
+				processHarvestInactive(1, hs);
 			}
 		}
 	}
-	
+
 	@Override
 	public List<Packhouse> listActivePackhouse() {
 		// TODO Auto-generated method stub
 
 		return utilDAO.listActivePackhouse();
 	}
-	
+
 	@Override
 	public Agent findAgentByProfileAndBranchIdActive(String agentId, String branchId) {
 
 		return utilDAO.findAgentByProfileAndBranchIdActive(agentId, branchId);
 	}
-	
+
 	@Override
 	public void processShipmentandharvest(ExporterRegistration expReg) {
 
 		utilDAO.processShipmentandharvest(expReg);
 	}
-	@Override
-	public void processShipmentInactive(Integer long1,List<Shipment> expReg) {
 
-		utilDAO.processShipmentInactive(long1,expReg);
-	}
-	
 	@Override
-	public void processHarvestInactive(Integer long1,List<Harvest> long2) {
+	public void processShipmentInactive(Integer long1, List<Shipment> expReg) {
 
-		utilDAO.processHarvestInactive(long1,long2);
+		utilDAO.processShipmentInactive(long1, expReg);
 	}
-	
+
+	@Override
+	public void processHarvestInactive(Integer long1, List<Harvest> long2) {
+
+		utilDAO.processHarvestInactive(long1, long2);
+	}
+
 	@Override
 	public Planting findPlantingById(Long id) {
 		// TODO Auto-generated method stub
 		return utilDAO.findPlantingById(id);
 	}
-	
+
 	@Override
 	public String findExporterNameById(String table, String id) {
 		// TODO Auto-generated method stub
 		return utilDAO.findExporterNameById(table, id);
 	}
-	
+
 	@Override
 	public List<Planting> listPlantingByFarmCropsId(Long farmid) {
 		return utilDAO.listPlantingByFarmCropsId(farmid);
 	}
+
+	@Override
+	public ProductTransfer findProductTransferById(Long id) {
+		return utilDAO.findProductTransferById(id);
+	}
+
+	@Override
+	public List<Packhouse> listOfPackhouseByExporterId(Long exporterId) {
+		return utilDAO.listOfPackhouseByExporterId(exporterId);
+	}
+
+	@Override
+	public List<PackhouseIncoming> listOfIncomingShipmentbasedOnPackhouse(long packHouseId) {
+		return utilDAO.listOfIncomingShipmentbasedOnPackhouse(packHouseId);
+	}
+
+	@Override
+	public List<ProductTransfer> listOfProductTransfer() {
+		return utilDAO.listOfProductTransfer();
+	}
+
+	@Override
+	public void saveProductTransfer(ProductTransfer productTransfer) {
+		saveOrUpdate(productTransfer);
+		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
+
+		productTransfer.getProductTransferDetails().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = uu.getCtt();
+
+			if (cityWarehouse != null) {
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						productTransfer.getCreatedDate(), 2, productTransfer.getId(), 0l, cityWarehouse.getLossWeight(),
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d,
+						uu.getTransferredWeight(), 0l, cityWarehouse.getHarvestedWeight(),
+						cityWarehouse.getLossWeight(), cityWarehouse.getSortedWeight() - uu.getTransferredWeight(),
+						"PRODUCT_TRANSFER", cityWarehouse.getBatchNo());
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - uu.getTransferredWeight());
+
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				update(cityWarehouse);
+
+			}
+
+			CityWarehouse productTransferCW = new CityWarehouse();
+			if (ctmap.containsKey(uu.getPlanting().getId())) {
+				productTransferCW = ctmap.get(uu.getPlanting().getId());
+				productTransferCW.setSortedWeight(productTransferCW.getSortedWeight() + uu.getTransferredWeight());
+				productTransferCW.setLossWeight(productTransferCW.getLossWeight() + 0d);
+			} else {
+
+				productTransferCW.setLossWeight(0d);
+				productTransferCW.setSortedWeight(uu.getTransferredWeight());
+				productTransferCW.setLossWeight(0d);
+				productTransferCW.setHarvestedWeight(0d);
+
+				productTransferCW.setPlanting(uu.getPlanting());
+				productTransferCW.setFarmcrops(uu.getPlanting().getFarmCrops());
+
+				productTransferCW.setPackBatch(uu.getBatchNo());
+				productTransferCW.setCreatedDate(productTransfer.getDate());
+				productTransferCW.setCityWarehouseDetails(new HashSet<>());
+				productTransferCW.setFarmcrops(uu.getPlanting().getFarmCrops());
+				productTransferCW.setPlanting(uu.getPlanting());
+				productTransferCW.setCreatedUser(productTransfer.getCreatedUser());
+				// productTransferCW.setCoOperative(productTransfer.getTransferFrom());
+				productTransferCW.setCoOperative(productTransfer.getTransferTo());
+				productTransferCW.setBranchId(productTransfer.getBranchId());
+				productTransferCW.setStockType(CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal());
+				productTransferCW.setBatchNo(productTransfer.getBatchNo());
+				productTransferCW.setBranchId(productTransfer.getBranchId());
+				productTransferCW.setIsDelete(0);
+			}
+
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, productTransferCW,
+					productTransfer.getCreatedDate(), 2, productTransfer.getId(), 0l, productTransferCW.getLossWeight(),
+					productTransferCW.getHarvestedWeight(), productTransferCW.getSortedWeight(), 0l, 0d, 0d,
+					uu.getTransferredWeight(), 0l, productTransferCW.getHarvestedWeight(),
+					productTransferCW.getLossWeight(), productTransferCW.getSortedWeight() + uu.getTransferredWeight(),
+					"INCOMING", null);
+			productTransferCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+			productTransferCW.setRevisionNo(DateUtil.getRevisionNumber());
+			ctmap.put(uu.getPlanting().getId(), productTransferCW);
+		});
+		ctmap.entrySet().forEach(uu -> {
+			saveOrUpdate(uu.getValue());
+		});
+	}
+
+	@Override
+	public void updateProductTransfer(ProductTransfer productTransfer, Map<CityWarehouse, Double> existingstock,
+			Set<ProductTransferDetail> pdSet) {
+
+		saveOrUpdate(productTransfer);
+		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
+
+		existingstock.entrySet().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = uu.getKey();
+			if (cityWarehouse != null) {
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						productTransfer.getCreatedDate(), 2, productTransfer.getId(), 0l, cityWarehouse.getLossWeight(),
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(),
+						0l, cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+						cityWarehouse.getSortedWeight() - uu.getValue(), "INCOMING REDUCTION", null);
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - (uu.getValue()));
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				update(cityWarehouse);
+			}
+
+			/*
+			 * CityWarehouse productTransferCW = (CityWarehouse)
+			 * farmerService.findObjectById(
+			 * "from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0"
+			 * , new Object[] { productTransfer.getTransferFrom().getId(),
+			 * productTransfer.getBatchNo(),
+			 * CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal(),
+			 * uu.getKey().getPlanting().getId() });
+			 */
+			CityWarehouse productTransferCW = (CityWarehouse) farmerService.findObjectById(
+					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+					new Object[] { productTransfer.getTransferTo().getId(), productTransfer.getBatchNo(),
+							CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal(), uu.getKey().getPlanting().getId() });
+			if (productTransferCW != null) {
+				productTransferCW.setSortedWeight(0d);
+				productTransferCW.setLossWeight(0d);
+				ctmap.put(productTransferCW.getPlanting().getId(), productTransferCW);
+			}
+
+		});
+		Map<Planting, Double> stockwe = pdSet.stream().collect(Collectors.groupingBy(ProductTransferDetail::getPlanting,
+				Collectors.summingDouble(ProductTransferDetail::getTransferredWeight)));
+		stockwe.entrySet().stream().forEach(str -> {
+			CityWarehouse productTransferCW = new CityWarehouse();
+			if (ctmap.containsKey(str.getKey().getId())) {
+				productTransferCW = ctmap.get(str.getKey().getId());
+			} else {
+				/*
+				 * productTransferCW = (CityWarehouse)
+				 * farmerService.findObjectById(
+				 * "from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0"
+				 * , new Object[] { productTransfer.getTransferFrom().getId(),
+				 * productTransfer.getBatchNo(),
+				 * CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal(),
+				 * str.getKey().getId() });
+				 */
+				productTransferCW = (CityWarehouse) farmerService.findObjectById(
+						"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+						new Object[] { productTransfer.getTransferTo().getId(), productTransfer.getBatchNo(),
+								CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal(), str.getKey().getId() });
+			}
+
+			if (productTransferCW != null) {
+				productTransferCW.setSortedWeight(productTransferCW.getSortedWeight() + str.getValue());
+				productTransferCW.setLossWeight(productTransferCW.getLossWeight() + 0d);
+
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, productTransferCW,
+						productTransfer.getCreatedDate(), 2, productTransfer.getId(), 0l,
+						productTransferCW.getLossWeight(), productTransferCW.getHarvestedWeight(),
+						productTransferCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
+						productTransferCW.getHarvestedWeight(), productTransferCW.getLossWeight() + 0d,
+						productTransferCW.getSortedWeight() + str.getValue(), "INCOMING", null);
+				productTransferCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+				productTransferCW.setRevisionNo(DateUtil.getRevisionNumber());
+				if (productTransferCW.getSortedWeight() <= 0) {
+					productTransferCW.setIsDelete(1);
+				}
+			} else {
+				productTransferCW = new CityWarehouse();
+				productTransferCW.setLossWeight(0d);
+				productTransferCW.setSortedWeight(0d);
+				productTransferCW.setFarmcrops(str.getKey().getFarmCrops());
+				productTransferCW.setPlanting(str.getKey());
+				productTransferCW.setSortedWeight(productTransferCW.getSortedWeight() + str.getValue());
+				// incominCW.setLossWeight(rejwt);
+				productTransferCW.setLossWeight(0d);
+				productTransferCW.setHarvestedWeight(0d);
+				productTransferCW.setCreatedDate(productTransfer.getDate());
+				productTransferCW.setCityWarehouseDetails(new HashSet<>());
+				productTransferCW.setCreatedUser(productTransfer.getCreatedUser());
+				// productTransferCW.setCoOperative(productTransfer.getTransferFrom());
+				productTransferCW.setCoOperative(productTransfer.getTransferTo());
+				productTransferCW.setBranchId(productTransfer.getBranchId());
+				productTransferCW.setStockType(CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal());
+				productTransferCW.setBatchNo(productTransfer.getBatchNo());
+				productTransferCW.setIsDelete(0);
+
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, productTransferCW,
+						productTransfer.getCreatedDate(), 2, productTransfer.getId(), 0l,
+						productTransferCW.getLossWeight(), productTransferCW.getHarvestedWeight(),
+						productTransferCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
+						productTransferCW.getHarvestedWeight(), productTransferCW.getLossWeight() + 0d,
+						productTransferCW.getSortedWeight() + str.getValue(), "INCOMING", null);
+				productTransferCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+				productTransferCW.setRevisionNo(DateUtil.getRevisionNumber());
+			}
+
+			ctmap.put(productTransferCW.getPlanting().getId(), productTransferCW);
+		});
+		ctmap.entrySet().forEach(uu -> {
+			if (uu.getValue().getSortedWeight() <= 0) {
+				uu.getValue().setIsDelete(1);
+			}
+			// saveOrUpdate(uu.getValue());
+			saveOrUpdatecitywarehouse(uu.getValue());
+		});
+
+	}
+
+	@Override
+	public void deleteProductTransfer(ProductTransfer productTransfer, Map<CityWarehouse, Double> existingstock,
+			Set<ProductTransferDetail> pdSet) {
+		saveOrUpdate(productTransfer);
+		Map<String, CityWarehouse> ctmap = new HashMap<String, CityWarehouse>();
+		existingstock.entrySet().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = uu.getKey();
+			if (cityWarehouse != null) {
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						productTransfer.getCreatedDate(), 2, productTransfer.getId(), 0l, cityWarehouse.getLossWeight(),
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(),
+						0l, cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+						cityWarehouse.getSortedWeight() - (uu.getValue() + cityWarehouse.getLossWeight()),
+						"INCOMING REDUCTION", null);
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - (uu.getValue()));
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				// update(cityWarehouse);
+				saveOrUpdatecitywarehouse(cityWarehouse);
+			}
+
+			/*
+			 * CityWarehouse productTransferCW = (CityWarehouse)
+			 * farmerService.findObjectById(
+			 * "from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0"
+			 * , new Object[] { productTransfer.getTransferFrom().getId(),
+			 * productTransfer.getBatchNo(),
+			 * CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal(),
+			 * uu.getKey().getPlanting().getId() });
+			 */
+			CityWarehouse productTransferCW = (CityWarehouse) farmerService.findObjectById(
+					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+					new Object[] { productTransfer.getTransferTo().getId(), productTransfer.getBatchNo(),
+							CityWarehouse.Stock_type.PRODUCT_TRANSFER.ordinal(), uu.getKey().getPlanting().getId() });
+
+			if (productTransferCW != null) {
+				productTransferCW.setSortedWeight(0d);
+				productTransferCW.setLossWeight(0d);
+				ctmap.put(productTransferCW.getQrCodeId(), productTransferCW);
+			}
+		});
+		ctmap.entrySet().forEach(uu -> {
+			if (uu.getValue().getSortedWeight() <= 0) {
+				uu.getValue().setIsDelete(1);
+			}
+			// saveOrUpdate(uu.getValue());
+			saveOrUpdatecitywarehouse(uu.getValue());
+		});
+	}
+
+	@Override
+	public void saveProductReception(ProductTransfer productReception) {
+		saveOrUpdate(productReception);
+		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
+
+		productReception.getProductTransferDetails().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = uu.getCtt();
+
+			if (cityWarehouse != null) {
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						productReception.getCreatedDate(), 2, productReception.getId(), 0l,
+						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
+						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+						cityWarehouse.getSortedWeight() - uu.getReceivedWeight(), "PRODUCT_RECEPTION",
+						cityWarehouse.getBatchNo());
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+
+				// trying
+				/*
+				 * cityWarehouse.setLossWeight(uu.getReceivedWeight());
+				 * cityWarehouse.setHarvestedWeight(cityWarehouse.
+				 * getSortedWeight() - uu.getReceivedWeight());
+				 * cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight()
+				 * - uu.getReceivedWeight());
+				 */
+				// end
+
+				cityWarehouse.setLossWeight(uu.getReceivedWeight());
+				cityWarehouse.setSortedWeight(0d);
+
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				update(cityWarehouse);
+
+			}
+
+			CityWarehouse incominCW = new CityWarehouse();
+			if (ctmap.containsKey(uu.getPlanting().getId())) {
+				incominCW = ctmap.get(uu.getPlanting().getId());
+				incominCW.setSortedWeight(incominCW.getSortedWeight() + uu.getReceivedWeight());
+				incominCW.setLossWeight(incominCW.getSortedWeight() - uu.getReceivedWeight());
+
+			} else {
+
+				incominCW.setLossWeight(0d);
+				incominCW.setSortedWeight(0d);
+				incominCW.setSortedWeight(uu.getReceivedWeight());
+				incominCW.setLossWeight(uu.getTransferredWeight() - uu.getReceivedWeight());
+				incominCW.setHarvestedWeight(0d);
+				// incominCW.setQrCodeId(uu.getQrCodeId());
+				incominCW.setPackBatch(uu.getBatchNo());
+				incominCW.setCreatedDate(productReception.getDate());
+				incominCW.setCityWarehouseDetails(new HashSet<>());
+				incominCW.setFarmcrops(uu.getPlanting().getFarmCrops());
+				incominCW.setPlanting(uu.getPlanting());
+				incominCW.setCreatedUser(productReception.getCreatedUser());
+				// incominCW.setCoOperative(productReception.getTransferFrom());
+				incominCW.setCoOperative(productReception.getTransferTo());
+				incominCW.setBranchId(productReception.getBranchId());
+				incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal());
+				incominCW.setBatchNo(productReception.getBatchNo());
+				incominCW.setBranchId(productReception.getBranchId());
+				incominCW.setQrCodeId(String.valueOf(DateUtil.getRevisionNumber()));
+				incominCW.setIsDelete(0);
+			}
+
+			CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+					productReception.getCreatedDate(), 2, productReception.getId(), 0l, incominCW.getLossWeight(),
+					incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, uu.getReceivedWeight(), 0l,
+					incominCW.getHarvestedWeight(), incominCW.getLossWeight(),
+					incominCW.getSortedWeight() + uu.getReceivedWeight(), "INCOMING", null);
+			incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+			incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+			ctmap.put(uu.getPlanting().getId(), incominCW);
+		});
+
+		ctmap.entrySet().forEach(uu -> {
+			saveOrUpdate(uu.getValue());
+		});
+
+	}
+
+	@Override
+	public void updateProductReception(ProductTransfer productReception, Map<CityWarehouse, Double> existingstock,
+			Set<ProductTransferDetail> pdSet) {
+
+		saveOrUpdate(productReception);
+		Map<Long, CityWarehouse> ctmap = new HashMap<Long, CityWarehouse>();
+		Map<Planting, Double> stockweas = pdSet.stream()
+				.collect(Collectors.groupingBy(ProductTransferDetail::getPlanting,
+						Collectors.summingDouble(ProductTransferDetail::getReceivedWeight)));
+
+		existingstock.entrySet().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = uu.getKey();
+			if (cityWarehouse != null) {
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						productReception.getCreatedDate(), 2, productReception.getId(), 0l,
+						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
+						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+						cityWarehouse.getSortedWeight() - uu.getValue(), "PRODUCT TRASNFER REDUCTION", null);
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+
+				cityWarehouse.setLossWeight(uu.getValue());
+				cityWarehouse.setSortedWeight(0d);
+
+				// trying
+				/*
+				 * cityWarehouse.setHarvestedWeight(cityWarehouse.
+				 * getSortedWeight() - (uu.getValue()));
+				 * cityWarehouse.setLossWeight(cityWarehouse.getSortedWeight()
+				 * -uu.getValue());
+				 * cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight()
+				 * - (uu.getValue()));
+				 */
+				// end
+
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				update(cityWarehouse);
+			}
+
+			CityWarehouse incominCW = (CityWarehouse) farmerService.findObjectById(
+					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+					new Object[] { productReception.getTransferTo().getId(), productReception.getBatchNo(),
+							CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(), uu.getKey().getPlanting().getId() });
+			if (incominCW != null) {
+				incominCW.setSortedWeight(0d);
+				incominCW.setLossWeight(0d);
+				ctmap.put(incominCW.getPlanting().getId(), incominCW);
+			}
+
+		});
+		Map<Planting, Double> stockwe = pdSet.stream().collect(Collectors.groupingBy(ProductTransferDetail::getPlanting,
+				Collectors.summingDouble(ProductTransferDetail::getReceivedWeight)));
+
+		Map<Planting, Double> rejQt = pdSet.stream().collect(Collectors.groupingBy(ProductTransferDetail::getPlanting,
+				Collectors.summingDouble(ProductTransferDetail::getTransferredWeight)));
+
+		stockwe.entrySet().stream().forEach(str -> {
+			Double rejwt = rejQt.containsKey(str.getKey()) ? rejQt.get(str.getKey()) : 0d;
+			CityWarehouse incominCW = new CityWarehouse();
+			if (ctmap.containsKey(str.getKey().getId())) {
+				incominCW = ctmap.get(str.getKey().getId());
+			} else {
+				incominCW = (CityWarehouse) farmerService.findObjectById(
+						"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+						new Object[] { productReception.getTransferFrom().getId(), productReception.getBatchNo(),
+								CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(), str.getKey().getId() });
+			}
+
+			if (incominCW != null) {
+				incominCW.setSortedWeight(incominCW.getSortedWeight() + str.getValue());
+				incominCW.setLossWeight(incominCW.getLossWeight() + rejwt);
+
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+						productReception.getCreatedDate(), 2, productReception.getId(), 0l, incominCW.getLossWeight(),
+						incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
+						incominCW.getHarvestedWeight(), incominCW.getLossWeight() + rejwt,
+						incominCW.getSortedWeight() + str.getValue(), "PRODUCT_RECEPTION", null);
+				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+				if (incominCW.getSortedWeight() <= 0) {
+					incominCW.setIsDelete(1);
+				}
+
+			} else {
+				incominCW = new CityWarehouse();
+				incominCW.setLossWeight(0d);
+				incominCW.setSortedWeight(0d);
+
+				incominCW.setFarmcrops(str.getKey().getFarmCrops());
+				incominCW.setPlanting(str.getKey());
+				incominCW.setSortedWeight(incominCW.getSortedWeight() + str.getValue());
+				incominCW.setLossWeight(rejwt);
+				incominCW.setHarvestedWeight(0d);
+				incominCW.setCreatedDate(productReception.getDate());
+				incominCW.setCityWarehouseDetails(new HashSet<>());
+				incominCW.setCreatedUser(productReception.getCreatedUser());
+				// incominCW.setCoOperative(productReception.getTransferFrom());
+				incominCW.setCoOperative(productReception.getTransferTo());
+				incominCW.setBranchId(productReception.getBranchId());
+				incominCW.setStockType(CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal());
+				incominCW.setBatchNo(productReception.getBatchNo());
+				incominCW.setIsDelete(0);
+
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, incominCW,
+						productReception.getCreatedDate(), 2, productReception.getId(), 0l, incominCW.getLossWeight(),
+						incominCW.getHarvestedWeight(), incominCW.getSortedWeight(), 0l, 0d, 0d, str.getValue(), 0l,
+						incominCW.getHarvestedWeight(), incominCW.getLossWeight() + rejwt,
+						incominCW.getSortedWeight() + str.getValue(), "PRODUCT_RECEPTION", null);
+				incominCW.getCityWarehouseDetails().add(cityWarehouseDetail);
+				incominCW.setRevisionNo(DateUtil.getRevisionNumber());
+			}
+
+			ctmap.put(incominCW.getPlanting().getId(), incominCW);
+
+		});
+
+		ctmap.entrySet().forEach(uu -> {
+			if (uu.getValue().getSortedWeight() <= 0) {
+				uu.getValue().setIsDelete(1);
+			}
+			saveOrUpdate(uu.getValue());
+		});
+
+	}
+
+	@Override
+	public void deleteProductReception(ProductTransfer productReception, Map<CityWarehouse, Double> existingstock,
+			Set<ProductTransferDetail> ptDetail) {
+
+		saveOrUpdate(productReception);
+		Map<String, CityWarehouse> ctmap = new HashMap<String, CityWarehouse>();
+
+		existingstock.entrySet().stream().forEach(uu -> {
+			CityWarehouse cityWarehouse = uu.getKey();
+			if (cityWarehouse != null) {
+				CityWarehouseDetail cityWarehouseDetail = new CityWarehouseDetail(null, cityWarehouse,
+						productReception.getCreatedDate(), 2, productReception.getId(), 0l,
+						cityWarehouse.getLossWeight(), cityWarehouse.getHarvestedWeight(),
+						cityWarehouse.getSortedWeight(), 0l, 0d, 0d, uu.getValue(), 0l,
+						cityWarehouse.getHarvestedWeight(), cityWarehouse.getLossWeight(),
+						cityWarehouse.getSortedWeight() - (uu.getValue() + cityWarehouse.getLossWeight()),
+						"INCOMING REDUCTION", null);
+				cityWarehouse.getCityWarehouseDetails().add(cityWarehouseDetail);
+				cityWarehouse.setSortedWeight(cityWarehouse.getSortedWeight() - (uu.getValue()));
+				cityWarehouse.setRevisionNo(DateUtil.getRevisionNumber());
+				update(cityWarehouse);
+			}
+
+			CityWarehouse incominCW = (CityWarehouse) farmerService.findObjectById(
+					"from CityWarehouse ct where ct.coOperative.id=? and ct.batchNo=? and ct.stockType=? and ct.planting.id=? AND ct.isDelete=0",
+					new Object[] { productReception.getTransferTo().getId(), productReception.getBatchNo(),
+							CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal(), uu.getKey().getPlanting().getId() });
+
+			if (incominCW != null) {
+				incominCW.setSortedWeight(0d);
+				incominCW.setLossWeight(0d);
+				ctmap.put(incominCW.getQrCodeId(), incominCW);
+			}
+		});
+		ctmap.entrySet().forEach(uu -> {
+			if (uu.getValue().getSortedWeight() <= 0) {
+				uu.getValue().setIsDelete(1);
+			}
+			saveOrUpdate(uu.getValue());
+		});
+	}
+
+	public List<ProductTransfer> listOfProductTransferByCityWareHouseBatches(List<String> batches) {
+		return utilDAO.listOfProductTransferByCityWareHouseBatches(batches);
+	}
+
+	@Override
+	public List<Object[]> getBuyerCountry(String id) {
+		// TODO Auto-generated method stub
+		return utilDAO.getBuyerCountry(id);
+	}
+
+	@Override
+	public List<Object[]> getScoutingRecomm(String plantingId) {
+		// TODO Auto-generated method stub
+		return utilDAO.getScoutingRecomm(plantingId);
+	}
+
+	@Override
+	public <T> List<T> getAuditRecords(String expRegis, Long id) {
+		// TODO Auto-generated method stub
+		return utilDAO.getAuditRecords(expRegis, id);
+	}
+
+	@Override
+	public Municipality findCityByVillageId(Long valueOf) {
+		// TODO Auto-generated method stub
+		return utilDAO.findCityByVillageId(valueOf);
+	}
+
+	@Override
+	public Locality findLocalityByVillageId(Long valueOf) {
+		// TODO Auto-generated method stub
+		return utilDAO.findLocalityByVillageId(valueOf);
+	}
+
+	@Override
+	public State findStateByVillageId(Long valueOf) {
+		// TODO Auto-generated method stub
+		return utilDAO.findStateByVillageId(valueOf);
+	}
+
+	@Override
+	public Country findCountryByVillageId(Long valueOf) {
+		// TODO Auto-generated method stub
+		return utilDAO.findCountryByVillageId(valueOf);
+	}
+
+	@Override
+	public Locality findLocalityByCityId(Long valueOf) {
+		// TODO Auto-generated method stub
+		return utilDAO.findLocalityByCityId(valueOf);
+	}
+
+	@Override
+	public State findStateByCityId(Long valueOf) {
+		// TODO Auto-generated method stub
+		return utilDAO.findStateByCityId(valueOf);
+	}
+
+	@Override
+	public Country findCountryByCityId(Long valueOf) {
+		// TODO Auto-generated method stub
+		return utilDAO.findCountryByCityId(valueOf);
+	}
+
+	@Override
+	public String findDataByTableFieldById(String table, String code, String field) {
+		// TODO Auto-generated method stub
+		return utilDAO.findDataByTableFieldById(table, code, field);
+	}
+
+	@Override
+	public String findObjectIdFromTableByFieldIdAndRevId(String table, String fieldValue, String audId) {
+		// TODO Auto-generated method stub
+		return utilDAO.findObjectIdFromTableByFieldIdAndRevId(table, fieldValue, audId);
+	}
+
+	@Override
+	public <T> List<T> getAuditRecordsWithRelations(String string, List<String> s, Long id) {
+		// TODO Auto-generated method stub
+		return utilDAO.getAuditRecordsWithRelations(string, s, id);
+	}
+
+	@Override
+	public void saveOrUpdatecitywarehouse(CityWarehouse obj) {
+		utilDAO.saveOrUpdatecitywarehouse(obj);
+	}
+
 }

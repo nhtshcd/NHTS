@@ -1501,10 +1501,10 @@ public class FarmerService implements IFarmerService {
 
 	@Override
 	public List<Object[]> executeChartQuery(String chartQuery, int dateFilter, String dateField, String sDate,
-			String eDate, Long id, String exporterField, String groupField, String orderField) {
+			String eDate, Long id, String exporterField, String groupField, String orderField,int i) {
 		// TODO Auto-generated method stub
 		return farmerDAO.executeChartQuery(chartQuery, dateFilter, dateField, sDate, eDate, id, exporterField,
-				groupField, orderField);
+				groupField, orderField,i);
 	}
 
 	@Override
@@ -1517,5 +1517,37 @@ public class FarmerService implements IFarmerService {
 	public List<ProcurementVariety> findProcurementVarietyByIds(List<Long> convertStringList) {
 		return farmerDAO.findProcurementVarietyByIds(convertStringList);
 	}
+	
+	@Override
+	public Date findMaximunDateFromSprayingByFarmCropsId(Long farmcropsId) {
+		// TODO Auto-generated method stub
+		return farmerDAO.findMaximunDateFromSprayingByFarmCropsId(farmcropsId);
+	}
+
+	@Override
+	public List<Object[]> findListOfScoutingByplantingIds(List<Long> fcids) {
+		// TODO Auto-generated method stub
+		return farmerDAO.findListOfScoutingByplantingIds(fcids);
+	}
+
+	@Override
+	public List<Object[]> getValueListByQuery(String query, Object[] param, String branchId) {
+		// TODO Auto-generated method stub
+		return farmerDAO.getValueListByQuery(query,param,branchId);
+	}
+	
+	@Override
+	public List<Object[]> getCatalogueAuditValueByQuery(Long param) {
+		// TODO Auto-generated method stub
+		return farmerDAO.getCatalogueAuditValueByQuery(param);
+	}
+	
+	@Override
+	public List<Object[]> findProcurementProductDetailById(Long param,String crop) {
+		// TODO Auto-generated method stub
+		return farmerDAO.findProcurementProductDetailById(param,crop);
+	}
+	
+	
 
 }

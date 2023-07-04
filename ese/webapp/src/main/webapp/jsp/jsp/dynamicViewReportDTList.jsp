@@ -153,7 +153,7 @@
 			
 			$(colNames.split("%")).each(function(k, val) {
 			 
-				var accestyp ='16,17,18,19,28,23,9,31,39,38,40';
+				var accestyp ='16,17,18,19,28,23,9,31,39,38,40,76';
 				var dataType ='6';
 				if (!isEmpty(val) ) {
 					var cols = val.split("#");
@@ -531,6 +531,62 @@ function printContract(val){
 						type : "POST",
 						async : true,
 						url : "generalPop_methodQuery.action",
+						data : {
+							query : query,
+							param : arg,
+							id : typez
+						},
+						success : function(result) {
+							var jsonValue = $.parseJSON(result);
+							$.each(jsonValue, function(k, value) {
+								var tr = $("<tr/>");
+								$.each(value, function(a, val) {
+									var td = $("<td/>");
+									td.text(val);
+									tr.append(td);
+								});
+								$("#detailDataBody").append(tr);
+							});
+						}
+					});
+					document.getElementById("enableDetailPopup").click();
+				} catch (e) {
+					alert(e);
+				}
+
+			}
+			function detailPopup1(img) {
+				var ids = img;
+				$("#detailDataTitle").empty();
+				$("#detailDataHead").empty();
+
+				$("#detailDataBody").empty();
+				if (ids != '') {
+					var val = ids;
+					var arg = val.split("~")[0].trim();
+					var query = val.split("~")[2].trim();
+					var head = val.split("~")[1].trim();
+					var headArr = head.split('~');
+					$.each(headArr, function(k, value) {
+						var tr = $("<tr/>");
+						var headArrs = value.split(',');
+						$.each(headArrs, function(a, val) {
+							
+							var td = $("<td/>");
+							td.text(val);
+							tr.append(td);
+
+						});
+						$("#detailDataHead").append(tr);
+					});
+					var title = val.split("~")[3].trim();
+					$("#detailDataTitle").append(title);
+				}
+				try {
+					$.ajax({
+						type : "POST",
+						async : true,
+						url : "generalPop_methodQueryDetail.action",
 						data : {
 							query : query,
 							param : arg,

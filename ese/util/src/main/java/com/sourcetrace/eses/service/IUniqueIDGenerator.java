@@ -76,6 +76,8 @@ public interface IUniqueIDGenerator {
 	public static final String PRODUCT_ENROLL_CHAR = "CR";
 	public static final String VARIETY_CHAR = "V";
 	public static final String GRADE_CHAR = "G";
+	public static final String PT_CHAR = "PT";
+	public static final String PR_CHAR = "PR";
 	public static final String SUB_CATEGORY_CHAR = "FP";
 	public static final String PRODUCT_CHAR = "P";
 	public static final String SEASON_CHAR = "HS";
@@ -604,4 +606,8 @@ public interface IUniqueIDGenerator {
 	public String getProcurementVarietyIdSeq();
 
 	public String getProcurementGradeIdSeq();
+	
+	public String getProductTransferIdSeq();
+	
+	public String getProductReceptionIdSeq();
 }

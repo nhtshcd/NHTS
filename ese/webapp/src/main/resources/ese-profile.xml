@@ -665,6 +665,31 @@
 				<param name="parse">true</param> <param name="encode">false</param> </result> -->
 		</action>
 		
+		<action name="productTransfer_*" method="{1}" class="productTransferAction">
+			<result name="success">/jsp/jsp/productTransfer.jsp</result>
+			<result name="input">/jsp/jsp/productTransfer.jsp</result>
+			<result name="update">/jsp/jsp/productTransfer.jsp</result>
+			<result name="detail">/jsp/jsp/productTransferDetails.jsp</result>
+			<result name="redirect" type="redirect">
+				<param name="location">${redirectContent}</param>
+				<param name="parse">true</param>
+				<param name="encode">false</param>
+			</result>
+		</action>
+		
+		<action name="productReception_*" method="{1}" class="productReceptionAction">
+			<result name="success">/jsp/jsp/productReception.jsp</result>
+			<result name="input">/jsp/jsp/productReception.jsp</result>
+			<result name="update">/jsp/jsp/productReception.jsp</result>
+			<result name="detail">/jsp/jsp/productReceptionDetails.jsp</result>
+			<result name="redirect" type="redirect">
+				<param name="location">${redirectContent}</param>
+				<param name="parse">true</param>
+				<param name="encode">false</param>
+			</result>
+		</action>
+		
+		
 	</package>
 	
 	

@@ -25,12 +25,13 @@ import org.hibernate.annotations.Where;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "scouting_details")
 @Getter
 @Setter
-
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class ScoutingDetails implements java.io.Serializable  {
 
 	private static final long serialVersionUID = 1L;

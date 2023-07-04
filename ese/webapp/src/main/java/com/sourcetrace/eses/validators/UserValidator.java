@@ -43,11 +43,18 @@ public class UserValidator implements IValidator {
         String currentBrnch=(String) httpRequest.getSession().getAttribute(ISecurityFilter.CURRENT_BRANCH);
 
         User aUser = (User) user;
+        if(aUser!=null && aUser.getId()!=null){
+        User findUser = utilDAO.findUser(aUser.getId());
+        if(findUser.getAgroChDealer()!=null){
+        	aUser.setAgroChDealer(findUser.getAgroChDealer());
+        }
+        }
         Map<String, String> errorCodes = new LinkedHashMap<String, String>();
         if (logger.isInfoEnabled()) {
             logger.info("validate(Object) " + user.toString());
         }
-        String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,10000000}$";
+        //String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,10000000}$";
+        String PASSWORD_PATTERN = "^(?=.*).{%%min%%,10000000}$";
         ESESystem es =  utilDAO.findPrefernceByOrganisationId(currentBrnch);
 			PASSWORD_PATTERN = PASSWORD_PATTERN.replace("%%min%%",
 					es.getPreferences().get(ESESystem.PASSWORD_MIN_LENGTH).toString());
@@ -179,11 +186,10 @@ public class UserValidator implements IValidator {
 
         if (aUser.getRole()==null || StringUtil.isEmpty(aUser.getRole().getId()) || aUser.getRole().getId() == 0) {
             errorCodes.put("empty.role.id", "empty.role");
-        }else if(aUser.getRole()!=null && Arrays.asList(1,2).contains(aUser.getRole().getType()) && aUser.getAgroChDealer()<=0){
+        }else if(aUser.getRole()!=null && Arrays.asList(1,2).contains(aUser.getRole().getType()) && aUser.getAgroChDealer()==null){
         	 errorCodes.put("empty.exporter", "empty.exporter");
         }
 
-       
 
         return errorCodes;
     }

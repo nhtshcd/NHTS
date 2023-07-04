@@ -1,8 +1,8 @@
 package com.sourcetrace.eses.dao;
 
-import java.util.Date;
-import java.util.List;
+import java.util.*;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Component;
 
 import com.sourcetrace.eses.entity.AccessLog;
@@ -53,6 +53,7 @@ import com.sourcetrace.eses.entity.ProcurementGrade;
 import com.sourcetrace.eses.entity.ProcurementProduct;
 import com.sourcetrace.eses.entity.ProcurementVariety;
 import com.sourcetrace.eses.entity.Product;
+import com.sourcetrace.eses.entity.ProductTransfer;
 import com.sourcetrace.eses.entity.Role;
 import com.sourcetrace.eses.entity.Scouting;
 import com.sourcetrace.eses.entity.SeasonMaster;
@@ -203,8 +204,8 @@ public interface IUtilDAO extends IESEDAO {
 	public Vendor findVendorById(String Id);
 
 	public List<Customer> listCustomer();
-	
-	/*public List<Pcbp> listPcbp();*/
+
+	/* public List<Pcbp> listPcbp(); */
 	public List<Object[]> listPcbp();
 
 	public Customer findCustomerBycustomerId(String customerId);
@@ -283,7 +284,7 @@ public interface IUtilDAO extends IESEDAO {
 	public VillageWarehouse findVillageWarehouse(long villageId, String agentId, String qualityCode);
 
 	public Customer findCustomerById(String customerId);
-	
+
 	public Customer findCustomerByName(String customerName);
 
 	public ESEAccount findAccountByProfileId(String profileId);
@@ -469,8 +470,6 @@ public interface IUtilDAO extends IESEDAO {
 	public List<LanguagePreferences> listLanguagePreferences();
 
 	public List<Object[]> listStates();
-	
-	
 
 	public List<Object[]> listLocalities();
 
@@ -902,9 +901,9 @@ public interface IUtilDAO extends IESEDAO {
 	Farmer findFarmerByEmail(String email);
 
 	List<Object[]> listExporter();
-	
+
 	List<Object[]> listBuyer();
-	
+
 	List<Object[]> listUOM();
 
 	public List<Farmer> listFarmerName();
@@ -936,9 +935,9 @@ public interface IUtilDAO extends IESEDAO {
 	public ExporterRegistration findExproterByCompanyName(String name);
 
 	public ExporterRegistration findExportRegById(Long id);
-	
+
 	public Pcbp findPcbpById(Long id);
-	
+
 	public Pcbp findPcbpByvarietyAndChamical(Long va, Long ch);
 
 	public State listStatesById(Long id);
@@ -948,7 +947,7 @@ public interface IUtilDAO extends IESEDAO {
 	public List<ProcurementVariety> listProcurementVarietyByProcurementProductId(Long id);
 
 	public ProcurementVariety findProcurementVariertyById(Long id);
-	
+
 	public List<Pcbp> findPcbpByProcurementGradeId(Long id);
 
 	public ProcurementProduct findProcurementProductById(Long id);
@@ -973,15 +972,15 @@ public interface IUtilDAO extends IESEDAO {
 	void addProcurementVariety(ProcurementVariety procurementVariety);
 
 	List<ProcurementGrade> listProcurementGradeByProcurementVarietyId(Long id);
-	
-	List<ProcurementGrade> listProcurementGradeByProcurementVarietyIdGradeid(Long id,String IdGrades);
+
+	List<ProcurementGrade> listProcurementGradeByProcurementVarietyIdGradeid(Long id, String IdGrades);
 
 	ProcurementGrade findProcurementGradeByNameAndVarietyId(String name, Long id);
 
 	ProcurementGrade findProcurementGradeById(Long id);
 
 	List<ProcurementVariety> listProcurementVariety();
-	
+
 	List<ProcurementVariety> listProcurementVarietyBasedOnCropCat(String ugandaExport);
 
 	ProcurementProduct findProcurementProductByNameAndBranch(String name, String branchId_F);
@@ -993,9 +992,9 @@ public interface IUtilDAO extends IESEDAO {
 	ProcurementVariety findProcurementVariertyByCode(String code);
 
 	ProcurementGrade findProcurementGradeByCode(String code);
-	
+
 	ProcurementGrade findProcurementGradeByName(String name);
-	
+
 	ProcurementVariety findProcurementVarietyByName(String name);
 
 	ProcurementGrade findProcurementGradeByNameAndBranch(String name, String branchId_F);
@@ -1013,13 +1012,13 @@ public interface IUtilDAO extends IESEDAO {
 	List<Farm> listFarmByFarmerId(Long id);
 
 	List<FarmCrops> listFarmCropByFarmId(Long farmid);
-	
-    List<Planting> listOfPlantingByBlockId(Long id);
+
+	List<Planting> listOfPlantingByBlockId(Long id);
 
 	FarmCrops findFarmCropsById(Long id);
 
 	Object[] findIfFarmerExist(String phno, String nid);
-	
+
 	Object[] findIfFarmerExistForFarmer(String nid);
 
 	List<ProcurementGrade> listProcurementGradeByProcurementVarietyIds(String procurementVariety);
@@ -1040,19 +1039,20 @@ public interface IUtilDAO extends IESEDAO {
 
 	public List<Packhouse> listPackhouse();
 
-	public List<CityWarehouse> listCityWareHouse() ;
+	public List<CityWarehouse> listCityWareHouse();
+
 	public List<FarmCrops> listFarmCrops();
 
 	List<ShipmentDetails> findShipmentDetailById(Long id);
-	
+
 	public Packhouse findWarehouseByCode(String code);
-	
+
 	public List<Shipment> listOfShipmentByCustomerId(long id);
 
-	public List<String> listPasswordsByTypeAndRefId(String type,long id);
+	public List<String> listPasswordsByTypeAndRefId(String type, long id);
 
 	List<LocaleProperty> listLocaleProp();
-	
+
 	public Integer findCustomerCount(Date sDate, Date eDate, Long loggedInDealer);
 
 	public Integer findProductsCount(Date sDate, Date eDate, Long loggedInDealer);
@@ -1074,14 +1074,53 @@ public interface IUtilDAO extends IESEDAO {
 	Agent findAgentByProfileAndBranchIdActive(String agentId, String branchId);
 
 	void processShipmentandharvest(ExporterRegistration expReg);
-	
-	void processShipmentInactive(Integer long1,List<Shipment> sh);
-	
-	void processHarvestInactive(Integer long1,List<Harvest> long2);
+
+	void processShipmentInactive(Integer long1, List<Shipment> sh);
+
+	void processHarvestInactive(Integer long1, List<Harvest> long2);
 
 	Planting findPlantingById(Long id);
 
 	String findExporterNameById(String table, String id);
 
 	List<Planting> listPlantingByFarmCropsId(Long farmid);
+
+	public ProductTransfer findProductTransferById(Long id);
+
+	public List<Packhouse> listOfPackhouseByExporterId(Long exporterId);
+
+	public List<PackhouseIncoming> listOfIncomingShipmentbasedOnPackhouse(long packHouseId);
+
+	List<ProductTransfer> listOfProductTransfer();
+
+	public List<ProductTransfer> listOfProductTransferByCityWareHouseBatches(List<String> batches);
+
+	List<Object[]> getBuyerCountry(String id);
+
+	List<Object[]> getScoutingRecomm(String plantingId);
+
+	<T> List<T> getAuditRecords(String expRegis, Long id);
+
+	Municipality findCityByVillageId(Long valueOf);
+
+	Locality findLocalityByVillageId(Long valueOf);
+
+	State findStateByVillageId(Long valueOf);
+
+	Country findCountryByVillageId(Long valueOf);
+
+	Locality findLocalityByCityId(Long valueOf);
+
+	State findStateByCityId(Long valueOf);
+
+	Country findCountryByCityId(Long valueOf);
+
+	String findDataByTableFieldById(String table, String code, String field);
+
+	String findObjectIdFromTableByFieldIdAndRevId(String table, String fieldValue, String audId);
+
+	<T> List<T> getAuditRecordsWithRelations(String string, List<String> s, Long id);
+
+	void saveOrUpdatecitywarehouse(CityWarehouse obj);
+
 }

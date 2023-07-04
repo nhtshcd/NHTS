@@ -4,8 +4,10 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
+import org.json.simple.JSONObject;
 import org.springframework.beans.BeanUtils;
 import org.springframework.context.annotation.Scope;
 import org.springframework.stereotype.Component;
@@ -63,6 +65,10 @@ public class HarvestAction extends SwitchAction {
 	@Getter
 	@Setter
 	private String qtyHarvested;
+	
+	@Getter
+	@Setter
+	private String selectedFarmCropsId;
 
 	/**
 	 * for detail page and list data
@@ -70,6 +76,14 @@ public class HarvestAction extends SwitchAction {
 	 * @return
 	 * @throws Exception
 	 */
+	
+	@Getter
+	@Setter
+	List<Object[]> ex;
+	
+	@Getter
+	@Setter
+	private String roleID;
 	public String detail() throws Exception {
 		if (id != null && !StringUtil.isEmpty(id) && StringUtil.isLong(id)) {
 			harvest = (Harvest) farmerService.findObjectById(QUERY, new Object[] { Long.valueOf(getId()), 1,3 });
@@ -88,6 +102,8 @@ public class HarvestAction extends SwitchAction {
 			// !StringUtil.isEmpty(harvest.getDeliveryType())) {
 			// harvest.setDeliveryType(getDeliveryTypeList().get(harvest.getDeliveryType()).toString());
 			// }
+			roleID = getLoggedInRoleID();
+			 ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Harvest", harvest.getId());
 
 			setCommand(DETAIL);
 			return DETAIL;
@@ -113,7 +129,8 @@ public class HarvestAction extends SwitchAction {
 			Planting farmCrops = (Planting) farmerService.findObjectById(FARMCROPS_QUERY,
 					new Object[] { harvest.getPlanting().getId(), 1 });
 			harvest.setPlanting(farmCrops);
-			
+			if(farmCrops!=null && farmCrops.getFarmCrops()!=null)
+			harvest.setFarmCrops(farmCrops.getFarmCrops());
 			
 			harvest.setDate(DateUtil.convertStringToDate(date, getGeneralDateFormat()));
 			harvest.setCreatedDate(new Date());
@@ -179,6 +196,8 @@ public class HarvestAction extends SwitchAction {
 						new Object[] { harvest.getPlanting().getId(), 1 });
 
 				harv.setPlanting(farmCrops);
+				if(farmCrops!=null && farmCrops.getFarmCrops()!=null)
+				harv.setFarmCrops(farmCrops.getFarmCrops());
 
 				CityWarehouse currentCt = (CityWarehouse) utilService
 						.findCityWarehouseByFarmCrops(harvest.getPlanting().getId());
@@ -193,6 +212,13 @@ public class HarvestAction extends SwitchAction {
 					existock.put(cityWarehouse, Double.valueOf(harv.getQtyHarvested()));
 				}
 
+				FarmCrops fc = (FarmCrops) farmerService.findObjectById(
+						"FROM FarmCrops fc WHERE fc.id=? and fc.exporter.status=1 and fc.exporter.isActive=1 and fc.status=1",
+						new Object[] { Long.valueOf(harvest.getPlanting().getFarmCrops().getId()) });
+				if(fc != null && !StringUtil.isEmpty(fc)){
+					harv.setStatus(1);
+				}
+				
 				harv.setNoStems(harvest.getNoStems());
 				// harv.setQtyHarvested(harvest.getQtyHarvested());
 				harv.setYieldsHarvested(harvest.getYieldsHarvested());
@@ -273,6 +299,21 @@ public class HarvestAction extends SwitchAction {
 		map.put("1", getText("Collection Center"));
 		map.put("2", getText("Marketing Agent"));
 		return map;
+	}
+	
+	public void populateValidateMaxSprayingPHIDate() {
+		JSONObject jss = new JSONObject();
+		if (selectedFarmCropsId != null && !StringUtil.isEmpty(selectedFarmCropsId) && date != null && !StringUtil.isEmpty(date) && StringUtil.isLong(selectedFarmCropsId)) {
+			Date maxDateVal = farmerService.findMaximunDateFromSprayingByFarmCropsId(Long.valueOf(selectedFarmCropsId));
+			Date harvesteDate=DateUtil.convertStringToDate(date, getGeneralDateFormat());
+			if (maxDateVal!= null && harvesteDate!= null ) {
+				if(maxDateVal.after(harvesteDate)){
+					//jss.put("maxDateVal", ("The recommended harvest date is "+ maxDateVal.toString()));
+					jss.put("maxDateVal", ("The recommended harvest date is "+ DateUtil.convertDateToString(maxDateVal, "dd-MM-yyyy")));
+				}
+			}
+		}
+		sendAjaxResponse(jss);
 	}
 
 	/**

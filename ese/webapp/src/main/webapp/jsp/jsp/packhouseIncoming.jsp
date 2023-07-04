@@ -156,6 +156,7 @@ function editRow(rowCounter){
 		
 		 var blockNo = $(this).find(".blockNo").text();
 		 var plantingId = $(this).find(".plantingId").text();
+		 var plantingName = $(this).find(".plantingIdLabel").text();
 	var editid = $(this).find(".incoId").val();
 		 var recievedUnits = $(this).find(".recievedUnits").text();
 		 var blockName = $(this).find(".blockName").text();
@@ -182,7 +183,7 @@ function editRow(rowCounter){
 		
 	   	$("#plantingId").val(plantingId).trigger('change');
 	   	if($("#plantingId").val()==null || $("#plantingId").val()=='' ){
-	    	 $('#plantingId').append(new Option(blockName, plantingId));
+	    	 $('#plantingId').append(new Option(plantingName,plantingId));
 	 	 	$("#plantingId").val(plantingId).trigger('change');	
 	   	}
 	   	
@@ -201,9 +202,9 @@ function editRow(rowCounter){
 		}
 		
 		if(editid!=undefined && editid!=''){
-			$("#remainingWeight").val((parseFloat(transferWeight)-parseFloat(recievedWeight)));
+			$("#remainingWeight").val((parseFloat(transferWeight)-parseFloat(recievedWeight)).toFixed(2));
 		}else{
-			$("#remainingWeight").val(remainsWeight);
+			$("#remainingWeight").val(remainsWeight.toFixed(2));
 		}
 		
 		
@@ -292,7 +293,7 @@ function populateBlockDetail(id) {
 				selectedBlock : id
 			},
 			success : function(result) {
-				//$('#blockId').val(result.blockId);
+				$('#blockId').val(result.blockId);
 				$('#product').val(result.product);
 				$('#variety').val(result.variety);
 				$('#createdDate').val(result.createdDate);
@@ -561,9 +562,9 @@ function closeDatepickernew(){
 		var totalRemi = 0;
 		 if(!isEmpty(transferWeight) && !isEmpty(val)){
 			 totalRemi = parseFloat(transferWeight) - parseFloat(val)
-			 $("#remainingWeight").val(parseFloat(totalRemi));
+			 $("#remainingWeight").val(parseFloat(totalRemi).toFixed(2));
 		 }else{
-			 $("#remainingWeight").val(parseFloat(totalRemi));
+			 $("#remainingWeight").val(parseFloat(totalRemi).toFixed(2));
 		 }
 	}
 
@@ -745,18 +746,18 @@ function closeDatepickernew(){
 							<s:iterator value="packhouseIncoming.packhouseIncomingDetails"
 								status="incr">
 								<tr id="row<s:property	value="#incr.index"/>"
-									class="prodrow <s:property value="farmcrops.id" />">
+									class="prodrow <s:property value="planting.id" />">
 									<s:hidden class="incoId" value="%{id}" />
-									<td class="blockNo hide"><s:property value="farmcrops.id" /></td>
+									<td class="blockNo hide"><s:property value="planting.id" /></td>
 									<td class="product hide"><s:property
-											value="cw.farmcrops.variety.procurementProduct.id" /></td>
+											value="cw.planting.variety.procurementProduct.id" /></td>
 									<td class="variety hide"><s:property
-											value="cw.farmcrops.variety.id" /></td>
+											value="cw.planting.variety.id" /></td>
 											
 									<td class="blockName"><s:property
-											value="farmcrops.blockName" /></td>
+											value="planting.farmCrops.blockName" /></td>
 									<td class="blockId"><s:property
-											value="cw.farmcrops.blockId" /></td>		
+											value="cw.planting.farmCrops.blockId" /></td>		
 											
 									<td class="plantingIdLabel"><s:property
 											value="planting.plantingId" /></td>
@@ -841,9 +842,13 @@ function closeDatepickernew(){
 							style="color: red;">*</sup>
 						</label>
 						<div class="form-element">
-							<s:textfield name="packhouseIncoming.truckType" theme="simple"
+							<%-- <s:textfield name="packhouseIncoming.truckType" theme="simple"
 								size="20" cssClass="lowercase form-control" id="truckType"
-								maxlength="20" />
+								maxlength="20" /> --%>
+							<s:select class="form-control  select2" id="truckType"
+								name="packhouseIncoming.truckType" listKey="key" listValue="value"
+								list="getCatList(getLocaleProperty('truckType'))" headerKey=" "
+								headerValue="%{getText('txt.select')}" />
 						</div>
 					</div>
 					<div class="flexform-item ">

@@ -60,6 +60,7 @@ public class PlantingAdapter implements ITxnAdapter {
 		String expHarvestQty = (String) reqData.get("expHarvestQty");
 		String lats = (String) reqData.get("lat");
 		String lons = (String) reqData.get("lon");
+		String fieldType = (String) reqData.get("fieldType");
 		
 		FarmCrops fm = (FarmCrops) farmerService.findObjectById("from FarmCrops fc where fc.blockId=?",
 				new Object[] { farmCode });
@@ -103,13 +104,14 @@ public class PlantingAdapter implements ITxnAdapter {
 		f.setModeApp(modeApp);
 		f.setLongitude(lons);
 		f.setLatitude(lats);
+		f.setFieldType(fieldType);
 		f.setStatus(1);
 		f.setMsgNo(head.getMsgNo());
 		ProcurementGrade pg = utilService.findProcurementGradeByCode(grade);
 		if (pg != null) {
 			f.setGrade(pg);
 			f.setVariety(pg.getProcurementVariety());
-			f.setSpecies(pg.getProcurementVariety().getProcurementProduct());
+		//	f.setSpecies(pg.getProcurementVariety().getProcurementProduct());
 		}
 		f.setRevisionNo(DateUtil.getRevisionNumber());
 

@@ -106,7 +106,7 @@ public class AgentAction extends SwitchAction {
 	private ICryptoUtil cryptoUtil;
 	private String warehouseName;
 	private String selectedRole;
-	
+
 	@Getter
 	@Setter
 	private UserActiveAndInActiveHostory userEditHistory;
@@ -636,7 +636,7 @@ public class AgentAction extends SwitchAction {
 			}
 			return INPUT;
 		} else {
-			agent.setProfileId(agent.getProfileId()==null ? "" : agent.getProfileId().toLowerCase());
+			agent.setProfileId(agent.getProfileId() == null ? "" : agent.getProfileId().toLowerCase());
 			agent.getPersonalInfo().setIdentityType(agent.getPersonalInfo().getIdentityType());
 			if (Profile.ACTIVE == agent.getStatus()) {
 				if (StringUtil.isEmpty(agent.getPassword())) {
@@ -665,16 +665,18 @@ public class AgentAction extends SwitchAction {
 			agent.setBranchId(getBranchId());
 			agent.setCreatedDate(new Date());
 			agent.setCreatedUser(getUsername());
-			//agent.setUpdatedDate(new Date());
-			//agent.setUpdatedUser(getUsername());
-			if (agent.getExporter() != null && agent.getExporter().getId() > 0) {
-				ExporterRegistration ex = utilService.findExportRegById(Long.valueOf(agent.getExporter().getId()));
-				agent.setExporter(ex);
-			}
-
-			if (agent.getPackhouse() != null && agent.getPackhouse().getId()!=null && agent.getPackhouse().getId()>0) {
+			// agent.setUpdatedDate(new Date());
+			// agent.setUpdatedUser(getUsername());
+			// saving exporter only when packhouse is null for Audit issues.
+			if (agent.getPackhouse() != null && agent.getPackhouse().getId() != null
+					&& agent.getPackhouse().getId() > 0) {
 				Packhouse ware = utilService.findWarehouseById(Long.valueOf(agent.getPackhouse().getId()));
 				agent.setPackhouse(ware);
+				agent.setExporter(null);
+			} else if (agent.getExporter() != null && agent.getExporter().getId() > 0) {
+				ExporterRegistration ex = utilService.findExportRegById(Long.valueOf(agent.getExporter().getId()));
+				agent.setExporter(ex);
+				agent.setPackhouse(null);
 			}
 			/*
 			 * Role
@@ -711,27 +713,32 @@ public class AgentAction extends SwitchAction {
 			ph.setPassword(aUser.getPassword());
 			ph.setReferenceId(aUser.getId());
 			utilService.save(ph);
-			
-			if(userEditHistory==null){
-				userEditHistory=new UserActiveAndInActiveHostory();
+
+			if (userEditHistory == null) {
+				userEditHistory = new UserActiveAndInActiveHostory();
 				userEditHistory.setBranchId(getBranchId());
 				userEditHistory.setCreatedDate(new Date());
 				userEditHistory.setCreatedUser(getUsername());
-				userEditHistory.setAgroChDealer(agent.getExporter().getId());
+				userEditHistory.setAgroChDealer(agent.getPackhouse() != null
+						? agent.getPackhouse().getExporter().getId() : agent.getExporter().getId());
 				userEditHistory.setDate(new Date());
 				DateFormat dateFormat = new SimpleDateFormat("hh.mm aa");
-		    	String dateString = dateFormat.format(new Date()).toString();
+				String dateString = dateFormat.format(new Date()).toString();
 				userEditHistory.setTime(dateString);
 				userEditHistory.setUserName(agent.getProfileId());
 				userEditHistory.setLoggedUser(getUsername());
 				userEditHistory.setActivity(5);
 				userEditHistory.setType(2);
 				utilService.save(userEditHistory);
-				}
+			}
 
 			return REDIRECT;
 		}
 	}
+
+	@Getter
+	@Setter
+	List<Object[]> ex;
 
 	/**
 	 * Detail.
@@ -757,6 +764,10 @@ public class AgentAction extends SwitchAction {
 			User user = utilService.findUserByUserName(getUsername());
 
 			setLoginUserName(request.getSession().getAttribute("user").toString());
+			// ex =
+			// utilService.getAuditRecords("com.sourcetrace.eses.entity.Agent",
+			// agent.getId());
+
 			command = DETAIL;
 			request.setAttribute(HEADING, getText(command + type));
 
@@ -793,8 +804,10 @@ public class AgentAction extends SwitchAction {
 				setSelectedStatus("1");
 			}
 			if (!StringUtil.isEmpty(agent.getPersonalInfo().getDateOfBirth())) {
-				//dateOfBirth = df.format(agent.getPersonalInfo().getDateOfBirth());
-				dateOfBirth = DateUtil.convertDateToString(agent.getPersonalInfo().getDateOfBirth(), getGeneralDateFormat());
+				// dateOfBirth =
+				// df.format(agent.getPersonalInfo().getDateOfBirth());
+				dateOfBirth = DateUtil.convertDateToString(agent.getPersonalInfo().getDateOfBirth(),
+						getGeneralDateFormat());
 			}
 			if (!ObjectUtil.isEmpty(agent.getAgentType())) {
 				setSelectedRole(agent.getAgentType().getId().toString());
@@ -812,6 +825,9 @@ public class AgentAction extends SwitchAction {
 				}
 			} else {
 				agent.setPassword(null);
+			}
+			if (agent.getPackhouse() != null && agent.getPackhouse().getExporter() != null) {
+				agent.setExporter(agent.getPackhouse().getExporter());
 			}
 			id = null;
 			command = UPDATE;
@@ -859,31 +875,33 @@ public class AgentAction extends SwitchAction {
 
 				if (Profile.ACTIVE == agent.getStatus()) {
 					if (agent.isChangePassword()) {
-					if (StringUtil.isEmpty(agent.getPassword())) {
-						addActionError(getText("empty.password"));
-						request.setAttribute(HEADING, getText("Agentupdate.page" + type));
-						return INPUT;
-					} else {
-						String oldPasswordToken = cryptoUtil
-								.encrypt(StringUtil.getMulipleOfEight(agent.getProfileId() + agent.getPassword()));
-						temp.setPassword(oldPasswordToken);
-						PasswordHistory ph = new PasswordHistory();
-						ph.setBranchId(temp.getBranchId());
-						ph.setCreatedDate(new Date());
-						ph.setType(String.valueOf(PasswordHistory.Type.MOBILE_USER.ordinal()));
-						ph.setPassword(oldPasswordToken);
-						ph.setReferenceId(temp.getId());
-						utilService.save(ph);
-					}
+						if (StringUtil.isEmpty(agent.getPassword())) {
+							addActionError(getText("empty.password"));
+							request.setAttribute(HEADING, getText("Agentupdate.page" + type));
+							return INPUT;
+						} else {
+							String oldPasswordToken = cryptoUtil
+									.encrypt(StringUtil.getMulipleOfEight(agent.getProfileId() + agent.getPassword()));
+							temp.setPassword(oldPasswordToken);
+							PasswordHistory ph = new PasswordHistory();
+							ph.setBranchId(temp.getBranchId());
+							ph.setCreatedDate(new Date());
+							ph.setType(String.valueOf(PasswordHistory.Type.MOBILE_USER.ordinal()));
+							ph.setPassword(oldPasswordToken);
+							ph.setReferenceId(temp.getId());
+							utilService.save(ph);
+						}
 					}
 				}
-				if (agent.getExporter() != null && agent.getExporter().getId() > 0) {
-					ExporterRegistration ex = utilService.findExportRegById(Long.valueOf(agent.getExporter().getId()));
-					temp.setExporter(ex);
-				}
+
 				if (agent.getPackhouse() != null && agent.getPackhouse().getId() != null) {
 					Packhouse ware = utilService.findWarehouseById(Long.valueOf(agent.getPackhouse().getId()));
 					temp.setPackhouse(ware);
+					temp.setExporter(null);
+				} else if (agent.getExporter() != null && agent.getExporter().getId() > 0) {
+					ExporterRegistration ex = utilService.findExportRegById(Long.valueOf(agent.getExporter().getId()));
+					temp.setExporter(ex);
+					temp.setPackhouse(null);
 				}
 				if (!ObjectUtil.isEmpty(agent.getAgentType()) && agent.getAgentType().getId() > 0) {
 					AgentType agentType = utilService.findAgentTypeById(agent.getAgentType().getId());
@@ -892,22 +910,24 @@ public class AgentAction extends SwitchAction {
 
 				setCurrentPage(getCurrentPage());
 				utilService.editAgentProfile(temp);
-				
-				if(userEditHistory==null){
-				userEditHistory=new UserActiveAndInActiveHostory();
-				userEditHistory.setBranchId(getBranchId());
-				userEditHistory.setCreatedDate(new Date());
-				userEditHistory.setCreatedUser(getUsername());
-				userEditHistory.setAgroChDealer(temp.getExporter().getId());
-				userEditHistory.setDate(new Date());
-				DateFormat dateFormat = new SimpleDateFormat("hh.mm aa");
-		    	String dateString = dateFormat.format(new Date()).toString();
-				userEditHistory.setTime(dateString);
-				userEditHistory.setUserName(temp.getProfileId());
-				userEditHistory.setLoggedUser(getUsername());
-				userEditHistory.setActivity(temp.getStatus());
-				userEditHistory.setType(2);
-				utilService.save(userEditHistory);
+
+				if (userEditHistory == null) {
+					userEditHistory = new UserActiveAndInActiveHostory();
+					userEditHistory.setBranchId(getBranchId());
+					userEditHistory.setCreatedDate(new Date());
+					userEditHistory.setCreatedUser(getUsername());
+					userEditHistory.setAgroChDealer(temp.getPackhouse() != null
+							? temp.getPackhouse().getExporter().getId() : temp.getExporter().getId());
+
+					userEditHistory.setDate(new Date());
+					DateFormat dateFormat = new SimpleDateFormat("hh.mm aa");
+					String dateString = dateFormat.format(new Date()).toString();
+					userEditHistory.setTime(dateString);
+					userEditHistory.setUserName(temp.getProfileId());
+					userEditHistory.setLoggedUser(getUsername());
+					userEditHistory.setActivity(temp.getStatus());
+					userEditHistory.setType(2);
+					utilService.save(userEditHistory);
 				}
 
 			}
@@ -1385,7 +1405,7 @@ public class AgentAction extends SwitchAction {
 
 	public void setBodStatus(Map<Integer, String> bodStatus) {
 
-		this.bodStatus = bodStatus;	
+		this.bodStatus = bodStatus;
 	}
 
 	/**
@@ -1480,11 +1500,11 @@ public class AgentAction extends SwitchAction {
 
 	public void populateValidate() {
 		Map<String, String> errorCodes = new LinkedHashMap<String, String>();
-		agent.setProfileId(agent.getProfileId()==null ? "" : agent.getProfileId().toLowerCase());
+		agent.setProfileId(agent.getProfileId() == null ? "" : agent.getProfileId().toLowerCase());
 		if (!StringUtil.isEmpty(agent.getProfileId())) {
 			Agent eAgent = utilService.findAgentByAgentId(agent.getProfileId());
 			if (eAgent != null && !eAgent.getId().equals(agent.getId())
-					&& eAgent.getProfileId().equalsIgnoreCase(agent.getProfileId()) && eAgent.getStatus()!=2) {
+					&& eAgent.getProfileId().equalsIgnoreCase(agent.getProfileId()) && eAgent.getStatus() != 2) {
 				errorCodes.put("profileId", "unique.agentId");
 			}
 		}
@@ -1511,7 +1531,9 @@ public class AgentAction extends SwitchAction {
 
 		if (agent.isChangePassword()) {
 
-			String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,10000000}$";
+			// String PASSWORD_PATTERN =
+			// "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,10000000}$";
+			String PASSWORD_PATTERN = "^(?=.*).{%%min%%,10000000}$";
 			ESESystem es = utilService.findPrefernceByOrganisationId(getBranchId());
 			PASSWORD_PATTERN = PASSWORD_PATTERN.replace("%%min%%",
 					es.getPreferences().get(ESESystem.PASSWORD_MIN_LENGTH).toString());

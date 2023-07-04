@@ -495,5 +495,9 @@ public interface ITxnErrorCodes {
 	 public static final String UNAUTHORISED_DEVICE = "75058";
 	 
 	    public static final String EMPTY_CROP_NAME = "75059";
+	    
+	    //Product Transfer
+	    public static final String EMPTY_TRANSFER_FROM = "75060";
+	    public static final String EMPTY_TRANSFER_TO = "75061";
 }
 

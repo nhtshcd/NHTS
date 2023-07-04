@@ -28,14 +28,13 @@
 		<div class="appContentWrapper marginBottom">
 			<div class="error">
 				<div id="validateError" style="text-align: left;"></div>
-				
-				
+
+
 			</div>
 			<div class="formContainerWrapper">
 				<h2>
-				<s:property
-										value='%{getLocaleProperty("info.landPreparation")}' />
-				
+					<s:property value='%{getLocaleProperty("info.landPreparation")}' />
+
 				</h2>
 				<div class="flexform">
 					<div class="dynamic-flexItem ">
@@ -46,17 +45,17 @@
 							<s:property value="date" />
 						</p>
 					</div>
-					
-						<div class="dynamic-flexItem">
-								<p class="flexItem">
-									<s:text name="farmer.fcode" />
-								</p>
-								<p class="flexItem">
-									<s:property value="landPreparation.farm.farmer.farmerId" />
-								</p>
-							</div>
-							
-							
+
+					<div class="dynamic-flexItem">
+						<p class="flexItem">
+							<s:text name="farmer.fcode" />
+						</p>
+						<p class="flexItem">
+							<s:property value="landPreparation.farm.farmer.farmerId" />
+						</p>
+					</div>
+
+
 					<div class="dynamic-flexItem ">
 						<p class="flexItem">
 							<s:property
@@ -66,15 +65,15 @@
 							<s:property value="landPreparation.farm.farmer.firstName" />
 						</p>
 					</div>
-					
+
 					<div class="dynamic-flexItem">
-								<p class="flexItem">
-									<s:text name="farmCode" />
-								</p>
-								<p class="flexItem">
-									<s:property value="landPreparation.farm.farmCode" />
-								</p>
-							</div>
+						<p class="flexItem">
+							<s:text name="farmCode" />
+						</p>
+						<p class="flexItem">
+							<s:property value="landPreparation.farm.farmCode" />
+						</p>
+					</div>
 					<div class="dynamic-flexItem ">
 						<p class="flexItem">
 							<s:property value="%{getLocaleProperty('landPreparation.farm')}" />
@@ -83,7 +82,7 @@
 							<s:property value="landPreparation.farm.farmName" />
 						</p>
 					</div>
-					
+
 					<div class="dynamic-flexItem ">
 						<p class="flexItem">
 							<s:property value="%{getLocaleProperty('landPreparation.block')}" />
@@ -92,34 +91,83 @@
 							<s:property value="farmCropfarmId" />
 						</p>
 					</div>
-					
+
 					<table class="table table-bordered aspect-detail"
 						id="landPreparationInfoTable">
 						<thead>
 							<tr>
-								<th><center><s:property
-										value="%{getLocaleProperty('landPreparation.activity')}" /></center></th>
-								<th><center><s:property
-										value="%{getLocaleProperty('landPreparation.activityMode')}" /></center></th>
-								<th><center><s:property
-										value="%{getLocaleProperty('landPreparation.noOfLabourers')}" /></center></th>
+								<th><center>
+										<s:property
+											value="%{getLocaleProperty('landPreparation.activity')}" />
+									</center></th>
+								<th class="hide"><center>
+										<s:property
+											value="%{getLocaleProperty('landPreparation.activityMode')}" />
+									</center></th>
+								<th><center>
+										<s:property
+											value="%{getLocaleProperty('landPreparation.noOfLabourers')}" />
+									</center></th>
 							</tr>
 						</thead>
 						<tbody id="landPreparationContent">
 							<s:iterator value="landPreparation.landPreparationDetails"
 								status="incr">
 								<tr id="row<s:property	value="#incr.index" />">
-									<td class="activity"><center><s:property value="%{getCatalgueNameByCode(activity)}" /></center></td>
-									<td class="activityMode"><center><s:property value="%{getCatalgueNameByCode(activityMode)}" /></center></td>
-									<td class="noOfLabourers"><center><s:property
-											value="noOfLabourers" /></center></td>
+									<td class="activity"><center>
+											<s:property value="%{getCatalgueNameByCode(activity)}" />
+										</center></td>
+									<td class="activityMode hide"><center>
+											<s:property value="%{getCatalgueNameByCode(activityMode)}" />
+										</center></td>
+									<td class="noOfLabourers"><center>
+											<s:property value="noOfLabourers" />
+										</center></td>
 								</tr>
 							</s:iterator>
 						</tbody>
 					</table>
 				</div>
-			</div>
 
+				<s:if test='#session.isAdmin =="true"'>
+					<s:iterator value="ex" var="innerList">
+						<div class="aPanel audit_history">
+							<div class="aTitle">
+								<h2>
+									<s:if
+										test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+										<s:property value="#innerList[0].createdUser" />
+									</s:if>
+									<s:else>
+										<s:property value="#innerList[0].updatedUser" />
+									</s:else>
+									-
+
+									<s:date name="#innerList[1].revisionDate"
+										format="dd/MM/yyyy hh:mm:ss" />
+									-
+									<s:property
+										value="%{getLocaleProperty('default'+#innerList[2])}" />
+									<div class="pull-right">
+										<a class="aCollapse "
+											href="#<s:property value="#innerList[1].id" />
+										"><i
+											class="fa fa-chevron-right"></i></a>
+									</div>
+								</h2>
+							</div>
+							<div class="aContent dynamic-form-con"
+								id="<s:property value="#innerList[1].id" />">
+
+								<jsp:include page='/jsp/jsp/auditLandDetail.jsp' />
+
+							</div>
+
+
+						</div>
+					</s:iterator>
+				</s:if>
+			</div>
 			<div class="flex-layout flexItemStyle">
 				<div class="margin-top-10">
 					<span id="cancel" class=""><span class="first-child"><button

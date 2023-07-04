@@ -55,6 +55,8 @@ $(document).ready(
 							}
 
 							);
+					var selectedBuyer='<s:property value="selectedBuyer"/>';
+					getCountry(selectedBuyer);
 			}
 			$("#buttonAdd1").on(
 					"click",
@@ -64,6 +66,14 @@ $(document).ready(
 						$("#shipmentDtl").val(shipmentDtl);
 						$('#packhouse').select2({disabled:false});
 						$("#buttonAdd1").prop("disabled", true);
+						
+						var shipmentSupportingFilesName='';
+						var fileList = document.getElementById("shipmentSupportingFiles").files;
+						for(var i = 0; i < fileList.length; i++) {
+							shipmentSupportingFilesName += fileList[i].name + ", ";
+						}
+						$("#shipmentSupportingFileName").val(shipmentSupportingFilesName);
+						
 						if (!validateAndSubmit("shipmentForm",
 								"shipment_")) {
 							$("#buttonAdd1").prop("disabled", false);
@@ -94,6 +104,15 @@ $(document).ready(
 			     }
 				 }
 				});
+			 
+			 $("#shipmentSupportingFiles").on("change", function() {
+				 $("#validateError").text("");
+				    if ($("#shipmentSupportingFiles")[0].files.length > 3) {
+				        $("#validateError").text("You can select only 3 files");
+				        $('#shipmentSupportingFiles').val('');
+				    }
+				});
+			 
 		});
 function loadLotNumbers() {
 	var pid= $('#packhouse').val();
@@ -191,7 +210,7 @@ function loadProductVariety(lotNo){
 				$('#packingQty').val(result.lotQty);
 				$('#qrCode').val(result.qrCode);
 				$('#createdDate').val(result.createdDate);
-				
+				$('#warId').val(result.ctyId);
 			}
 		});
 	}
@@ -237,7 +256,8 @@ function addRow(rowId){
 	 	let parts_of_date = createdDate.split("-");
 	 	var qrCode=$("#qrCode").val();
 	 	var detailId=$("#detailId").val();
-	 
+	 	var warId=$("#warId").val();
+	 	
 	 	let output = new Date(+parts_of_date[2], parts_of_date[1] - 1, +parts_of_date[0]);
 	 	
 	 	let parts_of_date1 = shipmentDate.split("-");
@@ -291,6 +311,7 @@ function addRow(rowId){
 		tableRow+="<td class='packingQty'>"+packingQty+"</td>";		
 		tableRow+="<td class='qrCode hide'>"+qrCode+"</td>";
 		tableRow+="<td class='detailId hide'>"+detailId+"</td>";
+		tableRow+="<td class='hide warId'>"+warId+"</td>";
 		tableRow+="<td><i style='cursor: pointer; font-size: 150%; color: blue;' class='fa fa-pencil-square-o' aria-hidden='true' onclick='editRow("+rowCounter+")' ></i>&nbsp;&nbsp;&nbsp;&nbsp;<i style='cursor: pointer; font-size: 150%; color: black;' class='fa fa-trash-o' aria-hidden='true' onclick='deleteDtl("+rowCounter+")'></td>";
 	   	tableRow+="</tr>";
 	   	$("#shipmentContent").append(tableRow);
@@ -411,7 +432,7 @@ function editRow(rowCounter){
 		 var detailId = $(this).find(".detailId").text();
 		 var plantingId = $(this).find(".plantingId").text();
 		 var plantingIdLabel = jQuery(this).find(".plantingIdLabel").text();
-		 
+		 var warId = jQuery(this).find(".warId").text();
 		 var packingUnitValue = $.map(packingUnitOption ,function(option) {
 			 	if(packingUnit.trim()==option.text.trim())
 			    	return option.value;
@@ -439,6 +460,7 @@ function editRow(rowCounter){
 		$("#variety").val(variety);
 		$("#packingUnitM").val(packingUnitValue).trigger('change');
 		$("#packingQty").val(packingQty);
+		$("#warId").val(packingQty);
 		if(editid!=undefined && editid!=''){
 			$("#lotQty").val((parseFloat(lotQty)+parseFloat(packingQty)).toFixed(2));
 		}else{
@@ -462,6 +484,7 @@ function resetData(){
 	$("#createdDate").val("");	
 	$("#qrCode").val("");	
 	$("#detailId").val("0");
+	$("#warId").val("");	
 }
 
 
@@ -480,7 +503,7 @@ function getShipmentDetail(){
 	var tableBody = $(".prodrow");
 	var shipmentDtl="";	
 	$.each(tableBody, function(index, value) {
-		var lotNo = $(this).find(".lotNo").text();
+		var lotNo = $(this).find(".warId").text();
 		var packingUnit = $(this).find(".packingUnit").text();	
 		
 			 var packingUnitOption = $('#packingUnitM option');
@@ -556,16 +579,44 @@ function populatePlanting(val){
 		clearElement('plantingId',true);
 	}
 } */
-
+function getCountry(val){
+	var selectedBuyerId=val;
+	if(!isEmpty(selectedBuyerId)){
+		$.ajax({
+			 type: "POST",
+	        async: false,
+	        url: "shipment_populateCountry.action",
+	        data: {selectedBuyerId : selectedBuyerId},
+	        success: function(result) {
+	        	
+	        	if(result!=""){
+					/* document.getElementById('shipmentDestination').value = result.shipmentDestination; */
+					document.getElementById('shipmentDestinationCode').value = result.shipmentDestinationCode;
+					}
+					else{
+						/* document.getElementById('shipmentDestination').value = ""; */
+						document.getElementById('shipmentDestinationCode').value = "";
+					}
+	        }
+		});
+	}else{
+		/* document.getElementById('shipmentDestination').value = ""; */
+		document.getElementById('shipmentDestinationCode').value = "";
+	}
+}
 </script>
 <body>
+    <s:form id="fileDownload" action="generalPop_populateDownload" >
+		<s:hidden id="loadId" name="idd" />
+	</s:form>
 	<s:form name="shipmentForm" cssClass="fillform" method="post"
-		action="shipment_%{command}" id="shipmentForm">
+		action="shipment_%{command}" id="shipmentForm" enctype="multipart/form-data">
 		<s:hidden name="shipmentDtl" id="shipmentDtl" />
 		<s:hidden name="redirectContent" id="redirectContent" />
 		<s:hidden name="currentPage" id="currentPage" />
 		<s:hidden name="command" id="command" />
 		<s:hidden name="shipment.id" id="sid" />
+		<s:hidden name="shipmentSupportingFileName" id="shipmentSupportingFileName" />
 
 		<div class="appContentWrapper marginBottom">
 			<div class="error">
@@ -601,6 +652,7 @@ function populatePlanting(val){
 								onchange="loadLotNumbers();loadExportLicenseNo(this.value)"
 								headerValue="%{getText('txt.select')}" />
 							<s:hidden id="packinval" />
+							<s:hidden id="warId" />
 						</div>
 					</div>
 					<div class="flexform-item ">
@@ -622,9 +674,18 @@ function populatePlanting(val){
 						<div class="form-element">
 							<s:select class="form-control select2" id="buyer"
 								name="selectedBuyer" Key="id" Value="name" list="buyerDynamic"
-								headerKey=" " headerValue="%{getText('txt.select')}" />
+								headerKey=" " headerValue="%{getText('txt.select')}" onchange="getCountry(this.value)"/>
 						</div>
 					</div>
+					<div class="flexform-item">
+					<label for="txt"><s:text
+							name="%{getLocaleProperty('shipment.shipmentDestination')}" /></label>
+					<div class="form-element">
+						<s:textfield name="shipmentDestinationCode" id="shipmentDestinationCode" 
+							theme="simple" class="form-control" readonly="true" />
+						<%-- <s:hidden name="shipmentDestinationCode" id="shipmentDestinationCode" /> --%>
+					</div>
+				</div>
 					<div class="flexform-item ">
 						<label for="txt"> <s:property
 								value="%{getLocaleProperty('shipment.pConsignmentNo')}" /><sup
@@ -752,7 +813,10 @@ function populatePlanting(val){
 
 									<td class="lotNo hide"><s:property
 											value="cityWarehouse.id" /></td>
-
+											
+									<td class="warId hide"><s:property
+											value="cityWarehouse.id" /></td>
+											
 									<td class="plantingIdLabel"><s:property
 											value="planting.plantingId" /></td>
 
@@ -806,6 +870,23 @@ function populatePlanting(val){
 								id="totalShipmentQty" />
 						</div>
 					</div>
+					
+					<div class="flexform-item part">
+					<label for="txt"><s:text
+							name="Shipment Supporting Files" /></label>
+					<div class="form-element">
+						<s:file name="shipmentSupportingFiles" id="shipmentSupportingFiles"
+							cssClass="form-control" multiple="multiple" />
+								<s:hidden name="shipment.shipmentSupportingFiles"/>
+						<s:if
+							test="command=='update'&& shipment.shipmentSupportingFiles!=null && shipment.shipmentSupportingFiles!=''">
+							<a class='fa fa-download pdfIc'
+								href='shipment_downloadMultipleImagesBasedOnDocumentId?idd=<s:property value="shipment.id"/>'
+								title='Download'></a>
+						</s:if>
+					</div>
+				</div>
+					
 				</div>
 			</div>
 			<div class="flex-layout flexItemStyle">

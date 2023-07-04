@@ -16,10 +16,10 @@
 								'a:first').attr("href",
 								'<s:property value="redirectContent" />');
 						url = 'sprayAndFieldManagement_';
-						jQuery('#sMphi').prop("readonly",true);
+						jQuery('#sMphi').prop("readonly", true);
 						if (command == 'create') {
 							loadSprayFarmer();
-						} 
+						}
 
 						$("#buttonAdd1").on(
 								'click',
@@ -30,9 +30,6 @@
 										disabled : false
 									});
 
-									
-									
-									
 									if (!validateAndSubmit("target1",
 											"sprayAndFieldManagement_")) {
 										$("#buttonAdd1")
@@ -55,11 +52,11 @@
 								});
 						if (command == 'update') {
 							$('#country').change();
-						
-						//	listFarm('<s:property value="sprayAndFieldManagement.farmCrops.farm.farmer.id"/>')
 
-							var cropDet = '<s:property value="selectedProduct" />';
-							$('#crop').val(cropDet).trigger('change');
+							//	listFarm('<s:property value="sprayAndFieldManagement.farmCrops.farm.farmer.id"/>')
+
+							/* var cropDet = '<s:property value="selectedProduct" />'; 
+							$('#crop').val(cropDet).trigger('change');*/
 							var varietyId = '<s:property value="sprayAndFieldManagement.variety" />';
 							$(
 									"#varietyName option[value='"
@@ -75,20 +72,22 @@
 
 							//var agName = '<s:property value="sprayAndFieldManagement.pcbp.id" />';
 							//$('#agroChemicalNamea').val(agName).trigger('change');
-							var farmCropsIdForUpdate='<s:property value="sprayAndFieldManagement.farmCrops.id"/>';
-							if(farmCropsIdForUpdate != null && farmCropsIdForUpdate != ''){
-							populatePlanting(farmCropsIdForUpdate);
+							var farmCropsIdForUpdate = '<s:property value="sprayAndFieldManagement.planting.farmCrops.id"/>';
+							if (farmCropsIdForUpdate != null
+									&& farmCropsIdForUpdate != '') {
+								populatePlanting(farmCropsIdForUpdate);
 							}
-							var chamicalsForUpdate='<s:property value="selectedTradeNameId"/>';
-							if(chamicalsForUpdate != null && chamicalsForUpdate != ''){
+							var chamicalsForUpdate = '<s:property value="selectedTradeNameId"/>';
+							if (chamicalsForUpdate != null
+									&& chamicalsForUpdate != '') {
 								populateChamicals(chamicalsForUpdate);
 							}
-							
+
 						}
-						 /* $('#sMuom').select2({
-							disabled : 'readonly'
-						}); */ 
-						
+						/* $('#sMuom').select2({
+						disabled : 'readonly'
+						}); */
+
 					});
 
 	function listFarmsCropProduct(farmId) {
@@ -109,7 +108,7 @@
 						},
 						success : function(result) {
 							insertOptions("crop", $.parseJSON(result));
-							var sllfar = '<s:property value="sprayAndFieldManagement.farmCrops.variety.procurementProduct.id"/>';
+							var sllfar = '<s:property value="sprayAndFieldManagement.planting.farmCrops.variety.procurementProduct.id"/>';
 							if (sllfar != null && sllfar != ''
 									&& sllfar != 'null') {
 								$('#crop').val(sllfar).change();
@@ -137,8 +136,10 @@
 						},
 						success : function(result) {
 							insertOptions("varietyName", $.parseJSON(result));
-							var sllfar = '<s:property value="sprayAndFieldManagement.farmCrops.id"/>';
-							if (selectedFarm=='<s:property value="sprayAndFieldManagement.farmCrops.farm.id"/>'  && sllfar != null && sllfar != ''
+							var sllfar = '<s:property value="sprayAndFieldManagement.planting.farmCrops.id"/>';
+							if (selectedFarm == '<s:property value="sprayAndFieldManagement.planting.farmCrops.farm.id"/>'
+									&& sllfar != null
+									&& sllfar != ''
 									&& sllfar != 'null') {
 								$('#varietyName').val(sllfar).change();
 							}
@@ -165,9 +166,11 @@
 							//alert("res"+result)
 							insertOptions("farm", $.parseJSON(result));
 
-							var sllfar = '<s:property value="sprayAndFieldManagement.farmCrops.farm.id"/>';
+							var sllfar = '<s:property value="sprayAndFieldManagement.planting.farmCrops.farm.id"/>';
 
-							if (selectedPro=='<s:property value="sprayAndFieldManagement.farmCrops.farm.farmer.id"/>'  && sllfar != null && sllfar != ''
+							if (selectedPro == '<s:property value="sprayAndFieldManagement.planting.farmCrops.farm.farmer.id"/>'
+									&& sllfar != null
+									&& sllfar != ''
 									&& sllfar != 'null') {
 
 								$('#farm').val(sllfar).select2().change();
@@ -184,18 +187,18 @@
 		$('#address').val('');
 		$('#mobileNo').val('');
 		if (!isEmpty(fid)) {
-		$.ajax({
-			type : "POST",
-			async : false,
-			url : "sprayAndFieldManagement_populateFarmerData.action",
-			data : {
-				selectedFarmer : fid
-			},
-			success : function(result) {
-				$('#address').val(result.address);
-				$('#mobileNo').val(result.mobileNo);
-			}
-		});
+			$.ajax({
+				type : "POST",
+				async : false,
+				url : "sprayAndFieldManagement_populateFarmerData.action",
+				data : {
+					selectedFarmer : fid
+				},
+				success : function(result) {
+					$('#address').val(result.address);
+					$('#mobileNo').val(result.mobileNo);
+				}
+			});
 		}
 	}
 
@@ -239,168 +242,214 @@
 		$('#variety').val('');
 		$('#grade').val('');
 		if (!isEmpty(cropid)) {
-		$.ajax({
-			type : "POST",
-			async : false,
-			url : "sprayAndFieldManagement_populateBlockDetailsForScoutingAndSpraying.action",
-			data : {
-				selectedFarmer : cropid
-			},
-			success : function(result) {
-				$('#cropPlantingId').val(result.plantingId);
-				$('#blockId').val(result.blockId);
-				$('#variety').val(result.variety);
-				$('#grade').val(result.grade);
+			$
+					.ajax({
+						type : "POST",
+						async : false,
+						url : "sprayAndFieldManagement_populateBlockDetailsForScoutingAndSpraying.action",
+						data : {
+							selectedFarmer : cropid
+						},
+						success : function(result) {
+							$('#cropPlantingId').val(result.plantingId);
+							$('#blockId').val(result.blockId);
+							$('#variety').val(result.variety);
+							$('#grade').val(result.grade);
 
-				var ppadd = $('#agroChemicalNamea').val();
-				populatePhiAndDosageDetail(ppadd);
+							var ppadd = $('#agroChemicalNamea').val();
+							populatePhiAndDosageDetail(ppadd);
 
-			}
-		});
+						}
+					});
 		}
 
 	}
-/* 	function populateBlockDetail(cropid) {
-		$('#cropPlantingId').val('');
-		$('#blockId').val('');
-		$('#variety').val('');
-		$('#grade').val('');
-		if (!isEmpty(cropid)) {
-		$.ajax({
-			type : "POST",
-			async : false,
-			url : "sprayAndFieldManagement_populateBlockDetails.action",
-			data : {
-				selectedFarmer : cropid
-			},
-			success : function(result) {
-				$('#cropPlantingId').val(result.plantingId);
-				$('#blockId').val(result.blockId);
-				$('#variety').val(result.variety);
-				$('#grade').val(result.grade);
+	/* 	function populateBlockDetail(cropid) {
+	 $('#cropPlantingId').val('');
+	 $('#blockId').val('');
+	 $('#variety').val('');
+	 $('#grade').val('');
+	 if (!isEmpty(cropid)) {
+	 $.ajax({
+	 type : "POST",
+	 async : false,
+	 url : "sprayAndFieldManagement_populateBlockDetails.action",
+	 data : {
+	 selectedFarmer : cropid
+	 },
+	 success : function(result) {
+	 $('#cropPlantingId').val(result.plantingId);
+	 $('#blockId').val(result.blockId);
+	 $('#variety').val(result.variety);
+	 $('#grade').val(result.grade);
 
-				var ppadd = $('#agroChemicalNamea').val();
-				populatePhiAndDosageDetail(ppadd);
+	 var ppadd = $('#agroChemicalNamea').val();
+	 populatePhiAndDosageDetail(ppadd);
 
-			}
-		});
-		}
+	 }
+	 });
+	 }
 
-	} */
-	
-	
+	 } */
+
 	function populateChamicals(call) {
 		var selectedPro = call;
-		clearElement('agroChemicalNamea',true);
-		
-	if(!isEmpty(selectedPro)){
-			$.ajax({
-				 type: "POST",
-		        async: false,
-		        url : "sprayAndFieldManagement_populateChamicals.action",
-		        data: {selectedFarmer : selectedPro},
-		        success: function(result) {
-		        	insertOptions("agroChemicalNamea", $.parseJSON(result));
-		        	
-		        	//var agName = '<s:property value="sprayAndFieldManagement.pcbp.id" />';
-		        	var agName='<s:property value="selectedTradeNameId"/>';
-		        	if (selectedPro =='<s:property value="sprayAndFieldManagement.planting.id" />' &&  agName != null && agName != '' && agName != 'null')
-		        	{
-		        		$('#agroChemicalNamea > option[value='+agName+']').prop("selected","selected");
-						 $("#agroChemicalNamea").select2();
-						 $('#agroChemicalNamea').change();
-		        		//$('#agroChemicalNamea').val(agName).trigger('change');
-		        	}
-					
-		        }
-			});
+		clearElement('agroChemicalNamea', true);
+
+		if (!isEmpty(selectedPro)) {
+			$
+					.ajax({
+						type : "POST",
+						async : false,
+						url : "sprayAndFieldManagement_populateChamicals.action",
+						data : {
+							selectedFarmer : selectedPro
+						},
+						success : function(result) {
+							insertOptions("agroChemicalNamea", $
+									.parseJSON(result));
+
+							//var agName = '<s:property value="sprayAndFieldManagement.pcbp.id" />';
+							var agName = '<s:property value="selectedTradeNameId"/>';
+							if (selectedPro == '<s:property value="sprayAndFieldManagement.planting.id" />'
+									&& agName != null
+									&& agName != ''
+									&& agName != 'null') {
+								$(
+										'#agroChemicalNamea > option[value='
+												+ agName + ']').prop(
+										"selected", "selected");
+								$("#agroChemicalNamea").select2();
+								$('#agroChemicalNamea').change();
+								//$('#agroChemicalNamea').val(agName).trigger('change');
+							}
+
+						}
+					});
 		}
-		
+
 	}
-	
-	function populatePlanting(val){
-		var selectedBlock=val;
+
+	function populatePlanting(val) {
+		var selectedBlock = val;
 		clearElement('plantingId', true);
-		if(!isEmpty(selectedBlock)){
-			$.ajax({
-				 type: "POST",
-		        async: false,
-		        url: "sprayAndFieldManagement_populatePlanting.action",
-		        data: {selectedBlock : selectedBlock},
-		        success: function(result) {
-		        	insertOptions("plantingId", $.parseJSON(result));
-		        	
-		        	if(command=='update'){
-		        		var plantingfar ='<s:property value="sprayAndFieldManagement.planting.id"/>';
-			        	if(plantingfar!=null && plantingfar!='' && plantingfar!='null'){
-			        		$('#plantingId').val(plantingfar).change();
-			        	}
-		        	} 
-		        	
-		        }
-			});
-		}else{
-			clearElement('plantingId',true);
+		if (!isEmpty(selectedBlock)) {
+			$
+					.ajax({
+						type : "POST",
+						async : false,
+						url : "sprayAndFieldManagement_populatePlanting.action",
+						data : {
+							selectedBlock : selectedBlock
+						},
+						success : function(result) {
+							insertOptions("plantingId", $.parseJSON(result));
+
+							if (command == 'update') {
+								var plantingfar = '<s:property value="sprayAndFieldManagement.planting.id"/>';
+								if (plantingfar != null && plantingfar != ''
+										&& plantingfar != 'null') {
+									$('#plantingId').val(plantingfar).change();
+								}
+							}
+
+						}
+					});
+		} else {
+			clearElement('plantingId', true);
 		}
 	}
-	
-	
+
 	function populatePhiAndDosageDetail(chamicalVal) {
 		var variety = $('#grade').val();
 		$('#sMdosage').val('');
 		$('#sMphi').val('');
 		//$('#sMuom').val('');//sMuom
 		$("#sMuom").select2("val", '');
-		if(!isEmpty(chamicalVal)){
-		$.ajax({
-			type : "POST",
-			async : false,
-			url : "sprayAndFieldManagement_populatePhiAndDosageDetails.action",
-			data : {
-				selectedChamical : chamicalVal,
-				selectedVariety : variety
-			},
-			success : function(result) {
-				if (command == 'create') {
-				$('#sMdosage').val(result.sMdosage);
-				if(isEmpty(result.sMphi) || result.sMphi==null || result.sMphi==''){
-				jQuery('#sMphi').prop("readonly",false);
-				var phi = '<s:property value="sprayAndFieldManagement.phi" />';
-				$("#sMphi").val(phi);
-				}else{
-					jQuery('#sMphi').prop("readonly",true);
-					$('#sMphi').val(result.sMphi);
-				}
-				
-				  $('#sMuom').select2({
-					disabled : false
-				});  
-				$('#sMuom').val(result.sMuom).select2().change();
-				 $('#sMuom').select2({
-					disabled : 'readonly'
-				});  
-				}else{
-					
-					var phi = '<s:property value="sprayAndFieldManagement.phi" />';
-					var dose = '<s:property value="sprayAndFieldManagement.dosage" />';
-					var muom = '<s:property value="sprayAndFieldManagement.uom" />';
-					jQuery('#sMphi').prop("readonly",true);
-					jQuery('#sMdosage').prop("readonly",false);
-					$('#sMdosage').val(dose);
-					$("#sMphi").val(phi);
-					jQuery('#sMdosage').prop("readonly",true);
-					  $('#sMuom').select2({
-						disabled : false
-					});  
-					$('#sMuom').val(muom).select2().change();
-					 $('#sMuom').select2({
-						disabled : 'readonly'
-					});  
-			}
-			}
-		});
+		if (!isEmpty(chamicalVal)) {
+			$
+					.ajax({
+						type : "POST",
+						async : false,
+						url : "sprayAndFieldManagement_populatePhiAndDosageDetails.action",
+						data : {
+							selectedChamical : chamicalVal,
+							selectedVariety : variety
+						},
+						success : function(result) {
+							if (command == 'create') {
+								$('#sMdosage').val(result.sMdosage);
+								if (isEmpty(result.sMphi)
+										|| result.sMphi == null
+										|| result.sMphi == '') {
+									jQuery('#sMphi').prop("readonly", false);
+									var phi = '<s:property value="sprayAndFieldManagement.phi" />';
+									$("#sMphi").val(phi);
+								} else {
+									jQuery('#sMphi').prop("readonly", true);
+									$('#sMphi').val(result.sMphi);
+								}
+
+								$('#sMuom').select2({
+									disabled : false
+								});
+								$('#sMuom').val(result.sMuom).select2()
+										.change();
+								$('#sMuom').select2({
+									disabled : 'readonly'
+								});
+							} else {
+
+								var phi = '<s:property value="sprayAndFieldManagement.phi" />';
+								var dose = '<s:property value="sprayAndFieldManagement.dosage" />';
+								var muom = '<s:property value="sprayAndFieldManagement.uom" />';
+								jQuery('#sMphi').prop("readonly", true);
+								jQuery('#sMdosage').prop("readonly", false);
+								/* $('#sMdosage').val(dose);
+								$("#sMphi").val(phi); */
+								$('#sMdosage').val(result.sMdosage);
+								$("#sMphi").val(result.sMphi);
+								jQuery('#sMdosage').prop("readonly", true);
+								$('#sMuom').select2({
+									disabled : false
+								});
+								$('#sMuom').val(result.sMuom).select2()
+										.change();
+								$('#sMuom').select2({
+									disabled : 'readonly'
+								});
+							}
+						}
+					});
 		}
 
+	}
+
+	function populateRecomm(val) {
+
+		var selectedPlantingId = val;
+		if (!isEmpty(selectedPlantingId)) {
+			$
+					.ajax({
+						type : "POST",
+						async : false,
+						url : "sprayAndFieldManagement_populateRecomm.action",
+						data : {
+							selectedPlantingId : selectedPlantingId
+						},
+						success : function(result) {
+
+							if (result != "" && result.recommen != ''
+									&& result.recommen != undefined) {
+								document.getElementById('recommen').value = result.recommen;
+							} else {
+								document.getElementById('recommen').value = "";
+							}
+						}
+					});
+		} else {
+			document.getElementById('recommen').value = "";
+		}
 	}
 </script>
 <body>
@@ -459,8 +508,8 @@
 					<div class="flexform-item">
 						<label for="txt"><s:text name="county.name" /></label>
 						<div class="form-element">
-							<s:select class="form-control  select2" list="{}"
-								headerKey="" theme="simple" name="selectedState"
+							<s:select class="form-control  select2" list="{}" headerKey=""
+								theme="simple" name="selectedState"
 								headerValue="%{getText('txt.select')}" Key="id" Value="name"
 								id="state" maxlength="20"
 								onchange="listLocality(this,'state','localities','city','panchayath','village');" />
@@ -470,8 +519,8 @@
 					<div class="flexform-item">
 						<label for="txt"><s:text name="subcountry.name" /></label>
 						<div class="form-element">
-							<s:select class="form-control  select2" list="{}"
-								headerKey="" theme="simple" name="selectedLocality"
+							<s:select class="form-control  select2" list="{}" headerKey=""
+								theme="simple" name="selectedLocality"
 								headerValue="%{getText('txt.select')}" Key="id" Value="name"
 								id="localities" maxlength="20"
 								onchange="listMunicipalities(this,'localities','city','panchayath','village');" />
@@ -491,8 +540,8 @@
 						<label for="txt"><s:text name="village.name" /></label>
 						<div class="form-element">
 							<s:select class="form-control  select2" list="{}"
-								onchange="loadFarmer(this.value)" headerKey=""
-								theme="simple" name="selectedVillage" maxlength="20"
+								onchange="loadFarmer(this.value)" headerKey="" theme="simple"
+								name="selectedVillage" maxlength="20"
 								headerValue="%{getText('txt.select')}" id="village" />
 						</div>
 					</div>
@@ -502,7 +551,8 @@
 								name="sprayAndFieldManagement.farmer" /><sup
 							style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select name="sprayAndFieldManagement.farmCrops.farm.farmer.id"
+							<s:select
+								name="sprayAndFieldManagement.planting.farmCrops.farm.farmer.id"
 								list="{}" headerKey="" headerValue="%{getText('txt.select')}"
 								listKey="key" listValue="value" theme="simple" id="farmer"
 								onchange="listFarm(this.value);loadAjaxData(this.value);"
@@ -517,7 +567,7 @@
 								name="sprayAndFieldManagement.farm" /><sup style="color: red;">*</sup></label>
 						<div class="form-element">
 							<s:select list="{}" headerKey=""
-								name="sprayAndFieldManagement.farmCrops.farm.id"
+								name="sprayAndFieldManagement.planting.farmCrops.farm.id"
 								headerValue="%{getText('txt.select')}" listKey="key"
 								listValue="value" theme="simple" id="farm"
 								onchange="listFarmsCropProduct(this.value)"
@@ -541,14 +591,14 @@
 							style="color: red;">*</sup></label>
 						<div class="form-element">
 							<s:select class="form-control  select2" id="varietyName"
-								name="sprayAndFieldManagement.farmCrops.id" listKey="key"
-								listValue="value" list="{}" headerKey=""
+								name="sprayAndFieldManagement.planting.farmCrops.id"
+								listKey="key" listValue="value" list="{}" headerKey=""
 								headerValue="%{getText('txt.select')}"
 								onchange="populatePlanting(this.value);" />
 						</div>
 					</div>
-					
-				 <div class="flexform-item">
+
+					<div class="flexform-item">
 						<label for="txt"><s:text name="Planting ID" /><sup
 							style="color: red;">*</sup></label>
 						<div class="form-element">
@@ -556,9 +606,9 @@
 								name="sprayAndFieldManagement.planting.id" listKey="key"
 								listValue="value" list="{}" headerKey=""
 								headerValue="%{getText('txt.select')}"
-								onchange="populateBlockDetail(this.value);populateChamicals(this.value)" />
+								onchange="populateBlockDetail(this.value);populateChamicals(this.value);populateRecomm(this.value)" />
 						</div>
-					</div> 
+					</div>
 
 					<%-- <div class="flexform-item">
 						<label for="txt"><s:text name="blockIds" /><sup
@@ -617,11 +667,10 @@
 
 					<div class="flexform-item">
 						<label for="txt"><s:text
-								name="sprayAndFieldManagement.endDateSpray" />
-								<!-- <sup style="color: red;">*</sup> --></label>
+								name="sprayAndFieldManagement.endDateSpray" /> <!-- <sup style="color: red;">*</sup> --></label>
 						<div class="form-element">
-							<s:textfield name="endDateOfSpraying" id="endDateSpray" theme="simple"
-								maxlength="20"
+							<s:textfield name="endDateOfSpraying" id="endDateSpray"
+								theme="simple" maxlength="20"
 								data-date-format="%{getGeneralDateFormat().toLowerCase()}"
 								size="20" cssClass="date-picker form-control input-sm" />
 						</div>
@@ -645,9 +694,8 @@
 								name="sprayAndFieldManagement.pcbp" /><sup style="color: red;">*</sup></label>
 						<div class="form-element">
 							<s:select class="form-control select2 " id="agroChemicalNamea"
-								name="selectedTradeNameId" Key="id" Value="name"
-								list="{}" headerKey=""
-								headerValue="%{getText('txt.select')}"
+								name="selectedTradeNameId" Key="id" Value="name" list="{}"
+								headerKey="" headerValue="%{getText('txt.select')}"
 								onchange="populatePhiAndDosageDetail(this.value);" />
 						</div>
 					</div>
@@ -697,7 +745,7 @@
 								cssClass="form-control input-sm" />
 						</div>
 					</div>
-					
+
 					<div class="flexform-item">
 						<label for="txt"><s:text
 								name="sprayAndFieldManagement.operatorMedicalReport" /></label>
@@ -797,9 +845,10 @@
 						<label for="txt"><s:text
 								name="sprayAndFieldManagement.phi" /></label>
 						<div class="form-element">
-							<s:textfield  id="sMphi" theme="simple"
+							<s:textfield id="sMphi" theme="simple"
 								name="sprayAndFieldManagement.phi" size="20"
-								cssClass="form-control input-sm" />
+								cssClass="form-control input-sm"
+								onkeypress="return isNumber(event)" />
 
 						</div>
 					</div>
@@ -824,6 +873,25 @@
 								name="sprayAndFieldManagement.uom" Key="id" Value="name"
 								list="umoList" headerKey=""
 								headerValue="%{getText('txt.select')}" />
+						</div>
+					</div>
+					<div class="flexform-item">
+						<label for="txt"><s:text
+								name="sprayAndFieldManagement.activeIngredient" /> <!-- <sup style="color: red;">*</sup> -->
+						</label>
+						<div class="form-element">
+							<s:textfield name="sprayAndFieldManagement.activeIngredient"
+								id="activeIngredient" theme="simple" maxlength="20"
+								cssClass="form-control input-sm" />
+						</div>
+					</div>
+					<div class="flexform-item">
+						<label for="txt"><s:text
+								name="%{getLocaleProperty('sprayAndFieldManagement.recommen')}" /></label>
+						<div class="form-element">
+							<s:textfield name="sprayAndFieldManagement.recommen"
+								id="recommen" theme="simple" class="form-control"
+								readonly="true" />
 						</div>
 					</div>
 

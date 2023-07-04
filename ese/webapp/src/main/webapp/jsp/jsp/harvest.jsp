@@ -230,6 +230,28 @@
 		}
 		
 	}
+	
+	function populateValidateMaxSprayingPHIDate(val){
+		var selectedFarmCrops = $('#cropPlanting').val();
+			if(!isEmpty(selectedFarmCrops) && !isEmpty(val)){
+				$.ajax({
+					type : "POST",
+					async : false,
+					url : "harvest_populateValidateMaxSprayingPHIDate.action",
+					data : {
+						selectedFarmCropsId : selectedFarmCrops,
+						date : val
+					},
+					success : function(result) {
+						if(!isEmpty(result.maxDateVal)){
+						$('#validateError').text(result.maxDateVal);
+						}else{
+							$('#validateError').text("");
+						}
+					}
+				});
+				}
+		}
 
 	
 </script>
@@ -407,7 +429,7 @@
 						<div class="form-element">
 							<s:textfield name="date" id="date" theme="simple" maxlength="10"
 								data-date-format="%{getGeneralDateFormat().toLowerCase()}"
-								size="20" cssClass="date-picker form-control input-sm" />
+								size="20" cssClass="date-picker form-control input-sm" onchange="populateValidateMaxSprayingPHIDate(this.value)"/>
 						</div>
 					</div>
 					<div class="flexform-item">

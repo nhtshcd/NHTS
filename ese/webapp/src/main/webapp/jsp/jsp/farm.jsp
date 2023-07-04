@@ -215,8 +215,8 @@
 						</div>
 					</div>
 					<div class="flexform-item">
-						<label for="txt"><s:text name="farm.landRegNo" /><sup
-							style="color: red;">*</sup></label>
+						<label for="txt"><s:text name="farm.landRegNo" />
+						<!-- <sup style="color: red;">*</sup> --> </label>
 						<div class="form-element">
 							<s:textfield name="farm.landRegNo" class="form-control input-sm"
 								size="20" cssClass="form-control " maxlength="50" theme="simple" id="landRegNo" />

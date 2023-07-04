@@ -1463,5 +1463,23 @@ public class SequenceDAO extends ESEDAO implements ISequenceDAO {
 		return getESESequence(GRADE_ID_SEQ);
 	}
 
+	@SuppressWarnings("unchecked")
+    @Override
+    public String getProductTransferIdSeq() {
+        long selectedSeq = 0;
+        selectedSeq = getESESequence(PRODUCT_TRANSFER_ID_SEQ);
+        String webFarmerId = StringUtil.appendZeroPrefix(String.valueOf(selectedSeq),
+        		PRODUCT_TRANSFER_ID_LENGTH);
+        return webFarmerId;
+    }
+	
+	@SuppressWarnings("unchecked")
+	@Override
+	public String getProductReceptionIdSeq() {
+		long selectedSeq = 0;
+		selectedSeq = getESESequence(PRODUCT_RECEPTION_ID_SEQ);
+		String webFarmerId = StringUtil.appendZeroPrefix(String.valueOf(selectedSeq),PRODUCT_RECEPTION_ID_LENGTH);
+		return webFarmerId;
+	}
 	
 }

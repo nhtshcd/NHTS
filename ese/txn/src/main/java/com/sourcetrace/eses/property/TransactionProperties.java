@@ -190,6 +190,11 @@ public class TransactionProperties {
     public static final String CUSTOMER_NAME = "byrName";
 	public static final String BUYER_ID = "byrId";
     public static final String BUYER_DOWNLOAD_REVISION_NO = "byrRevNo";
+    public static final String BUYER_COUNTRY = "buyrCountry";
+    public static final String BUYER_COUNTRY_CODE = "buyrCountryCode";
+    public static final String BUYER_COUNTY= "buyrCounty";
+    public static final String BUYER_SUB_COUNTY= "buyrSubCounty";
+    public static final String BUYER_WARD= "buyrWard";
     
     public static final String IS_GENERIC="isGeneric";
     public static final String IS_BUYER="isBuyer";

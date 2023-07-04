@@ -13,6 +13,7 @@
 	<s:if test='"update".equalsIgnoreCase(command)'>
 		<s:hidden key="user.id" id="id" />
 	</s:if>
+
 	<s:hidden name="redirectContent" id="redirectContent" />
 	<s:hidden key="command" />
 	<s:hidden key="selecteddropdwon" id="listname" />
@@ -162,11 +163,12 @@
 					<div class="form-element">
 						<s:if test='userImageString!=null && userImageString!=" "'>
 							<s:file name="userImage" id="userImage"
-								onchange="checkImgHeightAndWidth(this)" />
+								onchange="checkImgHeightAndWidth(this);validateImages(this.id)" />
 						</s:if>
 						<s:else>
 							<s:file name="userImage" id="userImage"
-								onchange="checkImgHeightAndWidth(this);validateImage(this.id,['png', 'jpg', 'jpeg','JPG','JPEG','PNG','pdf','PDF'])" cssClass="form-control" />
+								onchange="checkImgHeightAndWidth(this);validateImage(this.id,['png', 'jpg', 'jpeg','JPG','JPEG','PNG','pdf','PDF']);validateImages(this.id)"
+								cssClass="form-control" />
 						</s:else>
 						<button type="button" class="aButtonClsWbg" id="remImg"
 							onclick='deleteFile(<s:property value="user.id" />)'>
@@ -175,7 +177,7 @@
 						</button>
 					</div>
 				</div>
-				
+
 
 			</div>
 		</div>
@@ -203,7 +205,8 @@
 
 					<div class="form-element">
 						<s:textfield name="user.contInfo.phoneNumber" theme="simple"
-							maxlength="20" cssClass="form-control input-sm" onkeypress="return isNumber(event)" />
+							maxlength="20" cssClass="form-control input-sm"
+							onkeypress="return isNumber(event)" />
 					</div>
 				</div>
 
@@ -214,7 +217,8 @@
 					</label>
 					<div class="form-element">
 						<s:textfield name="user.contInfo.mobileNumbere" theme="simple"
-							maxlength="15" cssClass="form-control input-sm" onkeypress="return isNumber(event)"/>
+							maxlength="15" cssClass="form-control input-sm"
+							onkeypress="return isNumber(event)" />
 					</div>
 				</div>
 
@@ -269,21 +273,23 @@
 					<div class="form-element">
 						<s:select name="seletedRole" id="selectRole" list="roles"
 							listKey="key" listValue="value" theme="simple" headerKey=""
-							headerValue="%{getText('txt.select')}" 	onchange="populateExporter(this.value)"
+							headerValue="%{getText('txt.select')}"
+							onchange="populateExporter(this.value)"
 							cssClass="form-control input-sm select2" />
 					</div>
 				</div>
 				<s:if test="getLoggedInDealer()<=0">
-				<div class="flexform-item hide" id="export">
-					<label for="txt"><s:text name="agent.exporter" /> <sup
-						style="color: red;">*</sup></label>
-					<div class="form-element">
-						<s:select name="user.agroChDealer" id="exporter" list="exporterList"
-							listKey="key" listValue="value" theme="simple" headerKey=""
-							headerValue="%{getText('txt.select')}"
-							cssClass="form-control input-sm select2" />
+					<div class="flexform-item hide" id="export">
+						<label for="txt"><s:text name="agent.exporter" /> <sup
+							style="color: red;">*</sup></label>
+						<div class="form-element">
+							<s:select name="user.agroChDealer" id="exporter"
+								list="exporterList" listKey="key" listValue="value"
+								theme="simple" headerKey=""
+								headerValue="%{getText('txt.select')}"
+								cssClass="form-control input-sm select2" />
+						</div>
 					</div>
-				</div>
 				</s:if>
 				<div class="flexform-item">
 					<label for="txt"><s:property
@@ -292,7 +298,7 @@
 							should be less than 100KB )</font> </label>
 					<div class="form-element">
 						<s:file name="file1" id="file1" cssClass="form-control"
-							onchange="setFileTrainingCert(this.value);validateImages(this.id)" />
+							onchange="setFileTrainingCert(this.value);validateImage(this.id,['png', 'jpg', 'jpeg','JPG','JPEG','PNG','pdf','PDF']);validateImages(this.id)" />
 						<s:if
 							test="command=='update' && user.signature!=null && user.signature!=''">
 							<button type="button" class="fa fa-download"
@@ -304,9 +310,11 @@
 					<label for="txt"> <s:text name="user.password" /> <sup
 						style="color: red;"> *</sup></label>
 					<div class="form-element">
-						<s:password id="p" name="user.password" theme="simple" title="%{getPasswordToolTip()}"
-							 cssClass="form-control input-sm" />
-							 <i class="fa fa-eye" id="togglePassword" style="margin-left: -30px; cursor: pointer;" onclick="showPassword(this)"></i>
+						<s:password id="p" name="user.password" theme="simple"
+							title="%{getPasswordToolTip()}" cssClass="form-control input-sm" />
+						<i class="fa fa-eye" id="togglePassword"
+							style="margin-left: -30px; cursor: pointer;"
+							onclick="showPassword(this)"></i>
 					</div>
 				</div>
 
@@ -315,9 +323,11 @@
 						style="color: red;"> *</sup></label>
 					<div class="form-element">
 						<s:password id="p1" name="user.confirmPassword" theme="simple"
-							 cssClass="form-control input-sm" />
-							 <i class="fa fa-eye" id="togglePassword" style="margin-left: -30px; cursor: pointer;" onclick="showPassword1(this)"></i>
-							 <!--  <i class="fa fa-eye-slash" id="togglePassword" style="margin-left: -30px; cursor: pointer;" onclick="showPassword1(this)"></i> -->
+							cssClass="form-control input-sm" />
+						<i class="fa fa-eye" id="togglePassword"
+							style="margin-left: -30px; cursor: pointer;"
+							onclick="showPassword1(this)"></i>
+						<!--  <i class="fa fa-eye-slash" id="togglePassword" style="margin-left: -30px; cursor: pointer;" onclick="showPassword1(this)"></i> -->
 					</div>
 				</div>
 			</div>
@@ -396,6 +406,7 @@
 <s:form id="fileDownload" action="user_populateDownload">
 	<s:hidden id="loadId" name="idd" />
 </s:form>
+
 <%-- <s:form name="cancelform" action="user_list.action">
 	<s:hidden key="currentPage" />
 </s:form> --%>
@@ -513,6 +524,10 @@ var command = '<s:property value="command"/>';
 								
 				
 				populateExporter('<s:property value="seletedRole" />')
+				
+				if(command=='update'){
+					$('#exporter').prop('disabled', true);
+				}
 				});
 	function onCancel() {
 		window.location.href = "<s:property value="redirectContent" />";
@@ -534,9 +549,13 @@ var command = '<s:property value="command"/>';
 	 		if (fileExt == 'jpg' || fileExt == 'jpeg' || fileExt == 'png'
 				|| fileExt == 'JPG' || fileExt == 'JPEG' || fileExt == 'PNG' || fileExt == 'pdf' || fileExt == 'PDF') {
 			if (file.size > 100000) {
-				alert('Image Size Exceeds');
+				//alert(idd)
+				alert('File Size Exceeds');
 				$(s).replaceWith($(s).val('').clone(true));
 				hit = false;
+				if (idd.trim() === "file1") {
+				    document.getElementById("signature").value = "";
+				}
 				enableButton();
 				result=false;
 				

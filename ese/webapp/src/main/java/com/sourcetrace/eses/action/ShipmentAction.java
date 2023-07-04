@@ -1,5 +1,11 @@
 package com.sourcetrace.eses.action;
 
+import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
+import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -11,6 +17,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
@@ -20,6 +28,7 @@ import org.springframework.stereotype.Component;
 import com.sourcetrace.eses.entity.CityWarehouse;
 import com.sourcetrace.eses.entity.CityWarehouseDetail;
 import com.sourcetrace.eses.entity.Customer;
+import com.sourcetrace.eses.entity.DocumentUpload;
 import com.sourcetrace.eses.entity.FarmCrops;
 import com.sourcetrace.eses.entity.Packhouse;
 import com.sourcetrace.eses.entity.PackhouseIncoming;
@@ -33,6 +42,7 @@ import com.sourcetrace.eses.entity.Shipment;
 import com.sourcetrace.eses.entity.ShipmentDetails;
 import com.sourcetrace.eses.entity.Sorting;
 import com.sourcetrace.eses.util.DateUtil;
+import com.sourcetrace.eses.util.FileUtil;
 import com.sourcetrace.eses.util.ObjectUtil;
 import com.sourcetrace.eses.util.StringUtil;
 import com.sourcetrace.eses.util.ValidationUtil;
@@ -50,8 +60,9 @@ public class ShipmentAction extends SwitchAction {
 	private String BUYER_QUERY = "FROM Customer c WHERE c.id=?";
 	private String LOT_NO_QUERY = "FROM CityWarehouse cw WHERE cw.coOperative.id=? AND cw.stockType=? and cw.sortedWeight>0 and cw.isDelete=0";
 	private String CITYWAREHOUSE_QUERY = "FROM Packing cw WHERE cw.batchNo=? AND cw.status=?";
-	//private String PACKHOUSE_BATCH_QUERY = "FROM CityWarehouse cw WHERE cw.id=? AND cw.stockType=?";
-	private String PACKHOUSE_BATCH_QUERY = "FROM CityWarehouse cw WHERE cw.planting.id=? AND cw.stockType=? and cw.isDelete=0";
+	// private String PACKHOUSE_BATCH_QUERY = "FROM CityWarehouse cw WHERE
+	// cw.id=? AND cw.stockType=?";
+	private String PACKHOUSE_BATCH_QUERY = "FROM CityWarehouse cw WHERE cw.id=? AND cw.planting.id=? AND cw.stockType=? and cw.isDelete=0";
 	private String CITYWAREHOUSE_ID_QUERY = "FROM CityWarehouse cw WHERE cw.id=? AND cw.stockType=? and cw.isDelete=0";
 
 	@Getter
@@ -109,22 +120,47 @@ public class ShipmentAction extends SwitchAction {
 	@Getter
 	@Setter
 	private String pid;
-	
+
 	@Getter
 	@Setter
 	private String isEdit;
-	
+
 	@Getter
 	@Setter
 	private String qrCode;
-	
+
 	@Getter
 	@Setter
 	private String lotNos;
+	@Getter
+	@Setter
+	private String selectedBuyerId;
+	@Getter
+	@Setter
+	private String shipmentDestination;
+	@Getter
+	@Setter
+	private String shipmentDestinationCode;
+
+	@Getter
+	@Setter
+	private List<File> shipmentSupportingFiles;
+	@Getter
+	@Setter
+	private String shipmentSupportingFileName;
+	@Getter
+	@Setter
+	private String idd;
+	@Getter
+	@Setter
+	private String ids;
+	@Getter
+	@Setter
+	List<Object[]> ex;
 
 	public String detail() throws Exception {
 		if (id != null && !StringUtil.isEmpty(id) && StringUtil.isLong(id)) {
-			shipment = (Shipment) farmerService.findObjectById(QUERY, new Object[] { Long.valueOf(getId()), 1,3,4 });
+			shipment = (Shipment) farmerService.findObjectById(QUERY, new Object[] { Long.valueOf(getId()), 1, 3, 4 });
 			if (shipment == null) {
 				addActionError(NO_RECORD);
 				return REDIRECT;
@@ -136,13 +172,20 @@ public class ShipmentAction extends SwitchAction {
 			selectedPConsignmentNo = shipment.getPConsignmentNo();
 			shipment.getShipmentDetails().stream().forEach(uu -> {
 				CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(PACKHOUSE_BATCH_QUERY,
-						new Object[] { uu.getCityWarehouse().getPlanting().getId(), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-				
+						new Object[] { uu.getCityWarehouse().getId(), uu.getCityWarehouse().getPlanting().getId(),
+								CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
+
 				Packing sr = (Packing) farmerService.findObjectById(CITYWAREHOUSE_QUERY,
-						new Object[] { cw.getBatchNo(),1 });
+						new Object[] { cw.getBatchNo(), 1 });
 				uu.setSr(sr);
 			});
-			
+
+			if (shipment.getCustomer() != null) {
+
+				shipmentDestination = findShipmentDestinationById(shipment.getCustomer().getId().toString());
+
+			}
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Shipment", shipment.getId());
 			setCurrentPage(getCurrentPage());
 			setCommand(DETAIL);
 			return DETAIL;
@@ -167,6 +210,8 @@ public class ShipmentAction extends SwitchAction {
 
 			shipment = new Shipment();
 
+			// shipment.setShipmentDestination(shipmentDestination);
+			shipment.setShipmentDestination(shipmentDestinationCode);
 			shipment.setPackhouse(packhouse);
 			shipment.setCustomer(customer);
 			shipment.setShipmentDate(DateUtil.convertStringToDate(getShipmentDate(), getGeneralDateFormat()));
@@ -177,18 +222,55 @@ public class ShipmentAction extends SwitchAction {
 			shipment.setLatitude(getLatitude());
 			shipment.setLongitude(getLongitude());
 			shipment.setPConsignmentNo(getSelectedPConsignmentNo());
-			shipment.setKenyaTraceCode(shipment.getPackhouse().getExporter().getName()+"_"+selectedExpLicNo+"_"+getSelectedPConsignmentNo()+"_"+DateUtil.getDateTimWithMinNew());
+			shipment.setKenyaTraceCode(shipment.getPackhouse().getExporter().getName() + "_" + selectedExpLicNo + "_"
+					+ getSelectedPConsignmentNo() + "_" + DateUtil.getDateTimWithMinNew());
 
 			if (shipmentDtl != null && !StringUtil.isEmpty(shipmentDtl)) {
 				Set<ShipmentDetails> shipmentDetails = getShipmentDetails(shipment);
 				shipment.setShipmentDetails(shipmentDetails);
 			}
 			DecimalFormat df = new DecimalFormat(".00");
-			  Double sty;
-			  sty=shipment.getShipmentDetails().stream().mapToDouble(u -> u.getPackingQty() == null ? 0 : Double.valueOf(u.getPackingQty())).sum();
+			Double sty;
+			sty = shipment.getShipmentDetails().stream()
+					.mapToDouble(u -> u.getPackingQty() == null ? 0 : Double.valueOf(u.getPackingQty())).sum();
 			shipment.setTotalShipmentQty(Double.valueOf(df.format(sty)));
 
-			utilService.save(shipment);
+			if (shipmentSupportingFiles != null && shipmentSupportingFiles.size() > 0) {
+				int i = 0;
+				StringBuilder sb = new StringBuilder();
+				for (File file : shipmentSupportingFiles) {
+					shipmentSupportingFileName = StringUtil.removeLastComma(shipmentSupportingFileName);
+					String[] arr1 = shipmentSupportingFileName.split(",");
+					/*
+					 * String[] arr = arr1[i].split("[.]",
+					 * arr1[i].lastIndexOf(".")); String fileName =
+					 * arr[0].substring(arr[0].lastIndexOf("\\") + 1).trim();
+					 */
+
+					int dot = arr1[i].lastIndexOf('.');
+					String fileExtension = arr1[i].substring(dot + 1);
+					System.out.println("fileExtension->" + fileExtension);
+					int sep = arr1[i].lastIndexOf('/');
+					String fileName = arr1[i].substring(sep + 1, dot);
+					System.out.println("fileName->" + fileName);
+
+					if (!fileName.equals("") && fileName != null) {
+						DocumentUpload du = new DocumentUpload();
+						du.setName(fileName);
+						du.setContent(FileUtil.getBinaryFileContent(file));
+						du.setDocFileContentType(fileExtension);
+						du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()));
+						du.setType(DocumentUpload.docType.SHIPMENT.ordinal());
+						du.setFileType(DocumentUpload.fileType.TEXT.ordinal());
+						utilService.save(du);
+						sb.append(String.valueOf(du.getId())).append(",");
+					}
+					i++;
+				}
+				shipment.setShipmentSupportingFiles(sb.toString().substring(0, sb.toString().lastIndexOf(",")));
+			}
+
+			// utilService.save(shipment);
 			utilService.saveShipment(shipment);
 		}
 		return REDIRECT;
@@ -208,9 +290,9 @@ public class ShipmentAction extends SwitchAction {
 				sDetails.setCityWarehouse(cityWarehouse);
 				sDetails.setPackingUnit(list.get(1).toString());
 				sDetails.setPackingQty(list.get(2).toString());
-				if(list.get(4).toString() != null && !StringUtil.isEmpty(list.get(4).toString())){
+				if (list.get(4).toString() != null && !StringUtil.isEmpty(list.get(4).toString())) {
 					sDetails.setQrCodeId(list.get(4).toString());
-				}else{
+				} else {
 					sDetails.setQrCodeId(String.valueOf(DateUtil.getRevisionNumber()));
 				}
 				sDetails.setStatus(1);
@@ -220,7 +302,7 @@ public class ShipmentAction extends SwitchAction {
 						sDetails.setPlanting(planing);
 					}
 				}
-				
+
 				sDetails.setShipment(shipment);
 				shipmentDetailsSet.add(sDetails);
 			});
@@ -230,7 +312,7 @@ public class ShipmentAction extends SwitchAction {
 
 	public String update() throws Exception {
 		if (id != null && !StringUtil.isEmpty(id) && shipment == null) {
-			shipment = (Shipment) farmerService.findObjectById(QUERY, new Object[] { Long.valueOf(getId()), 1,3,4 });
+			shipment = (Shipment) farmerService.findObjectById(QUERY, new Object[] { Long.valueOf(getId()), 1, 3, 4 });
 			if (shipment == null) {
 				addActionError(NO_RECORD);
 				return REDIRECT;
@@ -242,36 +324,21 @@ public class ShipmentAction extends SwitchAction {
 			selectedPConsignmentNo = shipment.getPConsignmentNo();
 			setCurrentPage(getCurrentPage());
 			isEdit = "1";
-			/*Recalling packde = (Recalling) farmerService.findObjectById(
-					"FROM Recalling pd where pd.kenyaTraceCode=?  and pd.status=1", new Object[] { shipment.getPConsignmentNo() });
-			if (packde == null) {
-				isEdit = "1";
-			} else {
-				isEdit = "0";
-			}*/
-			/*shipment.getShipmentDetails().stream().forEach(uu -> {
-				CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(PACKHOUSE_BATCH_QUERY,
-						new Object[] { uu.getPlanting().getId(), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-				Packing sr = (Packing) farmerService.findObjectById(CITYWAREHOUSE_QUERY,
-						new Object[] { cw.getBatchNo(),1 });
-				uu.setSr(sr);
-			});*/
-			
 			shipment.getShipmentDetails().stream().forEach(uu -> {
-				CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(CITYWAREHOUSE_ID_QUERY,
-						new Object[] { uu.getCityWarehouse().getId(), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
+				CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(CITYWAREHOUSE_ID_QUERY, new Object[] {
+						uu.getCityWarehouse().getId(), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
 				Packing sr = (Packing) farmerService.findObjectById(CITYWAREHOUSE_QUERY,
-						new Object[] { cw.getBatchNo(),1 });
+						new Object[] { cw.getBatchNo(), 1 });
 				uu.setSr(sr);
 			});
-			
+
 			id = null;
 			command = UPDATE;
 			request.setAttribute(HEADING, getText("shipmentupdate"));
 		} else {
 			if (shipment != null) {
 				Shipment s = (Shipment) farmerService.findObjectById(QUERY,
-						new Object[] { Long.valueOf(shipment.getId()), 1,3,4 });
+						new Object[] { Long.valueOf(shipment.getId()), 1, 3, 4 });
 
 				Packhouse pHouse = (Packhouse) farmerService.findObjectById(PACKHOUSE_QUERY,
 						new Object[] { Long.valueOf(getSelectedPackhouse()), 1 });
@@ -279,11 +346,13 @@ public class ShipmentAction extends SwitchAction {
 				Customer c = (Customer) farmerService.findObjectById(BUYER_QUERY,
 						new Object[] { Long.valueOf(getSelectedBuyer()) });
 				Map<CityWarehouse, Double> existock = new HashMap<CityWarehouse, Double>();
-				s.getShipmentDetails().stream().filter(uu-> uu.getShipment().getStatus() != null && !uu.getShipment().getStatus().equals(4)).forEach(uu -> {
-					existock.put(uu.getCityWarehouse(), Double.valueOf(uu.getPackingQty()));
-				});
-				
-				existock.entrySet().stream().forEach(uu ->{
+				s.getShipmentDetails().stream()
+						.filter(uu -> uu.getShipment().getStatus() != null && !uu.getShipment().getStatus().equals(4))
+						.forEach(uu -> {
+							existock.put(uu.getCityWarehouse(), Double.valueOf(uu.getPackingQty()));
+						});
+
+				existock.entrySet().stream().forEach(uu -> {
 					CityWarehouse cityWarehouse = uu.getKey();
 					if (cityWarehouse != null) {
 
@@ -299,44 +368,78 @@ public class ShipmentAction extends SwitchAction {
 						utilService.update(cityWarehouse);
 					}
 				});
-				
+
 				s.setShipmentDate(DateUtil.convertStringToDate(getShipmentDate(), getGeneralDateFormat()));
 				s.setPackhouse(pHouse);
 				s.setCustomer(c);
-				
+
+				// s.setShipmentDestination(shipmentDestination);
+				s.setShipmentDestination(shipmentDestinationCode);
 
 				s.setPConsignmentNo(getSelectedPConsignmentNo());
 				s.setUpdatedDate(new Date());
 				s.setUpdatedUser(getUsername());
-				if(s.getStatus() != null && !StringUtil.isEmpty(s.getStatus()) && s.getStatus().equals(4)){
+				if (s.getStatus() != null && !StringUtil.isEmpty(s.getStatus()) && s.getStatus().equals(4)) {
 					Packhouse packExp = (Packhouse) farmerService.findObjectById(
 							"FROM Packhouse f where f.id=? and f.exporter.status=1 and f.exporter.isActive=1 and f.status=1  ORDER BY f.name ASC",
 							new Object[] { Long.valueOf(pHouse.getId()) });
-					if(packExp == null || StringUtil.isEmpty(packExp)){
+					if (packExp == null || StringUtil.isEmpty(packExp)) {
 						s.setStatus(3);
-					}else{
+					} else {
 						s.setStatus(1);
 					}
-					s.setKenyaTraceCode(s.getPackhouse().getExporter().getName()+"_"+selectedExpLicNo+"_"+getSelectedPConsignmentNo()+"_"+DateUtil.getDateTimWithMinNew());
+					s.setKenyaTraceCode(s.getPackhouse().getExporter().getName() + "_" + selectedExpLicNo + "_"
+							+ getSelectedPConsignmentNo() + "_" + DateUtil.getDateTimWithMinNew());
 				}
 				Set<ShipmentDetails> sDtl = getShipmentDetails(s);
 				DecimalFormat df = new DecimalFormat(".00");
-			    Double sty=sDtl.stream()
+				Double sty = sDtl.stream()
 						.mapToDouble(u -> u.getPackingQty() == null ? 0 : Double.valueOf(u.getPackingQty())).sum();
 				s.setTotalShipmentQty(Double.valueOf(df.format(sty)));
-				s.getShipmentDetails().clear();
-				utilService.saveOrUpdate(s);
 
-				s.setShipmentDetails(sDtl);
+				if (shipmentSupportingFiles != null && shipmentSupportingFiles.size() > 0) {
+					int i = 0;
+					StringBuilder sb = new StringBuilder();
+					for (File file : shipmentSupportingFiles) {
+						shipmentSupportingFileName = StringUtil.removeLastComma(shipmentSupportingFileName);
+						String[] arr1 = shipmentSupportingFileName.split(",");
 
-				if (s.getShipmentDetails() != null && s.getShipmentDetails().size() > 0) {
-					s.getShipmentDetails().stream().filter(sd -> sd != null && !ObjectUtil.isEmpty(sd)).forEach(sd -> {
-						sd.setShipment(s);
-						utilService.save(sd);
-					});
+						/*
+						 * String[] arr = arr1[i].split("[.]",
+						 * arr1[i].lastIndexOf(".")); String fileName =
+						 * arr[0].substring(arr[0].lastIndexOf("\\") +
+						 * 1).trim();
+						 */
+
+						int dot = arr1[i].lastIndexOf('.');
+						String fileExtension = arr1[i].substring(dot + 1);
+						System.out.println("fileExtension->" + fileExtension);
+						int sep = arr1[i].lastIndexOf('/');
+						String fileName = arr1[i].substring(sep + 1, dot);
+						System.out.println("fileName->" + fileName);
+
+						if (!fileName.equals("") && fileName != null) {
+							DocumentUpload du = new DocumentUpload();
+							du.setName(fileName);
+							du.setContent(FileUtil.getBinaryFileContent(file));
+							du.setDocFileContentType(fileExtension);
+							du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()));
+							du.setType(DocumentUpload.docType.SHIPMENT.ordinal());
+							du.setFileType(DocumentUpload.fileType.TEXT.ordinal());
+							utilService.save(du);
+							sb.append(String.valueOf(du.getId())).append(",");
+						}
+						i++;
+					}
+					s.setShipmentSupportingFiles(sb.toString().substring(0, sb.toString().lastIndexOf(",")));
 				}
-				updateextingShipment(existock,s);
-				//utilService.updateShipment(existock,s);
+
+				s.getShipmentDetails().clear();
+				s.getShipmentDetails().addAll(sDtl);
+
+				utilService.saveOrUpdate(s);
+				updateextingShipment(existock, s);
+				// utilService.updateShipment(existock,s);
 			}
 			setCurrentPage(getCurrentPage());
 			request.setAttribute(HEADING, "shipmentlist");
@@ -348,17 +451,21 @@ public class ShipmentAction extends SwitchAction {
 	public String delete() {
 		String result = null;
 		if (id != null && !StringUtil.isEmpty(id)) {
-			Shipment s = (Shipment) farmerService.findObjectById(QUERY, new Object[] { Long.valueOf(getId()), 1,3,4 });
+			Shipment s = (Shipment) farmerService.findObjectById(QUERY,
+					new Object[] { Long.valueOf(getId()), 1, 3, 4 });
 			if (s == null) {
 				addActionError(NO_RECORD);
 				return null;
 			} else if (!ObjectUtil.isEmpty(s)) {
 				s.setStatus(ParentEntity.Active.DELETED.ordinal());
 				utilService.update(s);
-				s.getShipmentDetails().stream().filter(uu -> uu.getCityWarehouse()!=null && uu.getShipment().getStatus() != null && !uu.getShipment().getStatus().equals(4)).forEach(uu -> {
-					uu.getCityWarehouse().setSortedWeight(uu.getCityWarehouse().getSortedWeight()+Double.valueOf(uu.getPackingQty()));
-					utilService.update(uu.getCityWarehouse());
-				});
+				s.getShipmentDetails().stream().filter(uu -> uu.getCityWarehouse() != null
+						&& uu.getShipment().getStatus() != null && !uu.getShipment().getStatus().equals(4))
+						.forEach(uu -> {
+							uu.getCityWarehouse().setSortedWeight(
+									uu.getCityWarehouse().getSortedWeight() + Double.valueOf(uu.getPackingQty()));
+							utilService.update(uu.getCityWarehouse());
+						});
 				result = REDIRECT;
 			}
 		}
@@ -367,171 +474,191 @@ public class ShipmentAction extends SwitchAction {
 
 	public void populateLotNumbers() {
 		JSONArray jsnArr = new JSONArray();
-		if(!pid.isEmpty()){
-			
+		if (!pid.isEmpty()) {
+
 			List<CityWarehouse> cwList = (List<CityWarehouse>) farmerService.listObjectById(LOT_NO_QUERY,
 					new Object[] { Long.valueOf(pid), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-			cwList.stream().filter(u -> u.getBatchNo()!=null).map( u -> u.getBatchNo()).distinct().forEach(cw -> {
-				jsnArr.add(getJSONObject(cw,cw));
+			cwList.stream().filter(u -> u.getBatchNo() != null).map(u -> u.getBatchNo()).distinct().forEach(cw -> {
+				jsnArr.add(getJSONObject(cw, cw));
 			});
 		}
 
 		sendAjaxResponse(jsnArr);
 	}
 
-/*	public void populateBlock() {
-		JSONArray jsnArr = new JSONArray();
-		if (selectedLotNo != null && !StringUtil.isEmpty(selectedLotNo)) {
-			List<Object[]> cwList = (List<Object[]>) farmerService.listObjectById(
-					"select  ct.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0",
-					new Object[] { CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), selectedLotNo });
-
-			cwList.stream().forEach(cw -> {
-				jsnArr.add(getJSONObject(cw[0].toString(),cw[1].toString()+"-"+cw[2].toString()));
-			});
-		}
-		sendAjaxResponse(jsnArr);
-	}*/
+	/*
+	 * public void populateBlock() { JSONArray jsnArr = new JSONArray(); if
+	 * (selectedLotNo != null && !StringUtil.isEmpty(selectedLotNo)) {
+	 * List<Object[]> cwList = (List<Object[]>) farmerService.listObjectById(
+	 * "select  ct.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0"
+	 * , new Object[] { CityWarehouse.Stock_type.PACKING_STOCK.ordinal(),
+	 * selectedLotNo });
+	 * 
+	 * cwList.stream().forEach(cw -> {
+	 * jsnArr.add(getJSONObject(cw[0].toString(),cw[1].toString()+"-"+cw[2].
+	 * toString())); }); } sendAjaxResponse(jsnArr); }
+	 */
 	public void populateBlock() {
 		JSONArray jsnArr = new JSONArray();
 		if (selectedLotNo != null && !StringUtil.isEmpty(selectedLotNo)) {
-			/*List<Object[]> cwList = (List<Object[]>) farmerService.listObjectById(
-					"select  ct.farmcrops.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0",
-					new Object[] { CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), selectedLotNo });*/
-			
+			/*
+			 * List<Object[]> cwList = (List<Object[]>)
+			 * farmerService.listObjectById(
+			 * "select  ct.farmcrops.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0"
+			 * , new Object[] {
+			 * CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), selectedLotNo
+			 * });
+			 */
+
 			List<Object[]> cwList = new ArrayList<>();
 			if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
 				cwList = (List<Object[]>) farmerService.listObjectById(
-						"select  ct.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0 and ct.isDelete=0 and ct.farmcrops.exporter.id=?",
-						new Object[] { CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), selectedLotNo,Long.valueOf(getLoggedInDealer()) });
-			}else{
+						"select distinct ct.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0 and ct.isDelete=0 and ct.farmcrops.exporter.id=? group by ct.farmcrops.blockId",
+						new Object[] { CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), selectedLotNo,
+								Long.valueOf(getLoggedInDealer()) });
+			} else {
 				cwList = (List<Object[]>) farmerService.listObjectById(
-						"select  ct.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0 and ct.isDelete=0",
+						"select distinct ct.id,ct.farmcrops.blockId,ct.farmcrops.blockName from  CityWarehouse ct where ct.stockType=? and ct.batchNo=? and ct.sortedWeight>0 and ct.isDelete=0 group by ct.farmcrops.blockId",
 						new Object[] { CityWarehouse.Stock_type.PACKING_STOCK.ordinal(), selectedLotNo });
 			}
-			
-			cwList.stream().forEach(cw -> {
-				jsnArr.add(getJSONObject(cw[0].toString(),cw[1].toString()+"-"+cw[2].toString()));
+
+			cwList.stream().distinct().forEach(cw -> {
+				jsnArr.add(getJSONObject(cw[0].toString(), cw[1].toString() + "-" + cw[2].toString()));
 			});
 		}
 		sendAjaxResponse(jsnArr);
 	}
 
-	
-/*	public void populatePlanting() {
-		JSONArray plantingarr = new JSONArray();
-		if (selectedBlock != null && !ObjectUtil.isEmpty(selectedBlock) && !selectedBlock.equals("")) {
-			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.id=? AND cw.stockType=?",
-					new Object[] { Long.valueOf(selectedBlock), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-			if(cw!=null){
-				
-				LinkedList<Object> parame = new LinkedList();
-				String qry = "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=?  and p.status=1 ORDER BY p.id ASC";
-				parame.add(Long.valueOf(cw.getFarmcrops().getId()));
-				if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
-					qry = "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=?  and p.status=1 and fc.exporter.id=? ORDER BY p.id ASC";
-					parame.add(Long.valueOf(getLoggedInDealer()));
-				}
+	/*
+	 * public void populatePlanting() { JSONArray plantingarr = new JSONArray();
+	 * if (selectedBlock != null && !ObjectUtil.isEmpty(selectedBlock) &&
+	 * !selectedBlock.equals("")) { CityWarehouse cw = (CityWarehouse)
+	 * farmerService.
+	 * findObjectById("FROM CityWarehouse cw WHERE cw.id=? AND cw.stockType=?",
+	 * new Object[] { Long.valueOf(selectedBlock),
+	 * CityWarehouse.Stock_type.PACKING_STOCK.ordinal() }); if(cw!=null){
+	 * 
+	 * LinkedList<Object> parame = new LinkedList(); String qry =
+	 * "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=?  and p.status=1 ORDER BY p.id ASC"
+	 * ; parame.add(Long.valueOf(cw.getFarmcrops().getId())); if
+	 * (getLoggedInDealer() != null && getLoggedInDealer() > 0) { qry =
+	 * "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=?  and p.status=1 and fc.exporter.id=? ORDER BY p.id ASC"
+	 * ; parame.add(Long.valueOf(getLoggedInDealer())); }
+	 * 
+	 * List<Object[]> growerList = (List<Object[]>)
+	 * farmerService.listObjectById(qry, parame.toArray()); //List<Planting>
+	 * dataList =
+	 * utilService.listPlantingByFarmCropsId(cw.getFarmcrops().getId());
+	 * growerList.stream().distinct().forEach(f -> {
+	 * plantingarr.add(getJSONObject(f[0].toString(),f[1].toString())); }); } }
+	 * sendAjaxResponse(plantingarr); }
+	 */
 
-				List<Object[]> growerList = (List<Object[]>) farmerService.listObjectById(qry, parame.toArray());
-				//List<Planting> dataList = utilService.listPlantingByFarmCropsId(cw.getFarmcrops().getId());
-				growerList.stream().distinct().forEach(f -> {
-					plantingarr.add(getJSONObject(f[0].toString(),f[1].toString()));
-				});
-			}
-		}
-		sendAjaxResponse(plantingarr);
-	}*/
-	
 	public void populatePlanting() {
 		JSONArray plantingarr = new JSONArray();
-		if (selectedBlock != null && !ObjectUtil.isEmpty(selectedBlock) && !selectedBlock.equals("") && lotNos != null && !ObjectUtil.isEmpty(lotNos) && !lotNos.equals("")) {
-			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.id=? AND cw.stockType=? and cw.isDelete=0",
+		if (selectedBlock != null && !ObjectUtil.isEmpty(selectedBlock) && !selectedBlock.equals("") && lotNos != null
+				&& !ObjectUtil.isEmpty(lotNos) && !lotNos.equals("")) {
+			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
+					"FROM CityWarehouse cw WHERE cw.id=? and cw.sortedWeight>0 AND cw.stockType=? and cw.isDelete=0",
 					new Object[] { Long.valueOf(selectedBlock), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-			if(cw!=null){
-				
+			if (cw != null) {
+
 				LinkedList<Object> parame = new LinkedList();
-				String qry = "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=? and ct.isDelete=0  and p.status=1 ORDER BY p.id ASC";
+				String qry = "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=? and ct.sortedWeight>0 and ct.isDelete=0  and p.status=1 ORDER BY p.id ASC";
 				parame.add(Long.valueOf(cw.getFarmcrops().getId()));
 				if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
-					qry = "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=? and ct.isDelete=0 and p.status=1 and fc.exporter.id=? ORDER BY p.id ASC";
+					qry = "select distinct p.id,p.plantingId from CityWarehouse ct join ct.planting p join p.farmCrops fc where fc.id=? and ct.sortedWeight>0 and ct.isDelete=0 and p.status=1 and fc.exporter.id=? ORDER BY p.id ASC";
 					parame.add(Long.valueOf(getLoggedInDealer()));
 				}
 
 				List<Object[]> growerList = (List<Object[]>) farmerService.listObjectById(qry, parame.toArray());
 				growerList.stream().distinct().forEach(f -> {
-					if(f[0]!=null){
-						CityWarehouse cw1 = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.planting.id=? AND cw.batchNo=? AND cw.stockType=? and cw.isDelete=0",
-								new Object[] { Long.valueOf(f[0].toString()),lotNos, CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-						if(cw1!=null){
-							PackingDetail sr = (PackingDetail) farmerService.findObjectById("FROM PackingDetail cw WHERE cw.packing.batchNo=? AND cw.planting.id=? AND cw.packing.status=1",
-									new Object[] { cw1.getBatchNo(),Long.valueOf(cw1.getPlanting().getId())});
-							if(sr!=null && cw1.getPlanting()!=null && cw1.getPlanting().getVariety()!=null && sr.getPacking()!=null){
-								plantingarr.add(getJSONObject(f[0].toString(),f[1].toString()));
-								
+					if (f[0] != null) {
+						CityWarehouse cw1 = (CityWarehouse) farmerService.findObjectById(
+								"FROM CityWarehouse cw WHERE cw.planting.id=? AND cw.batchNo=? and cw.sortedWeight>0 AND cw.stockType=? and cw.isDelete=0",
+								new Object[] { Long.valueOf(f[0].toString()), lotNos,
+										CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
+						if (cw1 != null) {
+							PackingDetail sr = (PackingDetail) farmerService.findObjectById(
+									"FROM PackingDetail cw WHERE cw.packing.batchNo=? AND cw.planting.id=? AND cw.packing.status=1",
+									new Object[] { cw1.getBatchNo(), Long.valueOf(cw1.getPlanting().getId()) });
+							if (sr != null && cw1.getPlanting() != null && cw1.getPlanting().getVariety() != null
+									&& sr.getPacking() != null) {
+								plantingarr.add(getJSONObject(f[0].toString(), f[1].toString()));
+
 							}
 						}
 					}
-					
+
 				});
 			}
 		}
 		sendAjaxResponse(plantingarr);
 	}
-	
+
 	public void populateProductVariety() {
 		JSONObject jss = new JSONObject();
 		if (selectedLotNo != null && !StringUtil.isEmpty(selectedLotNo)) {
-			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.planting.id=? AND cw.batchNo=? AND cw.stockType=? and cw.isDelete=0",
-					new Object[] { Long.valueOf(selectedLotNo),lotNos, CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-			PackingDetail sr = (PackingDetail) farmerService.findObjectById("FROM PackingDetail cw WHERE cw.packing.batchNo=? AND cw.planting.id=? AND cw.packing.status=1",
-					new Object[] { cw.getBatchNo(),Long.valueOf(cw.getPlanting().getId())});
+			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
+					"FROM CityWarehouse cw WHERE cw.planting.id=? AND cw.batchNo=? AND cw.stockType=? and cw.isDelete=0",
+					new Object[] { Long.valueOf(selectedLotNo), lotNos,
+							CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
+			PackingDetail sr = (PackingDetail) farmerService.findObjectById(
+					"FROM PackingDetail cw WHERE cw.packing.batchNo=? AND cw.planting.id=? AND cw.packing.status=1",
+					new Object[] { cw.getBatchNo(), Long.valueOf(cw.getPlanting().getId()) });
 			jss.put("product", cw.getPlanting().getVariety().getName());
 			jss.put("variety", cw.getPlanting().getGrade().getName());
 			jss.put("lotQty", cw.getSortedWeight());
 			jss.put("createdDate", getGeneralDateFormat(String.valueOf(sr.getPacking().getPackingDate())));
-			jss.put("qrCode", sr !=null && sr.getQrCodeId() !=null && !StringUtil.isEmpty(sr.getQrCodeId()) ? String.valueOf(sr.getQrCodeId()) : " ");
-			//jss.put("detailId", sr !=null && sr.getId() !=null && !StringUtil.isEmpty(sr.getId()) ? String.valueOf(sr.getId()) : " ");
+			jss.put("qrCode", sr != null && sr.getQrCodeId() != null && !StringUtil.isEmpty(sr.getQrCodeId())
+					? String.valueOf(sr.getQrCodeId()) : " ");
+			jss.put("ctyId", cw.getId());
+			// jss.put("detailId", sr !=null && sr.getId() !=null &&
+			// !StringUtil.isEmpty(sr.getId()) ? String.valueOf(sr.getId()) : "
+			// ");
 		}
 		sendAjaxResponse(jss);
 	}
-	
-	public void populateqrCodecheck(){
+
+	public void populateqrCodecheck() {
 		JSONObject jss = new JSONObject();
 		if (qrCode != null && !StringUtil.isEmpty(qrCode)) {
-			Shipment sr = (Shipment) farmerService.findObjectById("FROM Shipment pi LEFT JOIN FETCH pi.shipmentDetails pid WHERE pid.status=? and pid.qrCodeId=?",
-					new Object[] { String.valueOf("1"),String.valueOf(qrCode) });
-			if(sr != null || !StringUtil.isEmpty(sr)){
+			Shipment sr = (Shipment) farmerService.findObjectById(
+					"FROM Shipment pi LEFT JOIN FETCH pi.shipmentDetails pid WHERE pid.status=? and pid.qrCodeId=?",
+					new Object[] { String.valueOf("1"), String.valueOf(qrCode) });
+			if (sr != null || !StringUtil.isEmpty(sr)) {
 				jss.put("QRCheck", "1");
-			}else{
+			} else {
 				jss.put("QRCheck", "0");
 			}
 		}
 		sendAjaxResponse(jss);
 	}
-/*	public void populateProductVariety() {
-		JSONObject jss = new JSONObject();
-		if (selectedLotNo != null && !StringUtil.isEmpty(selectedLotNo)) {
-			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(PACKHOUSE_BATCH_QUERY,
-					new Object[] { Long.valueOf(selectedLotNo), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-			Packing sr = (Packing) farmerService.findObjectById(CITYWAREHOUSE_QUERY,
-					new Object[] { cw.getBatchNo(),1 });
-			jss.put("product", cw.getPlanting().getVariety().getName());
-			jss.put("variety", cw.getPlanting().getGrade().getName());
-			jss.put("lotQty", cw.getSortedWeight());
-			jss.put("createdDate", getGeneralDateFormat(String.valueOf(sr.getPackingDate())));
-		}
-		sendAjaxResponse(jss);
-	}
-*/
+
+	/*
+	 * public void populateProductVariety() { JSONObject jss = new JSONObject();
+	 * if (selectedLotNo != null && !StringUtil.isEmpty(selectedLotNo)) {
+	 * CityWarehouse cw = (CityWarehouse)
+	 * farmerService.findObjectById(PACKHOUSE_BATCH_QUERY, new Object[] {
+	 * Long.valueOf(selectedLotNo),
+	 * CityWarehouse.Stock_type.PACKING_STOCK.ordinal() }); Packing sr =
+	 * (Packing) farmerService.findObjectById(CITYWAREHOUSE_QUERY, new Object[]
+	 * { cw.getBatchNo(),1 }); jss.put("product",
+	 * cw.getPlanting().getVariety().getName()); jss.put("variety",
+	 * cw.getPlanting().getGrade().getName()); jss.put("lotQty",
+	 * cw.getSortedWeight()); jss.put("createdDate",
+	 * getGeneralDateFormat(String.valueOf(sr.getPackingDate()))); }
+	 * sendAjaxResponse(jss); }
+	 */
 	public void populateExportLicenseNo() {
 		JSONObject jss = new JSONObject();
 		if (expLicNo != null && !StringUtil.isEmpty(expLicNo)) {
 			Packhouse packhouse = (Packhouse) farmerService.findObjectById(PACKHOUSE_QUERY,
 					new Object[] { Long.valueOf(expLicNo), Integer.valueOf(1) });
-			//jss.put("expLicNo", packhouse.getExporter().getRegNumber());4
-			if(packhouse!=null){
-			jss.put("expLicNo", packhouse.getExporter().getRefLetterNo());}
+			// jss.put("expLicNo", packhouse.getExporter().getRegNumber());4
+			if (packhouse != null) {
+				jss.put("expLicNo", packhouse.getExporter().getRefLetterNo());
+			}
 		}
 		sendAjaxResponse(jss);
 	}
@@ -544,11 +671,11 @@ public class ShipmentAction extends SwitchAction {
 		}
 		if (getSelectedPackhouse() == null || StringUtil.isEmpty(getSelectedPackhouse())) {
 			errorCodes.put("empty.shipment.packhouse", getLocaleProperty("empty.shipment.packhouse"));
-		}else{
+		} else {
 			Packhouse packhouse = (Packhouse) farmerService.findObjectById(
 					"FROM Packhouse f where f.id=? and f.exporter.status=1 and f.exporter.isActive=1 and f.status=1  ORDER BY f.name ASC",
 					new Object[] { Long.valueOf(getSelectedPackhouse()) });
-			if(packhouse == null || StringUtil.isEmpty(packhouse)){
+			if (packhouse == null || StringUtil.isEmpty(packhouse)) {
 				errorCodes.put("inactive.packhouse.export", getLocaleProperty("inactive.packhouse.export"));
 			}
 		}
@@ -560,50 +687,52 @@ public class ShipmentAction extends SwitchAction {
 		}
 
 		if (getSelectedPConsignmentNo() != null && !StringUtil.isEmpty(getSelectedPConsignmentNo())) {
-			
 
-				Shipment ship = (Shipment) farmerService.findObjectById("FROM Shipment s WHERE s.pConsignmentNo=? and s.status!=2",new Object[] { getSelectedPConsignmentNo() });
-				
-				if (ship != null  && (shipment.getId() == null ||  !shipment.getId().equals(ship.getId()))) {
+			Shipment ship = (Shipment) farmerService.findObjectById(
+					"FROM Shipment s WHERE s.pConsignmentNo=? and s.status!=2",
+					new Object[] { getSelectedPConsignmentNo() });
 
-						errorCodes.put("duplicate.consignmentno", "duplicate.consignmentno");
-						
-				}else{
-					
-				}
+			if (ship != null && (shipment.getId() == null || !shipment.getId().equals(ship.getId()))) {
 
-			
+				errorCodes.put("duplicate.consignmentno", "duplicate.consignmentno");
+
+			} else {
+
+			}
+
 		} else {
 			errorCodes.put("empty.shipment.pConsignmentNo", getLocaleProperty("empty.shipment.pConsignmentNo"));
 		}
 		if (getShipmentDtl() == null || StringUtil.isEmpty(getShipmentDtl())) {
 			errorCodes.put("empty.packerdetails", getLocaleProperty("empty.packerdetails"));
-		}else{
+		} else {
 			List<String> sList = Arrays.asList(getShipmentDtl().split("@"));
 			int[] index = { 0 };
 			sList.stream().filter(obj -> !StringUtil.isEmpty(obj)).forEach(sd -> {
 				List<String> list = Arrays.asList(sd.split("#"));
 				sList.get(index[0]++);
 				int currentIndex = index[0];
-				if(list.get(4).toString() != null && !StringUtil.isEmpty(list.get(4).toString())){
+				if (list.get(4).toString() != null && !StringUtil.isEmpty(list.get(4).toString())) {
 					CityWarehouse cityWarehouse = (CityWarehouse) farmerService.findObjectById(CITYWAREHOUSE_ID_QUERY,
-							new Object[] { Long.valueOf(list.get(0).toString()),CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
-					
-					ShipmentDetails sr = (ShipmentDetails) farmerService.findObjectById("FROM ShipmentDetails pi WHERE pi.shipment.status!=2 and pi.cityWarehouse.id=?",
-						new Object[] { Long.valueOf(cityWarehouse.getId()) });
-					
-				
-				if (sr != null && !sr.getId().equals(Long.valueOf(list.get(5).toString()))) {
-					errorCodes.put("empty.shipment.sortQr"+currentIndex, "Row" + currentIndex + ": "+
-							getLocaleProperty("empty.shipment.sortQr"));
-				}
+							new Object[] { Long.valueOf(list.get(0).toString()),
+									CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
+
+					ShipmentDetails sr = (ShipmentDetails) farmerService.findObjectById(
+							"FROM ShipmentDetails pi WHERE pi.shipment.status!=2 and pi.cityWarehouse.id=?",
+							new Object[] { Long.valueOf(cityWarehouse.getId()) });
+
+					if (sr != null && !sr.getId().equals(Long.valueOf(list.get(5).toString()))) {
+						errorCodes.put("empty.shipment.sortQr" + currentIndex,
+								"Row" + currentIndex + ": " + getLocaleProperty("empty.shipment.sortQr"));
+					}
 				}
 			});
 		}
 		printErrorCodes(errorCodes);
 	}
-	public void updateextingShipment( Map<CityWarehouse, Double> existingstock,Shipment shipment) {
-	
+
+	public void updateextingShipment(Map<CityWarehouse, Double> existingstock, Shipment shipment) {
+
 		shipment.getShipmentDetails().stream().forEach(uu -> {
 			CityWarehouse cityWarehouse = uu.getCityWarehouse();
 			if (cityWarehouse != null) {
@@ -621,6 +750,72 @@ public class ShipmentAction extends SwitchAction {
 			}
 		});
 
+	}
+
+	public void populateCountry() throws Exception {
+
+		if (selectedBuyerId != null && !StringUtil.isEmpty(selectedBuyerId)) {
+			if (!StringUtil.isEmpty(selectedBuyerId)) {
+				List<Object[]> farmerData = utilService.getBuyerCountry(selectedBuyerId);
+				JSONObject jsonObj = new JSONObject();
+				if (farmerData != null && !ObjectUtil.isEmpty(farmerData)) {
+					farmerData.stream().distinct().forEach(a -> {
+
+						/*jsonObj.put("shipmentDestination",
+								a[1] != null && !ObjectUtil.isEmpty(a[1]) ? a[1].toString() : "");*/
+						jsonObj.put("shipmentDestinationCode",
+								a[1] != null && !ObjectUtil.isEmpty(a[1]) ? a[1].toString() : "");
+
+					});
+					sendAjaxResponse(jsonObj);
+				}
+			}
+		}
+	}
+
+	public String downloadMultipleImagesBasedOnDocumentId() throws IOException {
+		if (!StringUtil.isEmpty(idd) && !StringUtil.isEmpty(ids)) {
+			Shipment shh = (Shipment) farmerService.findObjectById(QUERY, new Object[] { Long.valueOf(ids), 1, 3, 4 });
+			if (idd != null && !StringUtil.isEmpty(idd) && shh != null) {
+				OutputStream out = response.getOutputStream();
+				String[] fileIds = idd.split(",");
+				response.setContentType("application/zip");
+				response.setHeader("Content-Disposition", "attachment; filename=\"Shipment_Supporting_Files_"
+						+ shh.getPConsignmentNo() + "_" + DateUtil.getDateTimWithMin() + ".zip\"");
+				ZipOutputStream output = null;
+				byte[] buffer = new byte[10240];
+				try {
+					output = new ZipOutputStream(new BufferedOutputStream(response.getOutputStream(), 10240));
+					for (String fileId : fileIds) {
+						DocumentUpload dd = utilService.findDocumentUploadById(Long.valueOf(fileId));
+						if (dd.getContent() == null)
+							continue;
+						InputStream input = null;
+						try {
+							input = new ByteArrayInputStream(dd.getContent());
+							output.putNextEntry(new ZipEntry(dd.getName() + "." + dd.getDocFileContentType()));
+							for (int length = 0; (length = input.read(buffer)) > 0;) {
+								output.write(buffer, 0, length);
+							}
+							output.closeEntry();
+						} finally {
+							if (input != null)
+								try {
+									input.close();
+								} catch (IOException logOrIgnore) {
+								}
+						}
+					}
+				} finally {
+					if (output != null)
+						try {
+							output.close();
+						} catch (IOException logOrIgnore) {
+						}
+				}
+			}
+		}
+		return null;
 	}
 
 }

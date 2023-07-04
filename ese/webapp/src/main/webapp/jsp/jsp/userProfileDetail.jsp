@@ -61,9 +61,9 @@ function onCancel(){
 							</p>
 						</div>
 
-					</div>
+						<!-- </div>
 
-					<div class="formContainerWrapper dynamic-form-con">
+					<div class="formContainerWrapper dynamic-form-con"> -->
 						<h2>
 							<s:text name="info.personal" />
 						</h2>
@@ -106,8 +106,8 @@ function onCancel(){
 								<s:text name='%{user.language}' />
 							</p>
 						</div>
-					</div>
-					<div class="formContainerWrapper dynamic-form-con">
+						<!-- </div>
+					<div class="formContainerWrapper dynamic-form-con"> -->
 						<h2>
 							<s:text name="info.contact" />
 						</h2>
@@ -149,8 +149,8 @@ function onCancel(){
 						</div>
 
 
-					</div>
-					<div class="formContainerWrapper dynamic-form-con">
+						<!-- </div>
+					<div class="formContainerWrapper dynamic-form-con"> -->
 						<h2>
 							<s:text name="info.userCred" />
 						</h2>
@@ -162,6 +162,16 @@ function onCancel(){
 								<s:property value="roleName" />
 							</p>
 						</div>
+						<s:if test="user.agroChDealer!=null">
+							<div class="dynamic-flexItem">
+								<p class="flexItem">
+									<s:text name="agent.exporter" />
+								</p>
+								<p class="flexItem">
+									<s:property value="exporter" />
+								</p>
+							</div>
+						</s:if>
 						<div class="dynamic-flexItem">
 							<p class="flexItem">
 								<s:text name="user.status" />
@@ -170,19 +180,53 @@ function onCancel(){
 								<s:property value="status" />
 							</p>
 						</div>
-						
+
 						<div class="dynamic-flexItem">
+							<p class="flexItem">
+								<s:text name="%{getLocaleProperty('Signature')}" />
+							</p>
+							<s:if test="user.signature!=null">
 								<p class="flexItem">
-									<s:text name="%{getLocaleProperty('Signature')}" />
+									<button type="button" class="fa fa-download"
+										style="background-color: transparent"
+										onclick="popDownload(<s:property value="user.signature"/>)"></button>
 								</p>
-								<s:if test="user.signature!=null">
-									<p class="flexItem">
-										<button type="button" class="fa fa-download"
-											style="background-color: transparent"
-											onclick="popDownload(<s:property value="user.signature"/>)"></button>
-									</p>
-								</s:if>
-							</div>
+							</s:if>
+						</div>
+					</div>
+					<div class="formContainerWrapper">
+						<s:if test='#session.isAdmin =="true"'>
+							<s:iterator value="ex" var="innerList">
+								<div class="aPanel audit_history">
+									<div class="aTitle">
+										<h2>
+											<s:if
+												test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+												<s:property value="#innerList[0].createdUser" />
+											</s:if>
+											<s:else>
+												<s:property value="#innerList[0].updatedUser" />
+											</s:else>
+											-
+											<s:date name="#innerList[1].revisionDate"
+												format="dd/MM/yyyy hh:mm:ss" />
+											-
+											<s:property
+												value="%{getLocaleProperty('default'+#innerList[2])}" />
+											<div class="pull-right">
+												<a class="aCollapse "
+													href="#<s:property value="#innerList[1].id" />"><i
+													class="fa fa-chevron-right"></i></a>
+											</div>
+										</h2>
+									</div>
+									<div class="aContent dynamic-form-con"
+										id="<s:property value="#innerList[1].id" />">
+										<jsp:include page='/jsp/jsp/auditUserProfileDetail.jsp' />
+									</div>
+								</div>
+							</s:iterator>
+						</s:if>
 					</div>
 					<div class="yui-skin-sam">
 

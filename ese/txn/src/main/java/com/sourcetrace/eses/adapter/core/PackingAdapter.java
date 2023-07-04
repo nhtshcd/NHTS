@@ -76,6 +76,7 @@ public class PackingAdapter  implements ITxnAdapter {
 					String packWt = (String) jsonObj.get("packWt");
 					String farmbbDateId = (String) jsonObj.get("bbDate");
 					String price = (String) jsonObj.get("price");
+					String productVal = (String) jsonObj.get("productValue");
 					String rejectWts = (String) jsonObj.get("rejectWt");
 					String plantingId = (String) jsonObj.get("plantingId");
 					String QRCodeUnq = (String) jsonObj.get("QRCodeUnq");
@@ -100,8 +101,10 @@ public class PackingAdapter  implements ITxnAdapter {
 							"FROM CityWarehouse ct  where ct.planting.id=? and ct.batchNo=? and ct.stockType=?  and ct.isDelete=0",
 							new Object[] { fc.getId(), resBatchNo,
 									CityWarehouse.Stock_type.RECEPTION_STOCK.ordinal() });
+					packingdetail.setQrUnique(cw.getQrCodeId());
 					packingdetail.setCtt(cw);
 					packingdetail.setPrice(Double.valueOf(price));
+					packingdetail.setTotalprice(productVal);
 					packingdetail.setBlockId(fc.getFarmCrops());
 					packingdetail.setPlanting(fc);
 					packingdetail.setBatchNo(resBatchNo);

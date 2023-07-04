@@ -467,7 +467,7 @@ public class AgroDashboardAction extends ESEAction {
 			JSONArray nameArr = new JSONArray();
 		if(!ObjectUtil.isEmpty(d) && !StringUtil.isEmpty(d.getChartQuery())){
 			List<Object[]> result = farmerService.executeChartQuery(d.getChartQuery(),d.getDateFilter(),d.getDateFilterField(),sDate,eDate,Long.valueOf(exporterId),
-					d.getExporterFilterField(),d.getGroupByField(),d.getOrderByField());
+					d.getExporterFilterField(),d.getGroupByField(),d.getOrderByField(),d.getVersion());
 			
 			if(d.getChartType().equalsIgnoreCase("bar") || d.getChartType().equalsIgnoreCase("column")){
 			result.stream().forEach(obj -> {

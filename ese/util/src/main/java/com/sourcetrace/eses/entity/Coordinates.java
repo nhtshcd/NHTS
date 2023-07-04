@@ -1,11 +1,15 @@
 package com.sourcetrace.eses.entity;
 // Generated 23 Jun, 2020 5:09:17 PM by Hibernate Tools 5.0.6.Final
 
+import org.hibernate.envers.*;
+
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+
 import static javax.persistence.GenerationType.IDENTITY;
+
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
@@ -16,6 +20,7 @@ import javax.persistence.Table;
  */
 @Entity
 @Table(name = "COORDINATES")
+@Audited
 public class Coordinates implements Comparable<Coordinates> {
 
 	private Long id;

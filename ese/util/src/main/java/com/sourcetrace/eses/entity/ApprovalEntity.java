@@ -10,12 +10,18 @@ import org.hibernate.annotations.Where;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Getter
 @Setter
 @MappedSuperclass
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class ApprovalEntity extends ParentEntity implements java.io.Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	public static enum Type {
 		AGRODEALER, AGROCHEMICAL, PREMISES, FUMIGATOR, PERMIT, DEALER_RENEWAL, SEED_MERCHANT, SEED_MERCHANT_RENEWAL, IMPORT_APP,SEED_CERTIFICATION_SERVICES
 	}

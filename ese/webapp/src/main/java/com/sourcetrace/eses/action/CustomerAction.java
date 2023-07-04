@@ -66,6 +66,7 @@ public class CustomerAction extends SwitchAction {
 	private Map<String, String> holdingTypeList = new LinkedHashMap<String, String>();
 	private String tabIndex = "#tabs-1";
 
+	
 	private Map<String, String> listOfCustomerTypes;
 	private Map<String, String> listOfCustomerSegment;
 	/*List<Locality> localities = new ArrayList<Locality>();
@@ -92,6 +93,10 @@ public class CustomerAction extends SwitchAction {
 	@Setter
 	private String redirectContent;
 
+	@Getter
+	@Setter
+	List<Object[]> ex;
+	
 	/**
 	 * Data.
 	 * 
@@ -148,6 +153,7 @@ public class CustomerAction extends SwitchAction {
 	 * @throws Exception
 	 *             the exception
 	 */
+	
 	public String detail() throws Exception {
 
 		String view = "";
@@ -174,11 +180,12 @@ public class CustomerAction extends SwitchAction {
 			} else {
 				customer.setCustomerSegment("");
 			}
-			if (customer.getCity() != null) {
+			/*if (customer.getCity() != null) {
 				customer.getCity().setName(customer.getCity().getName());
-			}
+			}*/
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Customer", customer.getId());
 			command = UPDATE;
-			if (customer.getCity() != null) {
+			/*if (customer.getCity() != null) {
 				setSelectedCity(
 						customer.getCity() != null ? String.valueOf(customer.getCity().getId()) : "");
 				setSelectedLocality(customer.getCity() != null
@@ -187,7 +194,7 @@ public class CustomerAction extends SwitchAction {
 						? String.valueOf(customer.getCity().getLocality().getState().getId()) : "");
 				setSelectedCountry(customer.getCity() != null
 						? customer.getCity().getLocality().getState().getCountry().getName() : "");
-			}
+			}*/
 			view = DETAIL;
 			request.setAttribute(HEADING, getText("buyerdetail"));
 		} else {
@@ -225,17 +232,22 @@ public class CustomerAction extends SwitchAction {
 				customer.setCity(municipality);
 			}*/
 			
-			if (!StringUtil.isEmpty(selectedCity) && selectedCity != null) {
+			/*if (!StringUtil.isEmpty(selectedCity) && selectedCity != null) {
 				Municipality lt = utilService.findMunicipalityById(Long.valueOf(selectedCity));
 				customer.setCity(lt);
-			}
+			}*/
 
 			String customerIdSeq = idGenerator.createCustomerId();
 			customer.setCustomerId(customerIdSeq);
 			customer.setBranchId(getBranchId());
 			customer.setRevisionNo(DateUtil.getRevisionNumber());
 			customer.setStatus(0);
-
+            
+			customer.setCountry(customer.getCountry());
+			customer.setCounty(customer.getCounty());
+			customer.setSubCounty(customer.getSubCounty());
+			customer.setWard(customer.getWard());
+			
 			customer.setCreatedUser(getUsername());
 			customer.setCreatedDate(new Date());
 			if (customer.getExporter() != null && customer.getExporter().getId() > 0) {
@@ -280,14 +292,14 @@ public class CustomerAction extends SwitchAction {
 				customer.setCity(municipality);
 			}*/
 			
-			setSelectedCity(
+			/*setSelectedCity(
 					customer.getCity() != null ? String.valueOf(customer.getCity().getId()) : "");
 			setSelectedLocality(customer.getCity() != null
 					? String.valueOf(customer.getCity().getLocality().getId()) : "");
 			setSelectedState(customer.getCity() != null
 					? String.valueOf(customer.getCity().getLocality().getState().getId()) : "");
 			setSelectedCountry(customer.getCity() != null
-					? customer.getCity().getLocality().getState().getCountry().getName() : "");
+					? customer.getCity().getLocality().getState().getCountry().getName() : "");*/
 			setCurrentPage(getCurrentPage());
 			
 			
@@ -312,10 +324,10 @@ public class CustomerAction extends SwitchAction {
 					tempCustomer.setCity(municipality);
 				}*/
 				
-				if (!StringUtil.isEmpty(selectedCity) && selectedCity != null) {
+				/*if (!StringUtil.isEmpty(selectedCity) && selectedCity != null) {
 					Municipality city = utilService.findMunicipalityById(Long.valueOf(selectedCity));
 					tempCustomer.setCity(city);
-				}
+				}*/
 				
 				tempCustomer.setCustomerName(customer.getCustomerName());
 				tempCustomer.setCustomerAddress(customer.getCustomerAddress());
@@ -328,6 +340,12 @@ public class CustomerAction extends SwitchAction {
 				tempCustomer.setRevisionNo(DateUtil.getRevisionNumber());
 				tempCustomer.setUpdatedUser(getUsername());
 				tempCustomer.setUpdatedDate(new Date());
+				
+				tempCustomer.setCountry(customer.getCountry());
+				tempCustomer.setCounty(customer.getCounty());
+				tempCustomer.setSubCounty(customer.getSubCounty());
+				tempCustomer.setWard(customer.getWard());
+				
 				if (customer.getExporter() != null && customer.getExporter().getId() > 0) {
 					ExporterRegistration ex = utilService.findExportRegById(Long.valueOf(customer.getExporter().getId()));
 					tempCustomer.setExporter(ex);
@@ -440,7 +458,7 @@ public class CustomerAction extends SwitchAction {
 			errorCodes.put("empty.exporter", "empty.exporter");
 		}
 
-		if (getSelectedCountry() == null || StringUtil.isEmpty(getSelectedCountry()) || getSelectedCountry().equals("")) {
+		/*if (getSelectedCountry() == null || StringUtil.isEmpty(getSelectedCountry()) || getSelectedCountry().equals("")) {
 			errorCodes.put("empty.country", "empty.country");
 		}
 		if (getSelectedState() == null || StringUtil.isEmpty(getSelectedState()) || getSelectedState().equals("")) {
@@ -449,9 +467,21 @@ public class CustomerAction extends SwitchAction {
 		if (getSelectedLocality() == null || StringUtil.isEmpty(getSelectedLocality()) || getSelectedLocality().equals("")) {
 			errorCodes.put("empty.locality", "empty.locality");
 		}
-			if (getSelectedCity() == null || StringUtil.isEmpty(getSelectedCity()) || getSelectedCity().equals("")) {
+		if (getSelectedCity() == null || StringUtil.isEmpty(getSelectedCity()) || getSelectedCity().equals("")) {
 				errorCodes.put("empty.ward", "empty.ward");
-			}
+		}*/
+		if (customer.getCountry() == null || StringUtil.isEmpty(customer.getCountry()) || customer.getCountry().equals("")) {
+			errorCodes.put("empty.buyer.country", "empty.buyer.country");
+		}
+		if (customer.getCounty() == null || StringUtil.isEmpty(customer.getCounty()) || customer.getCounty().equals("")) {
+			errorCodes.put("empty.buyer.state", "empty.buyer.state");
+		}
+		if (customer.getSubCounty() == null || StringUtil.isEmpty(customer.getSubCounty()) || customer.getSubCounty().equals("")) {
+			errorCodes.put("empty.buyer.locality", "empty.buyer.locality");
+		}
+		if (customer.getWard() == null || StringUtil.isEmpty(customer.getWard()) || customer.getWard().equals("")) {
+			errorCodes.put("empty.buyer.ward", "empty.buyer.ward");
+		}
 
 
 		printErrorCodes(errorCodes);

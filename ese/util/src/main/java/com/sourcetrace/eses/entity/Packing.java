@@ -18,12 +18,13 @@ import org.hibernate.annotations.ParamDef;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "packing")
 @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))
 @Filters(@org.hibernate.annotations.Filter(name = "branchFilter", condition = "branch_id in ( :branchIdParam )"))
-
+@Audited
 @Getter
 @Setter
 public class Packing extends ParentEntity {
@@ -53,7 +54,7 @@ public class Packing extends ParentEntity {
 	@Column(name = "TOTAL_WT")
 	private Double totWt;
 
-	@OneToMany(mappedBy = "packing", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+	@OneToMany(mappedBy = "packing", fetch = FetchType.EAGER, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<PackingDetail> PackingDetails;
 	@Column(name = "MSG_NO")
 	private String msgNo;

@@ -248,12 +248,15 @@ public class FarmCropsAction extends SwitchAction {
 	 * @throws Exception
 	 *             the exception
 	 */
-
+	@Getter
+	@Setter
+	List<Object[]> ex;
 	public String detail() throws Exception {
 		if (id != null && !StringUtil.isEmpty(id) && StringUtil.isLong(id)) {
 			farmCrops = utilService.findFarmCropsById(Long.valueOf(id));
 			if (farmCrops != null && !ObjectUtil.isEmpty(farmCrops)) {
 				
+				ex=utilService.getAuditRecords("com.sourcetrace.eses.entity.FarmCrops", farmCrops.getId());
 					setCommand(DETAIL);
 
 				

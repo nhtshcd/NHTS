@@ -30,15 +30,15 @@
 			
 			if ("<s:property value='command'/>" == "update") {
 				$('#country').change();
-				loadFarmer('<s:property value="sorting.farmCrops.farm.farmer.village.id"/>');
+				loadFarmer('<s:property value="sorting.planting.farmCrops.farm.farmer.village.id"/>');
 				$("#farm")
 						.val(
-								"<s:property value='sorting.farmCrops.farm.id'/>")
+								"<s:property value='sorting.planting.farmCrops.farm.id'/>")
 						.select2();
-				listFarmCropsBlock("<s:property value='sorting.farmCrops.farm.id'/>");
+				listFarmCropsBlock("<s:property value='sorting.planting.farmCrops.farm.id'/>");
 				$("#block")
 						.val(
-								"<s:property value='sorting.farmCrops.id'/>")
+								"<s:property value='sorting.planting.farmCrops.id'/>")
 						.select2().change();
 			}
 		 
@@ -62,9 +62,9 @@
 						},
 						success : function(result) {
 							insertOptions("farm", $.parseJSON(result));
-							var pFarm = '<s:property value="sorting.farmCrops.farm.id"/>';
+							var pFarm = '<s:property value="sorting.planting.farmCrops.farm.id"/>';
 							
-							if (selectedFarmer== '<s:property value="sorting.farmCrops.farm.farmer.id"/>' && pFarm != null && pFarm != '' && pFarm != 'null') {
+							if (selectedFarmer== '<s:property value="sorting.planting.farmCrops.farm.farmer.id"/>' && pFarm != null && pFarm != '' && pFarm != 'null') {
 								$('#farm').val(pFarm).select2().change();
 							}
 							
@@ -89,8 +89,8 @@
 				},
 				success : function(result) {
 					insertOptions("block", $.parseJSON(result));
-					var block = '<s:property value="sorting.farmCrops.id"/>';
-					if (farmId=='<s:property value="sorting.farmCrops.farm.id"/>' && block != null && block != '' && block != 'null') {
+					var block = '<s:property value="sorting.planting.farmCrops.id"/>';
+					if (farmId=='<s:property value="sorting.planting.farmCrops.farm.id"/>' && block != null && block != '' && block != 'null') {
 						$('#block').val(block).change();
 					}
 	
@@ -319,7 +319,7 @@
 						</label>
 						<div class="form-element">
 							<s:select class="form-control select2" id="farmer"
-								name="sorting.farmCrops.farm.farmer.id" listKey="key"
+								name="sorting.planting.farmCrops.farm.farmer.id" listKey="key"
 								listValue="value" list="{}" headerKey=" "
 								headerValue="%{getText('txt.select')}"
 								onchange="listFarm(this.value);" />
@@ -332,7 +332,7 @@
 							style="color: red;">*</sup> </label>
 						<div class="form-element">
 							<s:select class="form-control select2" id="farm"
-								name="sorting.farmCrops.farm.id" listKey="key" listValue="value"
+								name="sorting.planting.farmCrops.farm.id" listKey="key" listValue="value"
 								list="{}" headerKey="" headerValue="%{getText('txt.select')}"
 								onchange="listFarmCropsBlock(this.value)" />
 						</div>
@@ -370,7 +370,7 @@
 							<s:select list="{}" headerKey=""
 								headerValue="%{getText('txt.select')}" listKey="key"
 								listValue="value" id="block" class="form-control select2"
-								name="sorting.farmCrops.id"
+								name="sorting.planting.farmCrops.id"
 								onchange="populatePlanting(this.value);" />
 						</div>
 					</div>
@@ -489,8 +489,12 @@
 							style="color: red;">*</sup>
 						</label>
 						<div class="form-element">
-							<s:textfield name="sorting.truckType" theme="simple" size="20"
-								cssClass="lowercase form-control" id="truckType" maxlength="20" />
+							<%-- <s:textfield name="sorting.truckType" theme="simple" size="20"
+								cssClass="lowercase form-control" id="truckType" maxlength="20" /> --%>
+						<s:select class="form-control  select2" id="truckType"
+								name="sorting.truckType" listKey="key" listValue="value"
+								list="getCatList(getLocaleProperty('truckType'))" headerKey=" "
+								headerValue="%{getText('txt.select')}" />
 						</div>
 					</div>
 					<div class="flexform-item ">

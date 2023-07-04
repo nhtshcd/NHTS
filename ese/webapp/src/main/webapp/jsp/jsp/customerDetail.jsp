@@ -24,9 +24,13 @@
 				<div class="flexform">
 
 					<div class="dynamic-flexItem">
-                						<p class="flexItem"><s:text name='exporter' /></p>
-                						<p class="flexItem"><s:property value="customer.exporter.name" /></p>
-                					</div>
+						<p class="flexItem">
+							<s:text name='exporter' />
+						</p>
+						<p class="flexItem">
+							<s:property value="customer.exporter.name" />
+						</p>
+					</div>
 
 					<div class="dynamic-flexItem ">
 						<p class="flexItem">
@@ -96,11 +100,12 @@
 							<s:text name="country.name" />
 						</p>
 						<p class="flexItem">
-							<s:property
+							<%-- <s:property
 								value="customer.city.locality.state.country.code" />
 							&nbsp-&nbsp
 							<s:property
-								value="customer.city.locality.state.country.name" />
+								value="customer.city.locality.state.country.name" /> --%>
+							<s:property value="customer.country" />
 						</p>
 					</div>
 
@@ -109,9 +114,10 @@
 							<s:text name="county.name" />
 						</p>
 						<p class="flexItem">
-							<s:property value="customer.city.locality.state.code" />
+							<%-- <s:property value="customer.city.locality.state.code" />
 							&nbsp-&nbsp
-							<s:property value="customer.city.locality.state.name" />
+							<s:property value="customer.city.locality.state.name" /> --%>
+							<s:property value="customer.county" />
 						</p>
 
 					</div>
@@ -121,9 +127,10 @@
 							<s:text name="subcountry.name" />
 						</p>
 						<p class="flexItem">
-							<s:property value="customer.city.locality.code" />
+							<%-- <s:property value="customer.city.locality.code" />
 							&nbsp-&nbsp
-							<s:property value="customer.city.locality.name" />
+							<s:property value="customer.city.locality.name" /> --%>
+							<s:property value="customer.subCounty" />
 						</p>
 
 					</div>
@@ -132,12 +139,11 @@
 							<s:text name="ward.name" />
 						</p>
 						<p class="flexItem">
-							<!-- <p class="flexItem" name="selectedCity">
-										 -->
-							<s:property value="customer.city.code" />
-							&nbsp-&nbsp
-							<s:property value="customer.city.name" />
 
+							<%-- <s:property value="customer.city.code" />
+							&nbsp-&nbsp
+							<s:property value="customer.city.name" /> --%>
+							<s:property value="customer.ward" />
 						</p>
 					</div>
 
@@ -201,7 +207,46 @@
 					</div> --%>
 
 				</div>
+				<s:if test='#session.isAdmin =="true"'>
+					<s:iterator value="ex" var="innerList">
+						<div class="aPanel audit_history">
+							<div class="aTitle">
+								<h2>
+									<s:if
+										test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+										<s:property value="#innerList[0].createdUser" />
+									</s:if>
+									<s:else>
+										<s:property value="#innerList[0].updatedUser" />
+									</s:else>
+									-
+
+									<s:date name="#innerList[1].revisionDate"
+										format="dd/MM/yyyy hh:mm:ss" />
+									-
+									<s:property
+										value="%{getLocaleProperty('default'+#innerList[2])}" />
+									<div class="pull-right">
+										<a class="aCollapse "
+											href="#<s:property value="#innerList[1].id" />
+										"><i
+											class="fa fa-chevron-right"></i></a>
+									</div>
+								</h2>
+							</div>
+							<div class="aContent dynamic-form-con"
+								id="<s:property value="#innerList[1].id" />">
+
+								<jsp:include page='/jsp/jsp/auditCustomerdetail.jsp' />
+
+							</div>
+
+
+						</div>
+					</s:iterator>
+				</s:if>
 			</div>
+
 			<div class="flex-layout flexItemStyle">
 				<div class="margin-top-10">
 					<span id="cancel" class=""><span class="first-child"><button

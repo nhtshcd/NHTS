@@ -70,7 +70,7 @@ public class CryptoUtilTest {
 	public void testDecryptPassword() {
 
 		String decryptPassword = cryptoUtil.decrypt(
-				"F013751DAD5B4886F9C2DD59A8CCC133BC63AA5EE2716FDC");
+				"5BF1E9B050932F22355A54B9534D6F50");
 		System.out.println("out :" + decryptPassword);
 		Assert.notNull(decryptPassword);
 

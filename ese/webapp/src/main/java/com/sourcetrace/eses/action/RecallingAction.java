@@ -7,6 +7,7 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -113,6 +114,12 @@ public class RecallingAction extends SwitchAction {
 	 * @return
 	 * @throws Exception
 	 */
+	@Getter
+	@Setter
+	private String roleID;
+	 @Getter
+		@Setter
+		List<Object[]> ex;
 	public String detail() throws Exception {
 
 		if (id != null && !StringUtil.isEmpty(id) && StringUtil.isLong(id)) {
@@ -131,7 +138,8 @@ public class RecallingAction extends SwitchAction {
 				custname = shipment.getCustomer().getCustomerName();
 				exportername = shipment.getPackhouse().getExporter().getName();
 			}
-
+			roleID = getLoggedInRoleID();
+			 ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Recalling", recalling.getId());
 			setCurrentPage(getCurrentPage());
 			setCommand(DETAIL);
 			return DETAIL;
@@ -304,7 +312,8 @@ public class RecallingAction extends SwitchAction {
 				rec.setActionByStakeholders(recalling.getActionByStakeholders());
 				rec.setUpdatedDate(new Date());
 				rec.setUpdatedUser(getUsername());
-
+				rec.setShipmentDestination(recalling.getShipmentDestination());
+				
 				if (files != null) {
 					DocumentUpload du = new DocumentUpload();
 					System.out.println("fphoto==>" + fphoto);
@@ -328,12 +337,12 @@ public class RecallingAction extends SwitchAction {
 						}
 					}
 				}
-
+				Set<RecallDetails> rdetaisl=new LinkedHashSet<>();
 				if (!StringUtil.isEmpty(selectedshipmentdetail)) {
 					String batchIdsArray[] = null;
 					selectedshipmentdetail = selectedshipmentdetail.replaceAll("\\s", "");
 					batchIdsArray = selectedshipmentdetail.split(",");
-
+					
 					for (String tempBatchId : batchIdsArray) {
 						if (!StringUtil.isEmpty(tempBatchId)) {
 							farmerService.updateshipmentdetail(tempBatchId);
@@ -341,18 +350,26 @@ public class RecallingAction extends SwitchAction {
 									"from ShipmentDetails where id=?", new Object[] { Long.valueOf(tempBatchId) });
 							if (sh != null) {
 								// utilService.save(RecallDetails.builder().farmcrops(sh.getCityWarehouse().getFarmcrops()).receivedWeight(Double.valueOf(sh.getPackingQty())).receivedUnits(sh.getPackingUnit()).recall(rec).batchNo(sh.getCityWarehouse().getBatchNo()).build());
-								utilService.save(RecallDetails.builder().farmcrops(sh.getCityWarehouse().getFarmcrops())
+								/*utilService.save(RecallDetails.builder().farmcrops(sh.getCityWarehouse().getFarmcrops())
 										.receivedWeight(Double.valueOf(sh.getPackingQty()))
 										.receivedUnits(sh.getPackingUnit()).recall(rec)
 										.batchNo(sh.getCityWarehouse().getFarmcrops().getBlockId())
-										.lotNo(sh.getCityWarehouse().getBatchNo()).shipmentdetail(sh).planting(sh.getCityWarehouse().getPlanting()).build());
-
+										.lotNo(sh.getCityWarehouse().getBatchNo()).shipmentdetail(sh).planting(sh.getCityWarehouse().getPlanting()).build());*/
+								RecallDetails build = RecallDetails.builder().farmcrops(sh.getCityWarehouse().getFarmcrops())
+								.receivedWeight(Double.valueOf(sh.getPackingQty()))
+								.receivedUnits(sh.getPackingUnit()).recall(rec)
+								.batchNo(sh.getCityWarehouse().getFarmcrops().getBlockId())
+								.lotNo(sh.getCityWarehouse().getBatchNo()).shipmentdetail(sh).planting(sh.getCityWarehouse().getPlanting()).build();
+								rdetaisl.add(build);
 							}
 						}
 					}
 				}
+				rec.getRecallDetails().addAll(rdetaisl);
 
-				utilService.update(rec);
+				
+				utilService.saveOrUpdate(rec);
+				//utilService.update(rec);
 
 			}
 			return REDIRECT;
@@ -596,6 +613,9 @@ public class RecallingAction extends SwitchAction {
 				// if (!command.equals("update"))
 				jsonObj.put("procurementGrades", procurementGradesJSON);
 				jsonObj.put("custname", shipment.getCustomer().getCustomerName());
+				//jsonObj.put("shipmentDestination", shipment.getCustomer().getCity().getLocality().getState().getCountry().getName());
+				jsonObj.put("shipmentDestination", shipment.getCustomer().getCountry());
+				//jsonObj.put("shipmentDestination", shipment.getShipmentDestination());
 				jsonObj.put("exporter", shipment.getPackhouse().getExporter().getName());
 				sendAjaxResponse(jsonObj);
 			}
@@ -647,6 +667,8 @@ public class RecallingAction extends SwitchAction {
 				// if (!command.equals("update"))
 				jsonObj.put("procurementGrades", procurementGradesJSON);
 				jsonObj.put("custname", shipment.getCustomer().getCustomerName());
+				//jsonObj.put("shipmentDestination", shipment.getCustomer().getCity().getLocality().getState().getCountry().getName());
+				jsonObj.put("shipmentDestination", shipment.getCustomer().getCountry());
 				jsonObj.put("exporter", shipment.getPackhouse().getExporter().getName());
 				sendAjaxResponse(jsonObj);
 				// System.out.println(cwList);

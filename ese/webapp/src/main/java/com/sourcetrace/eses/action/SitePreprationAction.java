@@ -44,7 +44,7 @@ public class SitePreprationAction extends SwitchAction {
 	protected static final String LIST = "list";
 	protected static final String TITLE_PREFIX = "title.";
 	protected static final String HEADING = "heading";
-	private String FARMCROPS_BLOCK_QUERY="FROM FarmCrops fc WHERE fc.id=? AND fc.status=?";
+	private String FARMCROPS_BLOCK_QUERY = "FROM FarmCrops fc WHERE fc.id=? AND fc.status=?";
 
 	@Getter
 	@Setter
@@ -131,6 +131,10 @@ public class SitePreprationAction extends SwitchAction {
 	@Setter
 	private String selectedFarmCrops;
 
+	@Getter
+	@Setter
+	private String roleID;
+
 	public String create() throws Exception {
 		if (selectedFarm == null) {
 			command = CREATE;
@@ -142,9 +146,10 @@ public class SitePreprationAction extends SwitchAction {
 			Farm fm = (Farm) farmerService.findObjectById("FROM Farm where id=?", new Object[] { farmid });
 			ProcurementVariety pv = (ProcurementVariety) farmerService.findObjectById(
 					"FROM ProcurementVariety where id =?", new Object[] { Long.valueOf(getSelectedProduct()) });
-			
-			FarmCrops fc = (FarmCrops) farmerService.findObjectById("FROM FarmCrops where id=?", new Object[] { Long.valueOf(getSelectedFarmCrops()) });
-		
+
+			FarmCrops fc = (FarmCrops) farmerService.findObjectById("FROM FarmCrops where id=?",
+					new Object[] { Long.valueOf(getSelectedFarmCrops()) });
+
 			sitePrepration.setFarmCrops(fc);
 			sitePrepration.setFarm(fm);
 			sitePrepration.setPreviousCrop(pv);
@@ -153,7 +158,7 @@ public class SitePreprationAction extends SwitchAction {
 			sitePrepration.setSoilAnalysis(getSoi());
 			sitePrepration.setWaterAnalysis(getWat());
 			sitePrepration.setBranchId(getBranchId());
-			if (files != null) {
+			if (files != null && sitePrepration.getEnvironmentalAssessment().equals("1")) {
 				DocumentUpload du = new DocumentUpload();
 				String[] tokens = photoear.split("\\.(?=[^\\.]+$)");
 				String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -161,7 +166,8 @@ public class SitePreprationAction extends SwitchAction {
 					String filetype = tokens[1];
 					if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 							|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+							|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 							|| filetype.equals("txt") || filetype.equals("TXT")) {
 						du.setName(name);
 						du.setContent(FileUtil.getBinaryFileContent(getFiles()));
@@ -173,8 +179,9 @@ public class SitePreprationAction extends SwitchAction {
 						sitePrepration.setEnvironmentalAssessmentReport(du.getRefCode().toString());
 					}
 				}
-			}
-			if (filesocr != null) {
+			} else
+				sitePrepration.setEnvironmentalAssessmentReport("");
+			if (filesocr != null && sitePrepration.getSocialRiskAssessment().equals("1")) {
 				DocumentUpload du = new DocumentUpload();
 				String[] tokens = photosocr.split("\\.(?=[^\\.]+$)");
 				String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -182,20 +189,22 @@ public class SitePreprationAction extends SwitchAction {
 					String filetype = tokens[1];
 					if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 							|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+							|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 							|| filetype.equals("txt") || filetype.equals("TXT")) {
 						du.setName(name);
 						du.setContent(FileUtil.getBinaryFileContent(filesocr));
 						du.setDocFileContentType(tokens[1]);
-						du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"1");
+						du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "1");
 						du.setType(DocumentUpload.docType.farmer.ordinal());
 						du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 						utilService.save(du);
 						sitePrepration.setSocialRiskAssessmentReport(du.getRefCode().toString());
 					}
 				}
-			}
-			if (filesar != null) {
+			} else
+				sitePrepration.setSocialRiskAssessmentReport("");
+			if (filesar != null && sitePrepration.getSoilAnalysis().equals("1")) {
 				DocumentUpload du = new DocumentUpload();
 				String[] tokens = photosar.split("\\.(?=[^\\.]+$)");
 				String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -203,20 +212,22 @@ public class SitePreprationAction extends SwitchAction {
 					String filetype = tokens[1];
 					if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 							|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+							|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 							|| filetype.equals("txt") || filetype.equals("TXT")) {
 						du.setName(name);
 						du.setContent(FileUtil.getBinaryFileContent(filesar));
 						du.setDocFileContentType(tokens[1]);
-						du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"2");
+						du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "2");
 						du.setType(DocumentUpload.docType.farmer.ordinal());
 						du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 						utilService.save(du);
 						sitePrepration.setSoilAnalysisReport(du.getRefCode().toString());
 					}
 				}
-			}
-			if (filewar != null) {
+			} else
+				sitePrepration.setSoilAnalysisReport("");
+			if (filewar != null && sitePrepration.getWaterAnalysis().equals("1")) {
 				DocumentUpload du = new DocumentUpload();
 				String[] tokens = photowar.split("\\.(?=[^\\.]+$)");
 				String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -224,19 +235,21 @@ public class SitePreprationAction extends SwitchAction {
 					String filetype = tokens[1];
 					if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 							|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+							|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+							|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 							|| filetype.equals("txt") || filetype.equals("TXT")) {
 						du.setName(name);
 						du.setContent(FileUtil.getBinaryFileContent(filewar));
 						du.setDocFileContentType(tokens[1]);
-						du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"3");
+						du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "3");
 						du.setType(DocumentUpload.docType.farmer.ordinal());
 						du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 						utilService.save(du);
 						sitePrepration.setWaterAnalysisReport(du.getRefCode().toString());
 					}
 				}
-			}
+			} else
+				sitePrepration.setWaterAnalysisReport("");
 
 			sitePrepration.setCreatedUser(getUsername());
 			sitePrepration.setBranchId(getBranchId());
@@ -254,12 +267,13 @@ public class SitePreprationAction extends SwitchAction {
 			Long fid = Long.valueOf(id);
 			sitePrepration = (SitePrepration) farmerService.findObjectById("FROM SitePrepration where id=?",
 					new Object[] { Long.valueOf(id) });
-				setSelectedProduct(sitePrepration.getPreviousCrop() != null
+			setSelectedProduct(sitePrepration.getPreviousCrop() != null
 					? String.valueOf(sitePrepration.getPreviousCrop().getId()) : "");
 			setSelectedFarm(sitePrepration.getFarm() != null ? String.valueOf(sitePrepration.getFarm().getId()) : "");
 			setSelectedFarmer(sitePrepration.getFarm() != null
 					? String.valueOf(sitePrepration.getFarm().getFarmer().getId()) : "");
-			setSelectedFarmCrops(sitePrepration.getFarmCrops() != null ? String.valueOf(sitePrepration.getFarmCrops().getId()) : "");
+			setSelectedFarmCrops(
+					sitePrepration.getFarmCrops() != null ? String.valueOf(sitePrepration.getFarmCrops().getId()) : "");
 			setEnv(sitePrepration.getEnvironmentalAssessment());
 			setSoc(sitePrepration.getSocialRiskAssessment());
 			setSoi(sitePrepration.getSoilAnalysis());
@@ -281,14 +295,15 @@ public class SitePreprationAction extends SwitchAction {
 			setSelectedCountry(sitePrepration.getFarm().getFarmer().getVillage() != null ? sitePrepration.getFarm()
 					.getFarmer().getVillage().getCity().getLocality().getState().getCountry().getName() : "");
 			setCurrentPage(getCurrentPage());
-			
+
 			if (sitePrepration.getFarmCrops() != null && !StringUtil.isEmpty(sitePrepration.getFarmCrops().getId())) {
-				FarmCrops fc = (FarmCrops) farmerService.findObjectById(" from FarmCrops fc where fc.id=?  and fc.status=1",
+				FarmCrops fc = (FarmCrops) farmerService.findObjectById(
+						" from FarmCrops fc where fc.id=?  and fc.status=1",
 						new Object[] { Long.valueOf(sitePrepration.getFarmCrops().getId()) });
 				setEditFarmCropId(fc.getId() != null ? String.valueOf(fc.getId()) : "");
 				setFarmCropfarmId(fc.getFarm().getId() != null ? String.valueOf(fc.getFarm().getId()) : "");
-				
-				}
+
+			}
 
 			command = UPDATE;
 			request.setAttribute(HEADING, getText("sitePreprationupdate"));
@@ -303,19 +318,22 @@ public class SitePreprationAction extends SwitchAction {
 					addActionError(NO_RECORD);
 					return REDIRECT;
 				}
-				
-				if (sitePrepration.getFarmCrops() != null && !StringUtil.isEmpty(sitePrepration.getFarmCrops().getId())) {
-					FarmCrops farmCrops=(FarmCrops) farmerService.findObjectById(FARMCROPS_BLOCK_QUERY, new Object[]{Long.valueOf(sitePrepration.getFarmCrops().getId()),1});
-					
+
+				if (sitePrepration.getFarmCrops() != null
+						&& !StringUtil.isEmpty(sitePrepration.getFarmCrops().getId())) {
+					FarmCrops farmCrops = (FarmCrops) farmerService.findObjectById(FARMCROPS_BLOCK_QUERY,
+							new Object[] { Long.valueOf(sitePrepration.getFarmCrops().getId()), 1 });
+
 					temp.setFarmCrops(farmCrops);
-					}
+				}
 				temp.setBranchId(getBranchId());
 				setCurrentPage(getCurrentPage());
 				temp.setBranchId(getBranchId());
 				Long farmid = Long.valueOf(getSelectedFarm().split(",")[0].trim());
 				Farm fm = (Farm) farmerService.findObjectById("FROM Farm where id=?", new Object[] { farmid });
-				FarmCrops fc = (FarmCrops) farmerService.findObjectById("FROM FarmCrops where id=?", new Object[] { Long.valueOf(getSelectedFarmCrops()) });
-				
+				FarmCrops fc = (FarmCrops) farmerService.findObjectById("FROM FarmCrops where id=?",
+						new Object[] { Long.valueOf(getSelectedFarmCrops()) });
+
 				temp.setFarmCrops(fc);
 				ProcurementVariety pv = (ProcurementVariety) farmerService.findObjectById(
 						"FROM ProcurementVariety where id =?", new Object[] { Long.valueOf(getSelectedProduct()) });
@@ -325,7 +343,7 @@ public class SitePreprationAction extends SwitchAction {
 				temp.setSocialRiskAssessment(getSoc());
 				temp.setSoilAnalysis(getSoi());
 				temp.setWaterAnalysis(getWat());
-				if (files != null) {
+				if (files != null && temp.getEnvironmentalAssessment().equals("1")) {
 					DocumentUpload du = new DocumentUpload();
 					String[] tokens = photoear.split("\\.(?=[^\\.]+$)");
 					String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -334,7 +352,8 @@ public class SitePreprationAction extends SwitchAction {
 
 						if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 								|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+								|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 								|| filetype.equals("txt") || filetype.equals("TXT")) {
 							du.setName(name);
 							du.setContent(FileUtil.getBinaryFileContent(getFiles()));
@@ -346,9 +365,14 @@ public class SitePreprationAction extends SwitchAction {
 							temp.setEnvironmentalAssessmentReport(du.getRefCode().toString());
 						}
 					}
-				}
+				} else if (files == null && temp.getEnvironmentalAssessment().equals("1")
+						&& temp.getEnvironmentalAssessmentReport() != null
+						&& !StringUtil.isEmpty(temp.getEnvironmentalAssessmentReport()))
+					temp.setEnvironmentalAssessmentReport(temp.getEnvironmentalAssessmentReport());
+				else
+					temp.setEnvironmentalAssessmentReport("");
 
-				if (filesocr != null) {
+				if (filesocr != null && temp.getSocialRiskAssessment().equals("1")) {
 					DocumentUpload du = new DocumentUpload();
 					String[] tokens = photosocr.split("\\.(?=[^\\.]+$)");
 					String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -356,20 +380,26 @@ public class SitePreprationAction extends SwitchAction {
 						String filetype = tokens[1];
 						if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 								|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+								|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 								|| filetype.equals("txt") || filetype.equals("TXT")) {
 							du.setName(name);
 							du.setContent(FileUtil.getBinaryFileContent(filesocr));
 							du.setDocFileContentType(tokens[1]);
-							du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"1");
+							du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "1");
 							du.setType(DocumentUpload.docType.farmer.ordinal());
 							du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 							utilService.save(du);
 							temp.setSocialRiskAssessmentReport(du.getRefCode().toString());
 						}
 					}
-				}
-				if (filesar != null) {
+				} else if (filesocr == null && temp.getSocialRiskAssessment().equals("1")
+						&& temp.getSocialRiskAssessmentReport() != null
+						&& !StringUtil.isEmpty(temp.getSocialRiskAssessmentReport()))
+					temp.setSocialRiskAssessmentReport(temp.getSocialRiskAssessmentReport());
+				else
+					temp.setSocialRiskAssessmentReport("");
+				if (filesar != null && temp.getSoilAnalysis().equals("1")) {
 					DocumentUpload du = new DocumentUpload();
 					String[] tokens = photosar.split("\\.(?=[^\\.]+$)");
 					String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -377,20 +407,25 @@ public class SitePreprationAction extends SwitchAction {
 						String filetype = tokens[1];
 						if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 								|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+								|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 								|| filetype.equals("txt") || filetype.equals("TXT")) {
 							du.setName(name);
 							du.setContent(FileUtil.getBinaryFileContent(filesar));
 							du.setDocFileContentType(tokens[1]);
-							du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"2");
+							du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "2");
 							du.setType(DocumentUpload.docType.farmer.ordinal());
 							du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 							utilService.save(du);
 							temp.setSoilAnalysisReport(du.getRefCode().toString());
 						}
 					}
-				}
-				if (filewar != null) {
+				} else if (filesar == null && temp.getSoilAnalysis().equals("1") && temp.getSoilAnalysisReport() != null
+						&& !StringUtil.isEmpty(temp.getSoilAnalysisReport()))
+					temp.setSoilAnalysisReport(temp.getSoilAnalysisReport());
+				else
+					temp.setSoilAnalysisReport("");
+				if (filewar != null && temp.getWaterAnalysis().equals("1")) {
 					DocumentUpload du = new DocumentUpload();
 					String[] tokens = photowar.split("\\.(?=[^\\.]+$)");
 					String name = tokens[0].substring(tokens[0].lastIndexOf("\\") + 1).trim();
@@ -398,19 +433,24 @@ public class SitePreprationAction extends SwitchAction {
 						String filetype = tokens[1];
 						if (tokens != null && filetype.equals("jpg") || filetype.equals("JPG") || filetype.equals("PNG")
 								|| filetype.equals("jpeg") || filetype.equals("JPEG") || filetype.equals("png")
-								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc") || filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
+								|| filetype.equals("pdf") || filetype.equals("PDF") || filetype.equals("doc")
+								|| filetype.equals("DOC") || filetype.equals("docx") || filetype.equals("DOCX")
 								|| filetype.equals("txt") || filetype.equals("TXT")) {
 							du.setName(name);
 							du.setContent(FileUtil.getBinaryFileContent(filewar));
 							du.setDocFileContentType(tokens[1]);
-							du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"3");
+							du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "3");
 							du.setType(DocumentUpload.docType.farmer.ordinal());
 							du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 							utilService.save(du);
 							temp.setWaterAnalysisReport(du.getRefCode().toString());
 						}
 					}
-				}
+				} else if (filewar == null && temp.getWaterAnalysis().equals("1")
+						&& temp.getWaterAnalysisReport() != null && !StringUtil.isEmpty(temp.getWaterAnalysisReport()))
+					temp.setWaterAnalysisReport(temp.getWaterAnalysisReport());
+				else
+					temp.setWaterAnalysisReport("");
 
 				temp.setCreatedUser(getUsername());
 				temp.setCreatedDate(new Date());
@@ -425,11 +465,15 @@ public class SitePreprationAction extends SwitchAction {
 
 	}
 
+	@Getter
+	@Setter
+	List<Object[]> ex;
+
 	public String detail() throws Exception {
 		String view = null;
 		if (id != null && !id.equals("")) {
-			 sitePrepration = (SitePrepration) farmerService
-					.findObjectById("FROM SitePrepration where id=?", new Object[] { Long.valueOf(id) });
+			sitePrepration = (SitePrepration) farmerService.findObjectById("FROM SitePrepration where id=?",
+					new Object[] { Long.valueOf(id) });
 			if (sitePrepration == null) {
 				addActionError(NO_RECORD);
 				return REDIRECT;
@@ -439,15 +483,17 @@ public class SitePreprationAction extends SwitchAction {
 			setSelectedFarm(sitePrepration.getFarm() != null ? String.valueOf(sitePrepration.getFarm().getId()) : "");
 			setSelectedFarmer(sitePrepration.getFarm() != null
 					? String.valueOf(sitePrepration.getFarm().getFarmer().getId()) : "");
-			
+
 			if (sitePrepration.getFarmCrops() != null && !StringUtil.isEmpty(sitePrepration.getFarmCrops())) {
-				FarmCrops fc = (FarmCrops) farmerService.findObjectById(" from FarmCrops fc where fc.id=?  and fc.status=1",
+				FarmCrops fc = (FarmCrops) farmerService.findObjectById(
+						" from FarmCrops fc where fc.id=?  and fc.status=1",
 						new Object[] { Long.valueOf(sitePrepration.getFarmCrops().getId()) });
-				
-				setFarmCropfarmId(fc.getBlockName() != null ? String.valueOf(fc.getBlockId()+"-"+fc.getBlockName()) : "");
-				
-				}
-			
+
+				setFarmCropfarmId(
+						fc.getBlockName() != null ? String.valueOf(fc.getBlockId() + "-" + fc.getBlockName()) : "");
+
+			}
+
 			setEnv(sitePrepration.getEnvironmentalAssessment());
 			setSoc(sitePrepration.getSocialRiskAssessment());
 			setSoi(sitePrepration.getSoilAnalysis());
@@ -459,6 +505,10 @@ public class SitePreprationAction extends SwitchAction {
 			setSocr(sitePrepration.getSocialRiskAssessmentReport());
 			setSoir(sitePrepration.getSoilAnalysisReport());
 			setWatr(sitePrepration.getWaterAnalysisReport());
+
+			roleID = getLoggedInRoleID();
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.SitePrepration", sitePrepration.getId());
+
 			setCurrentPage(getCurrentPage());
 			command = UPDATE;
 			view = DETAIL;
@@ -487,12 +537,12 @@ public class SitePreprationAction extends SwitchAction {
 
 		return result;
 	}
-	
+
 	public void populatBlocks() {
 		JSONArray farmerArr = new JSONArray();
 		if (selectedFarmer != null && !ObjectUtil.isEmpty(selectedFarmer) && !selectedFarmer.equals("")
 				&& selectedFarms != null && !ObjectUtil.isEmpty(selectedFarms)) {
-			
+
 			LinkedList<Object> parame = new LinkedList();
 			String qry = "FROM FarmCrops f  where f.farm.id=?  and f.status=1 ORDER BY f.id ASC";
 			parame.add(Long.valueOf(selectedFarms));
@@ -501,7 +551,8 @@ public class SitePreprationAction extends SwitchAction {
 				parame.add(Long.valueOf(getLoggedInDealer()));
 			}
 			List<FarmCrops> growerList = (List<FarmCrops>) farmerService.listObjectById(qry, parame.toArray());
-			//List<FarmCrops> dataList = utilService.listFarmCropByFarmId(Long.valueOf(selectedFarms));
+			// List<FarmCrops> dataList =
+			// utilService.listFarmCropByFarmId(Long.valueOf(selectedFarms));
 			growerList.stream().distinct().forEach(f -> {
 				farmerArr.add(getJSONObject(f.getId(), f.getBlockId() + " - " + f.getBlockName().toString()));
 			});
@@ -518,8 +569,9 @@ public class SitePreprationAction extends SwitchAction {
 		if (getSelectedFarm() == null || StringUtil.isEmpty(getSelectedFarm()) || getSelectedFarm().equals("")) {
 			errorCodes.put("empty.farm", "empty.farm");
 		}
-		
-		if (getSelectedFarmCrops() == null || StringUtil.isEmpty(getSelectedFarmCrops()) || getSelectedFarmCrops().equals("")) {
+
+		if (getSelectedFarmCrops() == null || StringUtil.isEmpty(getSelectedFarmCrops())
+				|| getSelectedFarmCrops().equals("")) {
 
 			errorCodes.put("empty.block", "empty.block");
 		}
@@ -574,26 +626,30 @@ public class SitePreprationAction extends SwitchAction {
 		}
 		dataList = (List<Object[]>) farmerService.listObjectById(qry, parame.toArray());
 		if (dataList != null && !ObjectUtil.isEmpty(dataList)) {
-			/*dataList.stream().distinct().forEach(f -> {
-				farmerArr.add(getJSONObject(f[0].toString(),
-						(f[1].toString() +" - "+f[2].toString() + " " + (f[3] != null && !ObjectUtil.isEmpty(f[3]) ? f[3].toString() : ""))));
-			});*/
-			
-			for(Object f[]:dataList){
-					 List<Farm> farm = utilService.listFarmByFarmerId(Long.valueOf(f[0].toString()));
-				if(!StringUtil.isListEmpty(farm)){
-					
-					farmerArr.add(getJSONObject(f[0].toString(),(f[1].toString() +" - "+f[2].toString() + " " + (f[3] != null && !ObjectUtil.isEmpty(f[3]) ? f[3].toString() : ""))));
+			/*
+			 * dataList.stream().distinct().forEach(f -> {
+			 * farmerArr.add(getJSONObject(f[0].toString(), (f[1].toString()
+			 * +" - "+f[2].toString() + " " + (f[3] != null &&
+			 * !ObjectUtil.isEmpty(f[3]) ? f[3].toString() : "")))); });
+			 */
+
+			for (Object f[] : dataList) {
+				List<Farm> farm = utilService.listFarmByFarmerId(Long.valueOf(f[0].toString()));
+				if (!StringUtil.isListEmpty(farm)) {
+
+					farmerArr.add(getJSONObject(f[0].toString(), (f[1].toString() + " - " + f[2].toString() + " "
+							+ (f[3] != null && !ObjectUtil.isEmpty(f[3]) ? f[3].toString() : ""))));
 				}
 			}
-			
+
 		}
 
 		sendAjaxResponse(farmerArr);
 
 	}
+
 	public void populateFarm() throws Exception {
-		
+
 		JSONArray farmerArr = new JSONArray();
 		if (selectedFarmer != null && !ObjectUtil.isEmpty(selectedFarmer) && !selectedFarmer.equals("")
 				&& selectedFarmer != null && !ObjectUtil.isEmpty(selectedFarmer)) {
@@ -605,31 +661,29 @@ public class SitePreprationAction extends SwitchAction {
 				parame.add(Long.valueOf(getLoggedInDealer()));
 			}
 			List<Object[]> growerList = (List<Object[]>) farmerService.listObjectById(qry, parame.toArray());
-			//List<FarmCrops> dataList = utilService.listFarmCropByFarmId(Long.valueOf(selectedFarm));
+			// List<FarmCrops> dataList =
+			// utilService.listFarmCropByFarmId(Long.valueOf(selectedFarm));
 			growerList.stream().distinct().forEach(f -> {
-				farmerArr.add(getJSONObject(f[0].toString(), f[1].toString()+"-"+f[2].toString()));
+				farmerArr.add(getJSONObject(f[0].toString(), f[1].toString() + "-" + f[2].toString()));
 			});
 		}
 		sendAjaxResponse(farmerArr);
 	}
 
-	
-
 	public void populateState() throws Exception {
 
 		JSONArray stateArr = new JSONArray();
 		if (!selectedCountry.equalsIgnoreCase("null") && (!StringUtil.isEmpty(selectedCountry))) {
-			
+
 			LinkedList<Object> parame = new LinkedList();
-			String qry="select distinct f.village.city.locality.state from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.country.name =? ";
+			String qry = "select distinct f.village.city.locality.state from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.country.name =? ";
 			parame.add(selectedCountry);
 			if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
-				qry="select distinct f.village.city.locality.state from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.country.name =?  and fc.exporter.id=?";
+				qry = "select distinct f.village.city.locality.state from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.country.name =?  and fc.exporter.id=?";
 				parame.add(getLoggedInDealer());
 			}
-			
-			
-			List<State> states =(List<State>)farmerService.listObjectById(qry, parame.toArray());
+
+			List<State> states = (List<State>) farmerService.listObjectById(qry, parame.toArray());
 			if (!ObjectUtil.isEmpty(states)) {
 				for (State state : states) {
 
@@ -651,18 +705,17 @@ public class SitePreprationAction extends SwitchAction {
 	public void populateLocality() throws Exception {
 		JSONArray localtiesArr = new JSONArray();
 		if (!selectedState.equalsIgnoreCase("null") && (!StringUtil.isEmpty(selectedState))) {
-			
+
 			LinkedList<Object> parame = new LinkedList();
-			String qry="select distinct f.village.city.locality from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.id =? ";
+			String qry = "select distinct f.village.city.locality from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.id =? ";
 			parame.add(Long.valueOf(selectedState));
 			if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
-				qry="select distinct f.village.city.locality from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.id =?   and fc.exporter.id=?";
+				qry = "select distinct f.village.city.locality from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.state.id =?   and fc.exporter.id=?";
 				parame.add(getLoggedInDealer());
 			}
-			
-				
-			List<Locality> listLocalities =(List<Locality>)farmerService.listObjectById(qry, parame.toArray());
-				if (!ObjectUtil.isEmpty(listLocalities)) {
+
+			List<Locality> listLocalities = (List<Locality>) farmerService.listObjectById(qry, parame.toArray());
+			if (!ObjectUtil.isEmpty(listLocalities)) {
 				for (Locality locality : listLocalities) {
 
 					String name = getLanguagePref(getLoggedInUserLanguage(), locality.getCode().trim().toString());
@@ -685,17 +738,16 @@ public class SitePreprationAction extends SwitchAction {
 	public void populateMunicipality() throws Exception {
 		JSONArray citiesArr = new JSONArray();
 		if (!selectedLocality.equalsIgnoreCase("null") && (!StringUtil.isEmpty(selectedLocality))) {
-			
+
 			LinkedList<Object> parame = new LinkedList();
-			String qry="select distinct f.village.city from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.id =? ";
+			String qry = "select distinct f.village.city from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.id =? ";
 			parame.add(Long.valueOf(selectedLocality));
 			if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
-				qry="select distinct f.village.city from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.id =?   and fc.exporter.id=?";
+				qry = "select distinct f.village.city from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.locality.id =?   and fc.exporter.id=?";
 				parame.add(getLoggedInDealer());
 			}
-			
-			
-			List<Municipality> listCity =(List<Municipality>)farmerService.listObjectById(qry,parame.toArray());
+
+			List<Municipality> listCity = (List<Municipality>) farmerService.listObjectById(qry, parame.toArray());
 			if (!ObjectUtil.isEmpty(listCity)) {
 				for (Municipality city : listCity) {
 
@@ -719,19 +771,18 @@ public class SitePreprationAction extends SwitchAction {
 
 		JSONArray villageArr = new JSONArray();
 		if (!selectedCity.equalsIgnoreCase("null") && (!StringUtil.isEmpty(selectedCity))) {
-			
+
 			LinkedList<Object> parame = new LinkedList();
-			String qry="select distinct f.village from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.id =? ";
+			String qry = "select distinct f.village from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.id =? ";
 			parame.add(Long.valueOf(selectedCity));
 			if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
-				qry="select distinct f.village from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.id =?    and fc.exporter.id=?";
+				qry = "select distinct f.village from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and f.village.city.id =?    and fc.exporter.id=?";
 				parame.add(getLoggedInDealer());
 			}
-			
-			
-			List<Village> listVillages =(List<Village>)farmerService.listObjectById(qry, parame.toArray());
-			
-				if (!ObjectUtil.isEmpty(listVillages)) {
+
+			List<Village> listVillages = (List<Village>) farmerService.listObjectById(qry, parame.toArray());
+
+			if (!ObjectUtil.isEmpty(listVillages)) {
 				for (Village village : listVillages) {
 
 					String name = getLanguagePref(getLoggedInUserLanguage(), village.getCode().trim().toString());
@@ -750,18 +801,17 @@ public class SitePreprationAction extends SwitchAction {
 		sendAjaxResponse(villageArr);
 
 	}
-	
 
 	public Map<String, String> getCountries() {
 
 		Map<String, String> countryMap = new LinkedHashMap<String, String>();
 		LinkedList<Object> parame = new LinkedList();
-		String qry="select distinct f.village.city.locality.state.country from Farm fm join fm.farmer f where f.status=1 ";
+		String qry = "select distinct f.village.city.locality.state.country from Farm fm join fm.farmer f where f.status=1 ";
 		if (getLoggedInDealer() != null && getLoggedInDealer() > 0) {
-			qry="select distinct f.village.city.locality.state.country from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and fc.exporter.id=?";
+			qry = "select distinct f.village.city.locality.state.country from FarmCrops fc join fc.farm fm join fm.farmer f where f.status=1 and fc.exporter.id=?";
 			parame.add(getLoggedInDealer());
 		}
-		List<Country> countryList =(List<Country>)farmerService.listObjectById(qry,parame.toArray());
+		List<Country> countryList = (List<Country>) farmerService.listObjectById(qry, parame.toArray());
 		for (Country obj : countryList) {
 			countryMap.put(obj.getName(), obj.getCode() + "-" + obj.getName());
 		}

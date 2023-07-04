@@ -5,6 +5,7 @@
 	<%@ include file="/jsp/common/grid-assets.jsp"%>
 	<%@ include file="/jsp/common/form-assets.jsp"%>
 	<script type="text/javascript">
+	var typez =<%out.print("'" + request.getParameter("id") + "'");%>;
 	$(document).ready(function(){
 		
     	var tenant='<s:property value="getCurrentTenantId()"/>';
@@ -42,6 +43,55 @@
  		refreshPopup();
  		refreshEduPopup();
  	}
+ 	
+ 	
+	function detailPopup(idd) {
+		var ids = idd;
+		$("#detailDataTitle").empty();
+		$("#detailDataHead").empty();
+
+		$("#detailDataBody").empty();
+		if (ids != '') {
+			var head='<s:property value="%{getLocaleProperty('catalogueDetailHead')}" />';
+			if (head != '') {	
+				var tr = $("<tr/>");
+				var headArrs = head.split(',');
+				$.each(headArrs, function(a, val) {
+					
+					var td = $("<td/>");
+					td.text(val);
+					tr.append(td);
+
+				});
+				$("#detailDataHead").append(tr);
+			}
+			var title ='<s:property value="%{getLocaleProperty('details')}" />';
+			$("#detailDataTitle").append(title);
+		}
+		try {
+			$.ajax({
+				type : "POST",
+				async : true,
+				url : "catalogue_methodQuery.action?id="+idd,
+				success : function(result) {
+					var jsonValue = $.parseJSON(result);
+					$.each(jsonValue, function(k, value) {
+						var tr = $("<tr/>");
+						$.each(value, function(a, val) {
+							var td = $("<td/>");
+							td.text(val);
+							tr.append(td);
+						});
+						$("#detailDataBody").append(tr);
+					});
+				}
+			});
+			document.getElementById("enableDetailPopup").click();
+		} catch (e) {
+			//alert(e);
+		}
+
+	}
  	
  	function addCatalogue(idd){
  		//alert("idd"+idd)
@@ -124,6 +174,9 @@
  		$('input[name="farmCatalogueStatus"]').attr('checked',false);
  		
  	}
+ 	function buttonDataCancel(id) {
+		document.getElementById(id).click();
+	}
  	function ediFunction(val){
  		var son = JSON.parse(val);
 
@@ -269,7 +322,9 @@
 						<th   width="20%" id="typez" class="hd"><s:text name="catalogue.typez" /></th>
 						<th   width="20%" id="name" class="hd"><s:text name="catalogue.name" /></th>
 						<th   width="20%" id="status" class="hd"><s:text name="status" /></th>
+						<th   width="10%" id="audit" class="hd noexp"><s:text name="Audit" /></th>
 						<th   width="20%" id="edit" class="hd"><s:text name="action" /></th>
+						
 							
 					</tr>
 				</thead>

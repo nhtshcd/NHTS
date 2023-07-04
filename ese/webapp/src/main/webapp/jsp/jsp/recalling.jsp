@@ -140,9 +140,11 @@ var command = '<s:property value="command"/>';
 					}
 					
 					$("#buyername").val(result.custname);
+					$("#shipmentDestination").val(result.shipmentDestination);
 					$("#exportername").val(result.exporter);
 					$('.bydet').removeClass("hide");
 					$(".farmexportdetail").removeClass("hide");
+					
 					/* var selectedrecall = '<s:property value="selectedrecallingdetail"/>'; */
 					for(var i=0;i<result.procurementGrades.length;i++){
 						var rowCounter = $('#cultiCharBody tr').length-1;
@@ -175,11 +177,13 @@ var command = '<s:property value="command"/>';
 						jQuery("#shipmentContent").append(tableRow);
 						}
 				},
+				 
 			});
 		}else{
 			$("#shipmentContent").empty();
 			$(".farmexportdetail").addClass("hide");
 		}
+		
 	}
 	
 	function saveshipmentdetails(){
@@ -281,6 +285,14 @@ var command = '<s:property value="command"/>';
 					<div class="form-element">
 						<s:textfield id="buyername" theme="simple"
 							cssClass="form-control input-sm" readonly="true" />
+					</div>
+				</div>
+				<div class="flexform-item bydet hide">
+					<label for="txt"><s:text
+							name="%{getLocaleProperty('shipment.shipmentDestination')}" /></label>
+					<div class="form-element">
+						<s:textfield name="recalling.shipmentDestination" id="shipmentDestination" 
+							theme="simple" class="form-control" readonly="true" />
 					</div>
 				</div>
 				<div class="flexform-item bydet hide">
@@ -543,7 +555,7 @@ var command = '<s:property value="command"/>';
 		</div>
 	</s:form>
 	
-	<s:form id="fileDownload" action="user_populateDownload">
+	<s:form id="fileDownload" action="recalling_populateDownload">
 		<s:hidden id="loadId" name="idd" />
 	</s:form>
 </body>

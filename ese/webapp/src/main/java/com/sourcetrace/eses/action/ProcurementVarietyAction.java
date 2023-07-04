@@ -3,6 +3,7 @@ package com.sourcetrace.eses.action;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -94,6 +95,10 @@ public class ProcurementVarietyAction extends SwitchValidatorAction {
 	@Getter
 	@Setter
 	private String crop;
+	
+	@Getter
+	@Setter
+	private String crop1;
 
 	@Autowired
 	private IUniqueIDGenerator idGenerator;
@@ -116,9 +121,7 @@ public class ProcurementVarietyAction extends SwitchValidatorAction {
 		if (!StringUtil.isEmpty(searchRecord.get("varietyName"))) {
 			filter.setName(searchRecord.get("varietyName").trim());
 		}
-		if (!StringUtil.isEmpty(searchRecord.get("cropHScode"))) {
-			filter.setCropHScode(searchRecord.get("cropHScode").trim());
-		}
+		
 
 		if (!StringUtil.isEmpty(searchRecord.get("procurementProductId"))) {
 			procurementProduct.setName(searchRecord.get("procurementProductId"));
@@ -161,11 +164,18 @@ public class ProcurementVarietyAction extends SwitchValidatorAction {
 		jsonObject.put("name", variety.getName());
 		actionOnj.put("code", variety.getCode());
 		actionOnj.put("name", variety.getName());
-		actionOnj.put("cropHScode", variety.getCropHScode());
+		
 		// actionOnj.put("cropHScode", variety.getCropHScode());
 		actionOnj.put("crop", variety.getProcurementProduct().getId());
 		actionOnj.put("id", variety.getId());
-		jsonObject.put("cropHScode", variety.getCropHScode());
+		//jsonObject.put("cropHScode", variety.getCropHScode());
+		if (request.getSession().getAttribute("roleId") != null
+				&& request.getSession().getAttribute("roleId").equals(2L)) {
+		jsonObject.put("audit","<button class='fa fa-info' aria-hidden='true' onclick='detailPopupV(\""
+				 + variety.getId() + "\")'></button>");
+		}else{
+			jsonObject.put("audit","No Access");
+		}
 		jsonObject.put("edit",
 				"<a href='#' onclick='ediFunctionV(\"" + StringEscapeUtils.escapeJavaScript(actionOnj.toString())
 						+ "\")' class='fa fa-edit' title='Edit' ></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='#' onclick='deletVariety(\""
@@ -185,7 +195,7 @@ public class ProcurementVarietyAction extends SwitchValidatorAction {
 						utilService.findProcurementProductById(Long.valueOf(this.getProcurementProductId())));
 			}
 			procurementVariety.setName(varietyName);
-			procurementVariety.setCropHScode(cropHScode);
+			
 			procurementVariety.setBranchId(getBranchId());
 			
 			procurementVariety.setCreatedUser(getUsername());
@@ -230,11 +240,11 @@ public class ProcurementVarietyAction extends SwitchValidatorAction {
 		if (!StringUtil.isEmpty(id)) {
 			ProcurementVariety temp = utilService.findProcurementVarietyById(Long.valueOf(id));
 			temp.setName(varietyName);
-			temp.setCropHScode(cropHScode);
+			//temp.setCropHScode(cropHScode);
 			temp.setUpdatedUser(getUsername());
 			temp.setUpdatedDate(new Date());
 
-			if (!StringUtil.isEmpty(varietyName) && !StringUtil.isEmpty(cropHScode)) {
+			if (!StringUtil.isEmpty(varietyName)) {
 
 				utilService.editProcurementVariety(temp);
 
@@ -384,4 +394,37 @@ public class ProcurementVarietyAction extends SwitchValidatorAction {
 		}
 		return toDoubleValue;
 	}
+	
+	public String populateDetail() {
+		if(id!=null) {
+			crop1="variety";
+			List<Object[]> Datas = farmerService.findProcurementProductDetailById(Long.valueOf(id),crop1);
+			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+
+			JSONObject jsonObj = new JSONObject();
+			previousObje = null;
+			Datas.stream().forEach(da -> {
+				JSONArray jsonArr = new JSONArray();
+
+				if (previousObje == null || !ObjectUtil.isEquals(da, previousObje)) {
+
+					for (i = 0; i < da.length; i++) {
+						if (da[i] != null) {
+							jsonArr.add(i, da[i].toString());
+						} else {
+							jsonArr.add(i, "");
+						}
+					}
+					jsonObj.put(j, jsonArr);
+					j++;
+					previousObje = da;
+				}
+
+			});
+			printAjaxResponse(jsonObj, "text/html");
+
+		} 
+		return null;
+	}
+
 }

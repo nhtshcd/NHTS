@@ -14,11 +14,13 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name="shipment")
 @Getter
 @Setter
+@Audited
 public class Shipment extends ParentEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -27,11 +29,11 @@ public class Shipment extends ParentEntity {
 	@Column(name="SHIPMENT_DATE")
 	private Date shipmentDate;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER,cascade=CascadeType.ALL)
 	@JoinColumn(name="PACKHOUSE_ID")
 	private Packhouse packhouse;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER,cascade=CascadeType.ALL)
 	@JoinColumn(name="CUSTOMER_ID")
 	private Customer customer;
 	
@@ -56,5 +58,11 @@ public class Shipment extends ParentEntity {
 
 	@Column(name = "MSG_NO")
 	private String msgNo;
+	
+	@Column(name = "SHIPMENT_DESTINATION")
+	private String shipmentDestination;
+	
+	@Column(name = "SHIPMENT_SUPPORTING_FILES")
+	private String shipmentSupportingFiles;
 
 }

@@ -17,6 +17,7 @@ import org.hibernate.annotations.ParamDef;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))
@@ -24,6 +25,7 @@ import lombok.Setter;
 @Table(name = "spray_field_management")
 @Getter
 @Setter
+@Audited
 public class SprayAndFieldManagement extends ParentEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -31,15 +33,15 @@ public class SprayAndFieldManagement extends ParentEntity {
 	@Column(name = "DATE")
 	private Date date;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+/*	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "FARM_CROP_ID")
-	private FarmCrops farmCrops;
+	private FarmCrops farmCrops;*/
 	
-	@ManyToOne(fetch=FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name="PLANTING_ID")
 	private Planting planting;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "PCBP_ID")
 	private Pcbp pcbp;
 
@@ -84,9 +86,18 @@ public class SprayAndFieldManagement extends ParentEntity {
 
 	@Column(name = "LAST_DATE_OF_CALIBRATION")
 	private Date lastDateOfCalibration;
+	
+	@Column(name = "PHI_AND_SPRAYING_DATE")
+	private Date dayOfPHIandSprayingDate;
 
 	@Column(name = "INSECT_TARGETED")
 	private String insectTargeted;
+	
+	@Column(name = "ACTIVE_INGREDIENT")
+	private String activeIngredient;
+	
+	@Column(name = "RECOMMEN")
+	private String recommen;
 
 	@Transient
 	private String variety;

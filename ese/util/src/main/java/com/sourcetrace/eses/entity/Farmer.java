@@ -26,12 +26,13 @@ import org.hibernate.annotations.ParamDef;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "farmer")
 @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))
 @Filters(@org.hibernate.annotations.Filter(name = "branchFilter", condition = "branch_id in ( :branchIdParam )"))
-
+@Audited
 @Getter
 @Setter
 public class Farmer extends ParentEntity {
@@ -153,6 +154,9 @@ public class Farmer extends ParentEntity {
 	@Column(name = "CROP_NAME", length = 50, columnDefinition = "VARCHAR(255)")
 	private String cropName;
 	
+	@Column(name = "CROP_VARIETY", length = 50, columnDefinition = "VARCHAR(255)")
+	private String cropVariety;
+	
 	// Transient
 	@Transient
 	private List<String> branchesList;
@@ -177,4 +181,7 @@ public class Farmer extends ParentEntity {
 	
 	@Column(name = "EXPORTERS")
 	private String exporters;
+	
+	@Column(name = "FARMER_CATEGORY")
+	private String fCat;
 }

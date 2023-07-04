@@ -215,10 +215,10 @@ public class TraceabilityViewReportAction extends BaseReportAction {
 			recommandation = " | Recommendations: " + scouting2.getRecommendations();
 		}
 
-		if (scouting2.getFarmCrops().getBlockId() != null) {
-			blockid = " | Block Id: " + scouting2.getFarmCrops().getBlockId();
+		if (scouting2.getPlanting().getFarmCrops().getBlockId() != null) {
+			blockid = " | Block Id: " + scouting2.getPlanting().getFarmCrops().getBlockId();
 		}
-		String testdata = txmyyt + batrch + " | Block : " + scouting2.getFarmCrops().getBlockName()
+		String testdata = txmyyt + batrch + " | Block : " + scouting2.getPlanting().getFarmCrops().getBlockName()
 				+ " | Crop Planting Id : " + scouting2.getPlanting().getPlantingId() + recommandation;
 		if (scouting2.getNameOfInsectsObserved() != null && !StringUtil.isEmpty(scouting2.getNameOfInsectsObserved())) {
 			testdata += " | Insects Observed : " + getCatlogueValueByCodeArray(scouting2.getNameOfInsectsObserved());

@@ -14,12 +14,13 @@ import org.hibernate.annotations.ParamDef;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "site_prepration")
 @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))
 @Filters(@org.hibernate.annotations.Filter(name = "branchFilter", condition = "branch_id in ( :branchIdParam )"))
-
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 @Getter
 @Setter
 public class SitePrepration extends ParentEntity {
@@ -29,7 +30,7 @@ public class SitePrepration extends ParentEntity {
 		INACTIVE, ACTIVE, APPROVE, REJECT, DELETED, EXPORTER_INSPECTION
 	}
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "CROP_ID")
 	private ProcurementVariety previousCrop;
 
@@ -80,7 +81,7 @@ public class SitePrepration extends ParentEntity {
 	@Column(name = "MSG_NO")
 	private String msgNo;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "FARM_CROPS_ID")
 	private FarmCrops farmCrops;
 }

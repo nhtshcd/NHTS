@@ -692,6 +692,7 @@ public class TxnEnrollmentProperties {
 	public static final String CROP_DETAIL = "crops";
 	public static final String CROP_ID = "cropId";
 	public static final String FARM_CROP_ID = "fcropId";
+	public static final String MAX_PHIDATES = "maxPhiDate";
 	public static final String CROP_VARIETY_ID = "varId";
 
 	public static final String BUYER_DOWNLOAD_REVISION_NO = "byrRevNo";

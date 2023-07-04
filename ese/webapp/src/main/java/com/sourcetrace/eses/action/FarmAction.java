@@ -3,11 +3,14 @@ package com.sourcetrace.eses.action;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang.StringEscapeUtils;
+import org.apache.poi.ss.formula.functions.T;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,6 +20,7 @@ import org.springframework.stereotype.Component;
 import com.sourcetrace.eses.entity.CoordinatesMap;
 import com.sourcetrace.eses.entity.Country;
 import com.sourcetrace.eses.entity.DocumentUpload;
+import com.sourcetrace.eses.entity.ExporterRegistration;
 import com.sourcetrace.eses.entity.Farm;
 import com.sourcetrace.eses.entity.Farmer;
 import com.sourcetrace.eses.entity.Locality;
@@ -107,6 +111,10 @@ public class FarmAction extends SwitchAction {
 	@Autowired
 	private IFarmerService farmerService;
 
+	@Getter
+	@Setter
+	List<Object[]> ex;
+
 	public String detail() throws Exception {
 		String view = null;
 		if (id != null && !StringUtil.isEmpty(id)) {
@@ -118,6 +126,10 @@ public class FarmAction extends SwitchAction {
 			String isSAddr = getYesNoList().get(farm.getIsAddressSame());
 			if (isSAddr != null && StringUtil.isEmpty(isSAddr))
 				farm.setIsAddressSame(isSAddr);
+
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Farm", farm.getId());
+
+			setCommand(DETAIL);
 
 			setCurrentPage(getCurrentPage());
 			command = UPDATE;
@@ -145,7 +157,7 @@ public class FarmAction extends SwitchAction {
 			}
 
 			Farmer farmer = new Farmer();
-			 farm = new Farm();
+			farm = new Farm();
 			// farmer.setFarmerId(this.farmerId);
 			farmer = farmerService.findFarmerByFarmerId(this.farmerId);
 			farm.setFarmer(farmer);
@@ -181,7 +193,7 @@ public class FarmAction extends SwitchAction {
 				du.setName(name);
 				du.setContent(FileUtil.getBinaryFileContent(landRegDocsFile));
 				du.setDocFileContentType(landRegDocsFileType);
-				du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"1");
+				du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "1");
 				du.setType(DocumentUpload.docType.IMPORT_APP.ordinal());
 				du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 				utilService.save(du);
@@ -204,7 +216,7 @@ public class FarmAction extends SwitchAction {
 			farm.setCreatedUser(getUsername());
 			farm.setStatus(1);
 
-			if (latLonJsonString != null && !StringUtil.isEmpty(latLonJsonString) && latLonJsonString.length()>2) {
+			if (latLonJsonString != null && !StringUtil.isEmpty(latLonJsonString) && latLonJsonString.length() > 2) {
 				CoordinatesMap cc = formCoord(latLonJsonString);
 				farm.setPlotting(cc);
 			}
@@ -272,7 +284,7 @@ public class FarmAction extends SwitchAction {
 					du.setName(name);
 					du.setContent(FileUtil.getBinaryFileContent(landRegDocsFile));
 					du.setDocFileContentType(landRegDocsFileType);
-					du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec())+"1");
+					du.setRefCode(String.valueOf(DateUtil.getDateTimWithMinsec()) + "1");
 					du.setType(DocumentUpload.docType.IMPORT_APP.ordinal());
 					du.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 					utilService.save(du);
@@ -303,7 +315,8 @@ public class FarmAction extends SwitchAction {
 					Farmer f = farmerService.findFarmerById(farm.getFarmer().getId());
 					fm.setFarmer(f);
 				}
-				if (latLonJsonString != null && !StringUtil.isEmpty(latLonJsonString)  && latLonJsonString.length()>2) {
+				if (latLonJsonString != null && !StringUtil.isEmpty(latLonJsonString)
+						&& latLonJsonString.length() > 2) {
 					CoordinatesMap cc = formCoord(latLonJsonString);
 					fm.setPlotting(cc);
 					fm.setLatitude(cc.getMidLatitude());
@@ -315,6 +328,8 @@ public class FarmAction extends SwitchAction {
 				}
 				fm.setIsAddressSame(farm.getIsAddressSame());
 				fm.setRevisionNo(DateUtil.getRevisionNumber());
+				fm.setUpdatedUser(getUsername());
+				fm.setUpdatedDate(new Date());
 				farmerService.editFarm(fm);
 			}
 			return REDIRECT;
@@ -345,18 +360,21 @@ public class FarmAction extends SwitchAction {
 		Map<String, String> errorCodes = new LinkedHashMap<>();
 		if (farm != null) {
 
-			/*if (!StringUtil.isEmpty(farm.getFarmName())) {
-				if (!ValidationUtil.isPatternMaches(farm.getFarmName(), ValidationUtil.ALPHANUMERIC_PATTERN)) {
-					errorCodes.put("pattern.farmName", getLocaleProperty("pattern.farmName"));
-				} else {
-					Long id = (Long) farmerService.findObjectById("select id from Farm fc where fc.farmName=? and fc.farmer.id=? and fc.status <>2",
-							new Object[] { farm.getFarmName() ,Long.valueOf(farmerUniqueId)});
-					if (id != null && (farm.getId() == null || !farm.getId().equals(id))) {
-						errorCodes.put("unique.farmname", getLocaleProperty("unique.farmname"));
-					}
-				}
-			} else*/
-			if (StringUtil.isEmpty(farm.getFarmName())){
+			/*
+			 * if (!StringUtil.isEmpty(farm.getFarmName())) { if
+			 * (!ValidationUtil.isPatternMaches(farm.getFarmName(),
+			 * ValidationUtil.ALPHANUMERIC_PATTERN)) {
+			 * errorCodes.put("pattern.farmName",
+			 * getLocaleProperty("pattern.farmName")); } else { Long id = (Long)
+			 * farmerService.
+			 * findObjectById("select id from Farm fc where fc.farmName=? and fc.farmer.id=? and fc.status <>2"
+			 * , new Object[] { farm.getFarmName()
+			 * ,Long.valueOf(farmerUniqueId)}); if (id != null && (farm.getId()
+			 * == null || !farm.getId().equals(id))) {
+			 * errorCodes.put("unique.farmname",
+			 * getLocaleProperty("unique.farmname")); } } } else
+			 */
+			if (StringUtil.isEmpty(farm.getFarmName())) {
 				errorCodes.put("empty.farmName", getLocaleProperty("empty.farmName"));
 			}
 
@@ -368,10 +386,13 @@ public class FarmAction extends SwitchAction {
 
 				errorCodes.put("empty.totalLandHolding", getLocaleProperty("empty.totalLandHolding"));
 			}
-			
-			/*if (latLonJsonString == null || StringUtil.isEmpty(latLonJsonString) || latLonJsonString.length() == 2) {
-				errorCodes.put("empty.plotting", getLocaleProperty("empty.plotting"));
-			}*/
+
+			/*
+			 * if (latLonJsonString == null ||
+			 * StringUtil.isEmpty(latLonJsonString) || latLonJsonString.length()
+			 * == 2) { errorCodes.put("empty.plotting",
+			 * getLocaleProperty("empty.plotting")); }
+			 */
 
 			// if (StringUtil.isEmpty(farm.getIsAddressSame()) ||
 			// farm.getIsAddressSame().equals(null)) {
@@ -379,16 +400,22 @@ public class FarmAction extends SwitchAction {
 			// getLocaleProperty("empty.isAddressSame"));
 			// }
 
-			/*if (StringUtil.isEmpty(farm.getAddress())) {
+			/*
+			 * if (StringUtil.isEmpty(farm.getAddress())) {
+			 * 
+			 * errorCodes.put("empty.address",
+			 * getLocaleProperty("empty.address")); }
+			 */
 
-				errorCodes.put("empty.address", getLocaleProperty("empty.address"));
-			}*/
-
-			if (StringUtil.isEmpty(farm.getLandRegNo())) {
-
-				errorCodes.put("empty.landRegNo", getLocaleProperty("empty.landRegNo"));
-			}else{
-				Long id = (Long) farmerService.findObjectById("select id from Farm fc where fc.landRegNo=? and fc.status <>2",
+			/*
+			 * if (StringUtil.isEmpty(farm.getLandRegNo())) {
+			 * 
+			 * errorCodes.put("empty.landRegNo",
+			 * getLocaleProperty("empty.landRegNo")); }
+			 */
+			if (!StringUtil.isEmpty(farm.getLandRegNo())) {
+				Long id = (Long) farmerService.findObjectById(
+						"select id from Farm fc where fc.landRegNo=? and fc.status <>2",
 						new Object[] { farm.getLandRegNo() });
 				if (id != null && (farm.getId() == null || !farm.getId().equals(id))) {
 					errorCodes.put("unique.landRegNo", getLocaleProperty("unique.landRegNo"));
@@ -504,8 +531,8 @@ public class FarmAction extends SwitchAction {
 		objDt.put("code", code);
 		objDt.put("name", farm.getFarmName());
 		objDt.put("area", farm.getTotalLandHolding());
-		objDt.put("village", farm.getProposedPlanting()!=null ?  farm.getProposedPlanting() : "");
-		objDt.put("city", farm.getVillage()!=null ? farm.getVillage().getName() : "");
+		objDt.put("village", farm.getProposedPlanting() != null ? farm.getProposedPlanting() : "");
+		objDt.put("city", farm.getVillage() != null ? farm.getVillage().getName() : "");
 		actionOnj.put("id", farm.getId());
 
 		objDt.put("edit",
@@ -518,8 +545,6 @@ public class FarmAction extends SwitchAction {
 		jsonObject.put("cell", objDt);
 		return jsonObject;
 	}
-
-	
 
 	public void populateState() throws Exception {
 
@@ -615,7 +640,6 @@ public class FarmAction extends SwitchAction {
 		sendAjaxResponse(villageArr);
 
 	}
-	
 
 	public Map<String, String> getCountries() {
 

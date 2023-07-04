@@ -14,11 +14,13 @@ import javax.persistence.TemporalType;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name="harvest")
 @Getter
 @Setter
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class Harvest extends ParentEntity {
 
 	private static final long serialVersionUID = 1L;

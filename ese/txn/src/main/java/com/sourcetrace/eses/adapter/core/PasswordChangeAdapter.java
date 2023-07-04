@@ -63,7 +63,8 @@ public class PasswordChangeAdapter implements ITxnAdapter {
 
 			}
 			
-			String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,10000000000}$";
+			//String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,10000000000}$";
+			String PASSWORD_PATTERN = "^(?=.*).{%%min%%,10000000000}$";
 			ESESystem es = utilService.findPrefernceByOrganisationId(agent.getBranchId());
 			PASSWORD_PATTERN = PASSWORD_PATTERN.replace("%%min%%",
 					es.getPreferences().get(ESESystem.PASSWORD_MIN_LENGTH).toString());

@@ -66,10 +66,24 @@
 			<div class="fullwidth">
 				<div class="flexWrapper">
 					<div class="flexLeft appContentWrapper">
-						<div class="formContainerWrapper dynamic-form-con">
+						<%-- <div class="formContainerWrapper dynamic-form-con">
 							<h2>
 								<s:property value="%{getLocaleProperty('info.scouting')}" />
-							</h2>
+							</h2> --%>
+							
+							<div class="formContainerWrapper">
+							<div class="aPanel farmer_info">
+								<div class="aTitle">
+									<h2>
+										<s:property value="%{getLocaleProperty('info.scouting')}" />
+										<div class="pull-right">
+											<a class="aCollapse" href="#"><i
+												class="fa fa-chevron-right"></i></a>
+										</div>
+									</h2>
+								</div>
+						<div class="aContent dynamic-form-con">
+							
 							<s:if test='branchId==null'>
 								<div class="dynamic-flexItem">
 									<p class="flexItem">
@@ -86,30 +100,18 @@
 									<s:text name="scouting.receivedDate" />
 								</p>
 								<p class="flexItem">
-									<%-- <s:property value="scouting.receivedDate" /> --%>
 									<s:date name="scouting.receivedDate" format="dd/MM/yyyy" />
-
 								</p>
 							</div>
 
-							<!--<div class="dynamic-flexItem">
-								<p class="flexItem">
-									<s:text name="exporterRegistr.cmpyName" />
-								</p>
-								<p class="flexItem">
-									<s:property value="scouting.farmCrops.farm.farmer.exporter.name" />
-								</p>
-							</div> -->
-							
-								<div class="dynamic-flexItem">
+							<div class="dynamic-flexItem">
 								<p class="flexItem">
 									<s:text name="farmer.fcode" />
 								</p>
 								<p class="flexItem">
-									<s:property value="scouting.farmCrops.farm.farmer.farmerId" />
+									<s:property value="scouting.planting.farmCrops.farm.farmer.farmerId" />
 								</p>
 							</div>
-							
 							
 							
 							<div class="dynamic-flexItem">
@@ -121,20 +123,21 @@
 								</p>
 							</div>
 							
-								<div class="dynamic-flexItem">
+							<div class="dynamic-flexItem">
 								<p class="flexItem">
 									<s:text name="farmCode" />
 								</p>
 								<p class="flexItem">
-									<s:property value="scouting.farmCrops.farm.farmCode" />
+									<s:property value="scouting.planting.farmCrops.farm.farmCode" />
 								</p>
 							</div>
+							
 							<div class="dynamic-flexItem">
 								<p class="flexItem">
 									<s:text name="profile.farm" />
 								</p>
 								<p class="flexItem">
-									<s:property value="scouting.farmCrops.farm.farmName" />
+									<s:property value="scouting.planting.farmCrops.farm.farmName" />
 								</p>
 							</div>
 
@@ -143,31 +146,19 @@
 									<s:text name="block" />
 								</p>
 								<p class="flexItem">
-									<s:property value="scouting.farmCrops.blockName" />
+									<s:property value="scouting.planting.farmCrops.blockName" />
 								</p>
 							</div>
-
-
 
 							 <div class="dynamic-flexItem">
 								<p class="flexItem">
 									<s:text name="blockId" />
 								</p>
 								<p class="flexItem">
-									<s:property value="scouting.farmCrops.blockId" />
+									<s:property value="scouting.planting.farmCrops.blockId" />
 								</p>
-
 							</div>
 							
-							<%--<div class="dynamic-flexItem">
-								<p class="flexItem">
-									<s:text name="Planting" />
-								</p>
-								<p class="flexItem">
-									<s:property value="scouting.planting.plantingId" />
-								</p>
-							</div> --%>
-
 							<div class="dynamic-flexItem">
 								<p class="flexItem">
 									<s:text name="Planting ID" />
@@ -176,9 +167,6 @@
 									<s:property value="scouting.planting.plantingId" />
 								</p>
 							</div>
-
-
-
 
 							<div class="dynamic-flexItem">
 								<p class="flexItem">
@@ -189,8 +177,6 @@
 								</p>
 							</div>
 
-
-
 							<div class="dynamic-flexItem">
 								<p class="flexItem">
 									<s:text name="scouting.cropVariety" />
@@ -199,15 +185,32 @@
 									<s:property value="scouting.planting.grade.name" />
 								</p>
 							</div>
+							
+							<div class="dynamic-flexItem">
+									<p class="flexItem">
+										<s:property value="%{getLocaleProperty('scouting.sprayingRequired')}" />
+									</p>
+									<p class="flexItem">
+										<s:property
+											value='%{getCatlogueValueByCodeArray(scouting.sprayingRequired)}' />
+									</p>
+								</div>
+								
+							<div class="dynamic-flexItem">
+								<p class="flexItem">
+									<s:text name="scouting.sctRecommendation" />
+								</p>
+								<p class="flexItem">
+									<s:property value="scouting.sctRecommendation" />
+								</p>
 							</div>
-
-
-							<div class="formContainerWrapper dynamic-form-con">
+								
+							<!-- </div>
+							<div class="formContainerWrapper dynamic-form-con"> -->
+							
 								<h2>
-									<%-- <s:property value="%{getLocaleProperty('info.scouting')}" /> --%>
 									<s:text name="info.insects" />
 								</h2>
-
 
 								<div class="dynamic-flexItem">
 									<p class="flexItem">
@@ -223,7 +226,6 @@
 									<p class="flexItem">
 										<s:property
 											value='%{getCatlogueValueByCodeArray(scouting.nameOfInsectsObserved)}' />
-
 									</p>
 								</div>
 								
@@ -236,12 +238,10 @@
 									</p>
 								</div>
 								
-								</div>
-								
-
-							<div class="formContainerWrapper dynamic-form-con">
+								<!-- </div>
+							<div class="formContainerWrapper dynamic-form-con"> -->
+							
 								<h2>
-									<%-- <s:property value="%{getLocaleProperty('info.scouting')}" /> --%>
 									<s:text name="info.disease" />
 								</h2>
 								
@@ -259,9 +259,9 @@
 									<p class="flexItem">
 										<s:property
 											value='%{getCatlogueValueByCodeArray(scouting.nameOfDisease)}' />
-
 									</p>
 								</div>
+								
 								<div class="dynamic-flexItem y2 hide">
 									<p class="flexItem">
 										<s:text name="scouting.perInfection" />
@@ -271,12 +271,10 @@
 									</p>
 								</div>
 								
-								</div>
-								
-
-							<div class="formContainerWrapper dynamic-form-con">
+								<!-- </div>
+							<div class="formContainerWrapper dynamic-form-con"> -->
+							
 								<h2>
-									<%-- <s:property value="%{getLocaleProperty('info.scouting')}" /> --%>
 									<s:text name="info.weedsObserveds" />
 								</h2>
 								
@@ -295,9 +293,9 @@
 									<p class="flexItem">
 										<s:property
 											value='%{getCatlogueValueByCodeArray(scouting.nameOfWeeds)}' />
-
 									</p>
 								</div>
+								
 								<div class="dynamic-flexItem y3 hide">
 									<p class="flexItem">
 										<s:text name="scouting.weedsPresence" />
@@ -306,6 +304,7 @@
 										<s:property value="scouting.weedsPresence" />
 									</p>
 								</div>
+								
 								<div class="dynamic-flexItem y3 hide">
 									<p class="flexItem">
 										<s:text name="scouting.recommendations" />
@@ -314,11 +313,11 @@
 										<s:property value="scouting.recommendations" />
 									</p>
 								</div>
-								</div>
-
-							<div class="formContainerWrapper dynamic-form-con">
+								
+								<!-- </div>
+							<div class="formContainerWrapper dynamic-form-con"> -->
+							
 								<h2>
-									<%-- <s:property value="%{getLocaleProperty('info.scouting')}" /> --%>
 									<s:text name="info.irrigation" />
 								</h2>
 
@@ -329,20 +328,19 @@
 									<p class="flexItem">
 										<s:property
 											value="%{getCatalgueNameByCode(scouting.sourceOfWater)}" />
-
 									</p>
 								</div>
-
 
 								<div class="dynamic-flexItem">
 									<p class="flexItem">
-										<s:text name="scouting.irrigationType" />
+										<%-- <s:text name="scouting.irrigationType" /> --%>
+										<s:property value="%{getLocaleProperty('scouting.irrigationType')}" />
 									</p>
 									<p class="flexItem">
 										<s:property value="scouting.irrigationType" />
-										<%-- <s:property value='%{getCatlogueValueByCodeArray(scouting.irrigationType)}' /> --%>
 									</p>
 								</div>
+								
 								<div class="dynamic-flexItem">
 									<p class="flexItem">
 										<s:text name="scouting.irrigationMethod" />
@@ -350,29 +348,51 @@
 									<p class="flexItem">
 										<s:property
 											value='%{getCatlogueValueByCodeArray(scouting.irrigationMethod)}' />
-
-
 									</p>
 								</div>
+								
 								<div class="dynamic-flexItem">
 									<p class="flexItem">
-										<s:text name="scouting.areaIrrrigated" />
+										<%-- <s:text name="scouting.areaIrrrigated" /> --%>
+										<s:property value="%{getLocaleProperty('scouting.areaIrrrigated')}" />
 									</p>
 									<p class="flexItem">
 										<s:property value="scouting.areaIrrrigated" />
 									</p>
 								</div>
-
-
-
-
-
-
-
-
-
-
 							</div>
+							</div>
+							<s:if test="roleID.trim().equalsIgnoreCase('2')">						
+								<s:iterator value="ex" var="innerList">
+								<div class="aPanel audit_history">
+									<div class="aTitle">
+										<h2>
+											<s:if test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+													<s:property value="#innerList[0].createdUser" />
+											</s:if>
+											<s:else>
+													 <s:property value="#innerList[0].updatedUser" />
+											 </s:else>
+											-
+											<s:date name="#innerList[1].revisionDate" format="dd/MM/yyyy hh:mm:ss" />
+											-
+											<s:property value="%{getLocaleProperty('default'+#innerList[2])}" />
+											<div class="pull-right">
+												<a class="aCollapse "
+													href="#<s:property value="#innerList[1].id" />"><i
+													class="fa fa-chevron-right"></i></a>
+											</div>
+										</h2>
+									</div>
+									<div class="aContent dynamic-form-con"
+										id="<s:property value="#innerList[1].id" />">
+										<jsp:include page='/jsp/jsp/auditScoutingDetail.jsp' />
+									</div>
+								</div>
+							</s:iterator> 
+							</s:if>
+							</div>
+							
 							<div class="yui-skin-sam">
 								<div class="margin-top-10">
 									<span id="cancel" class=""><span class="first-child"><button

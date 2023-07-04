@@ -356,13 +356,13 @@ $('.area').attr('readonly', 'readonly');
 		google.maps.event.addDomListener(document
 				.getElementById('delete-button'), 'click', function(event) {
 			//alert("ff");
-			coorArr = [];
-			event.stopPropagation();
-			event.preventDefault();
-			event.cancelBubble = true;
+					coorArr = [];
+					event.stopPropagation();
+					event.preventDefault();
+					event.cancelBubble = true;
 
-			deleteSelectedShape();
-			deletPolygon();
+					deleteSelectedShape();
+					deletPolygon();
 		});
 	}
 

@@ -258,7 +258,7 @@ function closeDatepickernew(){
 
 						</div>
 					</div>
-
+                   <div style="overflow: auto;">
 					<table class="table table-bordered aspect-detail"
 						id="shipmentInfoTable">
 						<thead>
@@ -302,6 +302,7 @@ function closeDatepickernew(){
 							</s:iterator>
 						</tbody>
 					</table>
+					</div>
 					<div class="flexform-item">
 						<label for="txt"><s:text name="postrecall.agencyName" />
 							<sup style="color: red;">*</sup></label>

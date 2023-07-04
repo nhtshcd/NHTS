@@ -16,11 +16,13 @@ import javax.persistence.Transient;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name="shipment_details")
 @Getter
 @Setter
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class ShipmentDetails implements Serializable{
 
 	private static final long serialVersionUID = 1L;

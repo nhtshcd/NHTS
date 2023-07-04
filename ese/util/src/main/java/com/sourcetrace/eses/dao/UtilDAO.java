@@ -1,125 +1,148 @@
 package com.sourcetrace.eses.dao;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.atomic.AtomicInteger;
-import java.util.stream.Collectors;
-
-import javax.transaction.Transactional;
-
-import org.hibernate.Criteria;
-import org.hibernate.Query;
-import org.hibernate.SQLQuery;
-import org.hibernate.Session;
-import org.hibernate.SessionFactory;
-import org.hibernate.criterion.Order;
-import org.hibernate.criterion.ProjectionList;
-import org.hibernate.criterion.Projections;
-import org.hibernate.criterion.Restrictions;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
-
-import com.sourcetrace.eses.entity.AccessLog;
-import com.sourcetrace.eses.entity.Action;
-import com.sourcetrace.eses.entity.Agent;
-import com.sourcetrace.eses.entity.AgentAccessLog;
-import com.sourcetrace.eses.entity.AgentAccessLogDetail;
-import com.sourcetrace.eses.entity.AgentType;
-import com.sourcetrace.eses.entity.AgroTransaction;
-import com.sourcetrace.eses.entity.Asset;
-import com.sourcetrace.eses.entity.BankInfo;
-import com.sourcetrace.eses.entity.BranchMaster;
-import com.sourcetrace.eses.entity.CityWarehouse;
-import com.sourcetrace.eses.entity.CityWarehouseDetail;
-import com.sourcetrace.eses.entity.Country;
-import com.sourcetrace.eses.entity.Customer;
-import com.sourcetrace.eses.entity.DeploymentLog;
-import com.sourcetrace.eses.entity.Device;
-import com.sourcetrace.eses.entity.Distribution;
-import com.sourcetrace.eses.entity.DocumentUpload;
-import com.sourcetrace.eses.entity.DynamicMenuFieldMap;
-import com.sourcetrace.eses.entity.DynamicReportConfig;
-import com.sourcetrace.eses.entity.ESEAccount;
-import com.sourcetrace.eses.entity.ESECard;
-import com.sourcetrace.eses.entity.ESESystem;
-import com.sourcetrace.eses.entity.ESETxnHeader;
-import com.sourcetrace.eses.entity.ESETxnStatus;
-import com.sourcetrace.eses.entity.Entitlement;
-import com.sourcetrace.eses.entity.ExporterRegistration;
-import com.sourcetrace.eses.entity.Farm;
-import com.sourcetrace.eses.entity.FarmCatalogue;
-import com.sourcetrace.eses.entity.FarmCatalogueMaster;
-import com.sourcetrace.eses.entity.FarmCrops;
-import com.sourcetrace.eses.entity.Farmer;
-import com.sourcetrace.eses.entity.FarmerDynamicFieldsValue;
-import com.sourcetrace.eses.entity.GramPanchayat;
-import com.sourcetrace.eses.entity.Harvest;
-import com.sourcetrace.eses.entity.HarvestSeason;
-import com.sourcetrace.eses.entity.IdentityType;
-import com.sourcetrace.eses.entity.Language;
-import com.sourcetrace.eses.entity.LanguagePreferences;
-import com.sourcetrace.eses.entity.LocaleProperty;
-import com.sourcetrace.eses.entity.Locality;
-import com.sourcetrace.eses.entity.Menu;
-import com.sourcetrace.eses.entity.Municipality;
-import com.sourcetrace.eses.entity.Pmt;
-import com.sourcetrace.eses.entity.PmtDetail;
-import com.sourcetrace.eses.entity.Procurement;
-import com.sourcetrace.eses.entity.ProcurementGrade;
-import com.sourcetrace.eses.entity.ProcurementProduct;
-import com.sourcetrace.eses.entity.ProcurementVariety;
-import com.sourcetrace.eses.entity.Product;
-import com.sourcetrace.eses.entity.Profile;
-import com.sourcetrace.eses.entity.Role;
-import com.sourcetrace.eses.entity.Scouting;
-import com.sourcetrace.eses.entity.SeasonMaster;
-import com.sourcetrace.eses.entity.ServicePoint;
-import com.sourcetrace.eses.entity.Shipment;
-import com.sourcetrace.eses.entity.ShipmentDetails;
-import com.sourcetrace.eses.entity.SprayAndFieldManagement;
-import com.sourcetrace.eses.entity.State;
-import com.sourcetrace.eses.entity.SubCategory;
 import com.sourcetrace.eses.entity.Transaction;
-import com.sourcetrace.eses.entity.TransactionLog;
-import com.sourcetrace.eses.entity.TransactionType;
-import com.sourcetrace.eses.entity.UptimeLog;
-import com.sourcetrace.eses.entity.User;
-import com.sourcetrace.eses.entity.Vendor;
-import com.sourcetrace.eses.entity.Village;
-import com.sourcetrace.eses.entity.VillageWarehouse;
-import com.sourcetrace.eses.entity.Packhouse;
-import com.sourcetrace.eses.entity.PackhouseIncoming;
-import com.sourcetrace.eses.entity.Pcbp;
-import com.sourcetrace.eses.entity.Planting;
-import com.sourcetrace.eses.entity.WarehouseProductDetail;
-import com.sourcetrace.eses.filter.ISecurityFilter;
-import com.sourcetrace.eses.util.DateUtil;
-import com.sourcetrace.eses.util.ObjectUtil;
-import com.sourcetrace.eses.util.StringUtil;
+import com.sourcetrace.eses.entity.*;
+import com.sourcetrace.eses.filter.*;
+import com.sourcetrace.eses.util.*;
+import org.apache.poi.ss.formula.functions.*;
+import org.hibernate.*;
+import org.hibernate.criterion.*;
+import org.hibernate.envers.*;
+import org.hibernate.envers.query.*;
+import org.hibernate.metadata.*;
+import org.hibernate.persister.entity.*;
+import org.hibernate.type.Type;
+import org.json.simple.*;
+import org.springframework.beans.factory.annotation.*;
+import org.springframework.stereotype.*;
+
+import javax.transaction.*;
+import java.lang.reflect.*;
+import java.math.*;
+import java.util.*;
+import java.util.concurrent.atomic.*;
+import java.util.regex.*;
+import java.util.stream.*;
 
 @Repository
 @Transactional
 public class UtilDAO extends ESEDAO implements IUtilDAO {
+
+	private static Map<String, Map<String, JSONObject>> allClassMetadata = new HashMap<>();
+
 	@Autowired
 	public UtilDAO(SessionFactory sessionFactory) {
+		Map<String, ClassMetadata> classMetadataMap = sessionFactory.getAllClassMetadata();
+
+		for (ClassMetadata classMetadata : classMetadataMap.values()) {
+
+			if (classMetadata instanceof AbstractEntityPersister) {
+				AbstractEntityPersister entityPersister = (AbstractEntityPersister) classMetadata;
+				String entityName = entityPersister.getEntityName();
+				String tableName = entityPersister.getTableName();
+				String[] propertyNames = entityPersister.getPropertyNames();
+				Map<String, JSONObject> fieldnam = new HashMap<>();
+
+				for (String propertyName : propertyNames) {
+					if (entityPersister.getPropertyType(propertyName).isAssociationType()) {
+						// Check if the property is a @ManyToOne
+						// relationship
+						String columnName = entityPersister.getPropertyColumnNames(propertyName)[0];
+						String[] columnNames = entityPersister.getPropertyColumnNames(propertyName);
+						String[] targetColumnNames = entityPersister.getPropertyColumnNames(propertyName);
+						String associatedEntity = entityPersister.getPropertyType(propertyName).getName();
+						Type propertyType = entityPersister.getPropertyType(propertyName);
+						// Collection collection = (Collection)
+						// entityPersister.getProperty(propertyName).getValue();
+
+						String relationType = propertyType.isEntityType() ? "MO"
+								: propertyType.isCollectionType() ? "OM" : "Unknown";
+
+						// Handle the non-audited @ManyToOne
+						// relationship
+						// ... your logic here ...
+						JSONObject js = new JSONObject();
+
+						js.put("Entity", entityName);
+						js.put("Relation", propertyName);
+						js.put("RelationType", relationType);
+						js.put("Table", tableName);
+						js.put("AssEntity", associatedEntity);
+						js.put("Column", columnNames[0]);
+						js.put("TargetColumn", targetColumnNames[0]);
+						if (relationType.equals("OM")) {
+							try {
+
+								Pattern pattern = Pattern.compile("<(.*?)>");
+								Matcher matcher = pattern.matcher(entityPersister.getMappedClass()
+										.getDeclaredField(propertyName).getGenericType().getTypeName());
+
+								while (matcher.find()) {
+									String content = matcher.group(1);
+									js.put("AssEntity", content);
+								}
+							} catch (Exception e) {
+
+							}
+						}
+						fieldnam.put(propertyName, js);
+
+					}
+				}
+				allClassMetadata.put(entityName, fieldnam);
+			}
+		}
+
 		this.setSessionFactory(sessionFactory);
+	}
+
+	// Method to check if a @ManyToOne property is marked as non-audited
+	private boolean isPropertyManyToOneNotAudited(AbstractEntityPersister entityPersister, String propertyName) {
+		try {
+			Class<?> entityClass = entityPersister.getMappedClass();
+			Field propertyField = entityClass.getDeclaredField(propertyName);
+			// notAuditedAnnotation =
+			// propertyField.getAnnotation(NotAudited.class);
+			return true;
+		} catch (NoSuchFieldException e) {
+			return false; // Property not found, consider it as not audited
+		}
+	}
+
+	public static boolean isEntityAudited(Class<?> entityClass) {
+
+		return Arrays.stream(entityClass.getAnnotations())
+				.anyMatch(annotation -> annotation.annotationType().equals(Audited.class));
 	}
 
 	@Override
 	public void save(Object user) {
-		super.save(user);
+		/* super.save(user); */
 
+		Session session = getSessionFactory().openSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
+
+		session.save(user);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		session.close();
 	}
 
 	@Override
 	public void saveOrUpdate(Object user) {
-		super.saveOrUpdate(user);
+		// super.saveOrUpdate(user);
 
+		Session session = getSessionFactory().openSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
+
+		session.saveOrUpdate(user);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		session.close();
 	}
 
 	@Override
@@ -145,10 +168,10 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		if (!ObjectUtil.isEmpty(branchFilter)) {
 			session.disableFilter(ISecurityFilter.BRANCH_FILTER);
 		}
-		Query query = session.createQuery("From Agent agent where agent.profileId=:agentId");
+		Query query = session.createQuery("From Agent agent where agent.profileId=:agentId and agent.status!=2");
 		query.setParameter("agentId", agentID);
-		List<Agent> aglis =query.list();
-		Agent agent = aglis!=null && aglis.size()>0 ? (Agent) query.list().get(0) :null;
+		List<Agent> aglis = query.list();
+		Agent agent = aglis != null && aglis.size() > 0 ? (Agent) query.list().get(0) : null;
 		session.flush();
 		session.close();
 		return agent;
@@ -418,7 +441,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		 * criteria.from(SupplierProcurementDetail.class);
 		 * from.join("SupplierProcurementDetail_.supplierProcurement");
 		 * from.join("SupplierProcurement_.agroTransaction");
-		 * 
+		 *
 		 * Predicate pp =
 		 * builder.and(builder.isNotNull(from.get("procurementGrade")),
 		 * builder.isNotNull(from.get("supplierProcurement")),
@@ -654,19 +677,17 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 
 		return list("FROM Customer sn left join fetch sn.locationDetail and sn.status=0");
 	}
-/*	
-	@Override
-	public List<Pcbp> listPcbp() {
-		
-		return list("FROM Customer sn left join fetch sn.locationDetail");
-	}*/
-	
+	/*
+	 * @Override public List<Pcbp> listPcbp() {
+	 *
+	 * return list("FROM Customer sn left join fetch sn.locationDetail"); }
+	 */
+
 	@Override
 	public List<Object[]> listPcbp() {
 		return list("select  p.id,p.tradeName FROM Pcbp p");
 
 	}
-	
 
 	@Override
 	public Customer findCustomerBycustomerId(String customerId) {
@@ -1020,9 +1041,9 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		Customer customer = (Customer) find("FROM Customer c WHERE c.customerId = ?", customerId);
 		return customer;
 	}
-	
+
 	public Customer findCustomerByName(String customerName) {
-		
+
 		Customer customer = (Customer) find("FROM Customer c WHERE c.customerName = ?", customerName);
 		return customer;
 	}
@@ -1459,6 +1480,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		sessions.saveOrUpdate(obj);
 		sessions.flush();
 		sessions.close();
+
 	}
 
 	@Override
@@ -1993,7 +2015,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		farmerDynamicFieldValuesList.forEach(empDetail -> {
 			session.saveOrUpdate(empDetail);
 			if (index.incrementAndGet() % 20 == 0) { // 20, same as the JDBC
-														// batch size
+				// batch size
 				// flush a batch of inserts and release memory:
 				session.flush();
 				session.clear();
@@ -2082,8 +2104,15 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	}
 
 	public void update(Object obj) {
-		getHibernateTemplate().update(obj);
+		Session session = getSessionFactory().openSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
 
+		session.update(obj);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		session.close();
 	}
 
 	@Override
@@ -2129,17 +2158,19 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	}
 
 	@Override
-	public Integer findUserCount(Date sDate, Date eDate,Long id) {
-		
-		Session session = getSessionFactory().openSession();			
-		//String q  = "select count(*) from User where createdDate BETWEEN :startDate AND :endDate and dataId<>3";
-		String q  = "select count(*) from User where dataId<>3";
-		if(id>0){
-			  q+=" AND agroChDealer= "+id;
+	public Integer findUserCount(Date sDate, Date eDate, Long id) {
+
+		Session session = getSessionFactory().openSession();
+		// String q = "select count(*) from User where createdDate BETWEEN
+		// :startDate AND :endDate and dataId<>3";
+		String q = "select count(*) from User where dataId<>3";
+		if (id > 0) {
+			q += " AND agroChDealer= " + id;
 		}
 		Query query = session.createQuery(q);
-		//query.setParameter("startDate", sDate).setParameter("endDate", eDate);
-				
+		// query.setParameter("startDate", sDate).setParameter("endDate",
+		// eDate);
+
 		Integer l = ((Long) query.uniqueResult()).intValue();
 		session.flush();
 		session.close();
@@ -2150,8 +2181,8 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	public Integer findUserCountByMonth(Date sDate, Date eDate) {
 
 		Session session = getSessionFactory().openSession();
-		Query query = session
-				.createQuery("select count(*) from User where createdDate BETWEEN :startDate AND :endDate and dataId<>3");
+		Query query = session.createQuery(
+				"select count(*) from User where createdDate BETWEEN :startDate AND :endDate and dataId<>3");
 		query.setParameter("startDate", sDate).setParameter("endDate", eDate);
 
 		Integer val = ((Long) query.uniqueResult()).intValue();
@@ -2161,16 +2192,18 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	}
 
 	@Override
-	public Integer findMobileUserCount(Date sDate, Date eDate,Long id) {
+	public Integer findMobileUserCount(Date sDate, Date eDate, Long id) {
 		Session session = getSessionFactory().openSession();
-		//String q= "Select count(*) from Agent s where createdDate BETWEEN :startDate AND :endDate and s.status=1";		
-		String q= "Select count(*) from Agent s where s.status=1";			
-		if(id>0){
-			  q+=" AND s.exporter.id= "+id;
+		// String q= "Select count(*) from Agent s where createdDate BETWEEN
+		// :startDate AND :endDate and s.status=1";
+		String q = "Select count(*) from Agent s where s.status=1";
+		if (id > 0) {
+			q += " AND s.exporter.id= " + id;
 		}
 		Query query = session.createQuery(q);
-		//query.setParameter("startDate", sDate).setParameter("endDate", eDate);
-				
+		// query.setParameter("startDate", sDate).setParameter("endDate",
+		// eDate);
+
 		Integer l = ((Long) query.uniqueResult()).intValue();
 		session.flush();
 		session.close();
@@ -2180,8 +2213,8 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	@Override
 	public Integer findMobileUserCountByMonth(Date sDate, Date eDate) {
 		Session session = getSessionFactory().openSession();
-		Query query = session
-				.createQuery("select count(*) from Agent where createdDate BETWEEN :startDate AND :endDate and s.status=1");
+		Query query = session.createQuery(
+				"select count(*) from Agent where createdDate BETWEEN :startDate AND :endDate and s.status=1");
 		query.setParameter("startDate", sDate).setParameter("endDate", eDate);
 
 		Integer val = ((Long) query.uniqueResult()).intValue();
@@ -2191,15 +2224,17 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	}
 
 	@Override
-	public Integer findDeviceCount(Date sDate, Date eDate,Long id) {
+	public Integer findDeviceCount(Date sDate, Date eDate, Long id) {
 		Session session = getSessionFactory().openSession();
-		//String q="select count(*) from Device where createdDate BETWEEN :startDate AND :endDate";
-		String q="select count(*) from Device";
-		if(id>0){
-			  q+=" where agent.exporter.id= "+id;
+		// String q="select count(*) from Device where createdDate BETWEEN
+		// :startDate AND :endDate";
+		String q = "select count(*) from Device";
+		if (id > 0) {
+			q += " where agent.exporter.id= " + id;
 		}
 		Query query = session.createQuery(q);
-		//query.setParameter("startDate", sDate).setParameter("endDate", eDate);
+		// query.setParameter("startDate", sDate).setParameter("endDate",
+		// eDate);
 		Integer val = ((Long) query.uniqueResult()).intValue();
 		session.flush();
 		session.close();
@@ -2228,22 +2263,24 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	}
 
 	@Override
-	public Integer findWarehouseCount(Date sDate, Date eDate,Long id) {
+	public Integer findWarehouseCount(Date sDate, Date eDate, Long id) {
 		Session session = getSessionFactory().openSession();
-		//String q="select count(*) from Packhouse WHERE  status=1  AND createdDate BETWEEN :startDate AND :endDate";
-		String q="select count(*) from Packhouse WHERE  status=1";
-		if(id>0){
-			  q+=" AND exporter= "+id;
+		// String q="select count(*) from Packhouse WHERE status=1 AND
+		// createdDate BETWEEN :startDate AND :endDate";
+		String q = "select count(*) from Packhouse WHERE  status=1";
+		if (id > 0) {
+			q += " AND exporter= " + id;
 		}
 		Query query = session.createQuery(q);
-		
-		//query.setParameter("startDate", sDate).setParameter("endDate", eDate);
+
+		// query.setParameter("startDate", sDate).setParameter("endDate",
+		// eDate);
 
 		Integer val = ((Long) query.uniqueResult()).intValue();
 		session.flush();
 		session.close();
 		return val;
-				
+
 	}
 
 	@Override
@@ -2262,9 +2299,8 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	@Override
 	public Integer findGroupCount() {
 		Session session = getSessionFactory().getCurrentSession();
-		return ((Long) session.createQuery(
-				"select count(*) from Packhouse WHERE  status=1 and typez='" + Packhouse.WarehouseTypes.SAMITHI.ordinal() + "'")
-				.uniqueResult()).intValue();
+		return ((Long) session.createQuery("select count(*) from Packhouse WHERE  status=1 and typez='"
+				+ Packhouse.WarehouseTypes.SAMITHI.ordinal() + "'").uniqueResult()).intValue();
 	}
 
 	@Override
@@ -3917,7 +3953,9 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 
 	@Override
 	public List<Object[]> listExporter() {
-		String queryString = "select acd.id,acd.COMPANY_NAME  from Exporter_registration acd WHERE  acd.Status <>2";
+		// String queryString = "select acd.id,acd.COMPANY_NAME from
+		// Exporter_registration acd WHERE acd.Status <>2";
+		String queryString = "select acd.id,acd.COMPANY_NAME  from Exporter_registration acd WHERE  acd.Status <>2 and acd.EXPORTER_STATUS=2";
 		Session sessions = getSessionFactory().openSession();
 		Query query = sessions.createSQLQuery(queryString);
 		List<Object[]> list = query.list();
@@ -3925,7 +3963,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		sessions.close();
 		return list;
 	}
-	
+
 	@Override
 	public List<Object[]> listBuyer() {
 		String queryString = "select acd.id,acd.CUSTOMER_NAME  from customer acd";
@@ -3936,7 +3974,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		sessions.close();
 		return list;
 	}
-	
+
 	@Override
 	public List<Object[]> listUOM() {
 		String queryString = "select acd.id,acd.CUSTOMER_NAME  from customer acd";
@@ -4061,7 +4099,8 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	@Override
 	public ExporterRegistration findExproterByCompanyName(String name) {
 		// TODO Auto-generated method stub
-		return (ExporterRegistration) find("FROM ExporterRegistration er WHERE  er.isActive <>2 and er.status <>2 and er.name = ?", name);
+		return (ExporterRegistration) find(
+				"FROM ExporterRegistration er WHERE  er.isActive <>2 and er.status <>2 and er.name = ?", name);
 	}
 
 	@Override
@@ -4079,26 +4118,26 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		return expoReg;
 
 	}
-	
+
 	@Override
 	public Pcbp findPcbpById(Long id) {
 		Pcbp pcbp = (Pcbp) find("FROM Pcbp e  WHERE e.id = ?", id);
 		return pcbp;
-		
+
 	}
-	
-	/*@Override
-	public Pcbp findPcbpByvarietyAndChamical(String va, String ch) {
-		Pcbp pcbp = (Pcbp) find("FROM Pcbp e  WHERE e.id = ?", va);
-		return pcbp;
-	}*/
-	
+
+	/*
+	 * @Override public Pcbp findPcbpByvarietyAndChamical(String va, String ch)
+	 * { Pcbp pcbp = (Pcbp) find("FROM Pcbp e  WHERE e.id = ?", va); return
+	 * pcbp; }
+	 */
+
 	@Override
 	public Pcbp findPcbpByvarietyAndChamical(Long va, Long ch) {
-	//	return (Pcbp) find("FROM Pcbp p WHERE p.cropvariety.id = ? AND p.chemicalName= ?", new Object[] { va, ch });
+		// return (Pcbp) find("FROM Pcbp p WHERE p.cropvariety.id = ? AND
+		// p.chemicalName= ?", new Object[] { va, ch });
 		return (Pcbp) find("FROM Pcbp p WHERE p.cropvariety.id = ? AND p.id= ?", new Object[] { va, ch });
 	}
-	
 
 	//
 	@Override
@@ -4124,12 +4163,12 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 
 		return procurementVariety;
 	}
-	
+
 	@Override
 	public List<Pcbp> findPcbpByProcurementGradeId(Long id) {
-		
-		return  list("FROM Pcbp pc WHERE pc.cropvariety.id = ?", id);
-		
+
+		return list("FROM Pcbp pc WHERE pc.cropvariety.id = ?", id);
+
 	}
 
 	@Override
@@ -4191,8 +4230,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 
 		return list("FROM ProcurementGrade pg WHERE pg.procurementVariety.id=? ORDER BY pg.name ASC", id);
 	}
-	
-	
+
 	@Override
 	public ProcurementGrade findProcurementGradeByNameAndVarietyId(String name, Long id) {
 		// TODO Auto-generated method stub
@@ -4213,7 +4251,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		// TODO Auto-generated method stub
 		return list("FROM ProcurementVariety pv ORDER BY pv.name");
 	}
-	
+
 	@Override
 	public List<ProcurementVariety> listProcurementVarietyBasedOnCropCat(String ugandaExport) {
 		List<Long> ids = Arrays.asList(ugandaExport.split(",")).stream()
@@ -4291,13 +4329,13 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		// TODO Auto-generated method stub
 		return (ProcurementGrade) find("FROM ProcurementGrade pg WHERE pg.code=?", code);
 	}
-	
+
 	@Override
 	public ProcurementGrade findProcurementGradeByName(String name) {
 		// TODO Auto-generated method stub
 		return (ProcurementGrade) find("FROM ProcurementGrade pg WHERE pg.name=?", name);
 	}
-	
+
 	@Override
 	public ProcurementVariety findProcurementVarietyByName(String name) {
 		// TODO Auto-generated method stub
@@ -4339,10 +4377,10 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	 * find("FROM Farmer fr WHERE  fr.phoneNo = ?", nid);
 	 * System.out.println("At 3998************"+fr.getPhoneNo());
 	 * }catch(Exception e){
-	 * 
+	 *
 	 * System.out.println("At 4001catch(Exception e) phone Not  exists");
 	 * }return fr; }
-	 * 
+	 *
 	 * @Override public User findByUsername(String username) { User user =
 	 * (User) find("from User u  where username=?", username); return user; }
 	 */
@@ -4376,7 +4414,8 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 
 	@Override
 	public Object[] findIfFarmerExistForFarmer(String nid) {
-		String queryString = "SELECT group_concat(distinct National_Id)  FROM farmer where status_code=0 and status=1 and (National_Id='" + nid + "') ";
+		String queryString = "SELECT group_concat(distinct National_Id)  FROM farmer where status_code=0 and status=1 and (National_Id='"
+				+ nid + "') ";
 		Session sessions = getSessionFactory().openSession();
 		Query querys = sessions.createSQLQuery(queryString);
 		Object[] results = (Object[]) querys.uniqueResult();
@@ -4384,7 +4423,7 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		sessions.close();
 		return results;
 	}
-	
+
 	@Override
 	public Object[] findIfFarmerExist(String phno, String nid) {
 		String queryString = "SELECT group_concat(distinct MOBILE_NUMBER),group_concat(distinct National_Id)  FROM farmer where status_code=0 and status=1 and (MOBILE_NUMBER='"
@@ -4412,12 +4451,12 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	@Override
 	public List<FarmCrops> listFarmCropByFarmId(Long farmid) {
 		return list("FROM FarmCrops f  where f.farm.id=?  and f.status=1 ORDER BY f.id ASC", farmid);
-	}	
-	
+	}
+
 	@Override
 	public List<Planting> listOfPlantingByBlockId(Long id) {
 		return list("FROM Planting p  where p.id=?  and p.status=1 ORDER BY p.id ASC", id);
-	}	
+	}
 
 	@Override
 	public List<ProcurementGrade> listProcurementGradeByProcurementVarietyIds(String procurementVariety) {
@@ -4443,24 +4482,27 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	@Override
 	public SprayAndFieldManagement findSprayAndFieldManagementById(Long id) {
 		return (SprayAndFieldManagement) find(
-				"from SprayAndFieldManagement s left join fetch s.farmCrops fc where s.id=?", id);
+				"from SprayAndFieldManagement s left join fetch s.planting fc where s.id=?", id);
 	}
 
 	@Override
 	public Scouting findScoutingById(Long id) {
 		// TODO Auto-generated method stub
-		return (Scouting) find("from Scouting s left join fetch s.farmCrops fc where s.id=?", id);
-	}
-	@Override
-	public FarmCrops findFarmCropByplantingfarmcode(String plantingId, String farmCode) {
-		return (FarmCrops) find("FROM FarmCrops fc WHERE fc.farm.code = ? AND fc.plantingId= ?", new Object[] { farmCode, plantingId });
+		return (Scouting) find("from Scouting s left join fetch s.planting fc where s.id=?", id);
 	}
 
 	@Override
-	public String findCropHierarchyNameById(String table,String id) {
+	public FarmCrops findFarmCropByplantingfarmcode(String plantingId, String farmCode) {
+		return (FarmCrops) find("FROM FarmCrops fc WHERE fc.farm.code = ? AND fc.plantingId= ?",
+				new Object[] { farmCode, plantingId });
+	}
+
+	@Override
+	public String findCropHierarchyNameById(String table, String id) {
 		// TODO Auto-generated method stub
 		Session sessions = getSessionFactory().openSession();
-		Query query = sessions.createSQLQuery("SELECT group_concat(p.name) as name FROM "+table+" p WHERE p.id IN ("+id+")");
+		Query query = sessions
+				.createSQLQuery("SELECT group_concat(p.name) as name FROM " + table + " p WHERE p.id IN (" + id + ")");
 		List<Object> list = query.list();
 		sessions.flush();
 		sessions.close();
@@ -4468,13 +4510,14 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 			return (String) list.get(0);
 		return null;
 	}
-	
+
 	@Override
-	public String findCropHierarchyHSCodeById(String table,String id) {
-		
+	public String findCropHierarchyHSCodeById(String table, String id) {
+
 		// TODO Auto-generated method stub
 		Session sessions = getSessionFactory().openSession();
-		Query query = sessions.createSQLQuery("SELECT group_concat(p.code) as code FROM "+table+" p WHERE p.id IN ("+id+")");
+		Query query = sessions
+				.createSQLQuery("SELECT group_concat(p.code) as code FROM " + table + " p WHERE p.id IN (" + id + ")");
 		List<Object> list = query.list();
 		sessions.flush();
 		sessions.close();
@@ -4487,7 +4530,8 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	public String findCropHsCodeByProcurementProductId(String table, String id) {
 		// TODO Auto-generated method stub
 		Session sessions = getSessionFactory().openSession();
-		Query query = sessions.createSQLQuery("SELECT group_concat(p.Crop_HS_code) as code FROM "+table+" p WHERE p.id IN ("+id+")");
+		Query query = sessions.createSQLQuery(
+				"SELECT group_concat(p.Crop_HS_code) as code FROM " + table + " p WHERE p.id IN (" + id + ")");
 		List<Object> list = query.list();
 		sessions.flush();
 		sessions.close();
@@ -4499,80 +4543,86 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	@Override
 	public CityWarehouse findCityWarehouseByFarmCrops(Long id) {
 		// TODO Auto-generated method stub
-		return (CityWarehouse)find("FROM CityWarehouse cw WHERE cw.planting.id=? and cw.isDelete=0 and cw.coOperative is  null",id);
+		return (CityWarehouse) find(
+				"FROM CityWarehouse cw WHERE cw.planting.id=? and cw.isDelete=0 and cw.coOperative is  null", id);
 	}
 
 	@Override
 	public List<Packhouse> listPackhouse() {
 		return list("FROM Packhouse f  WHERE f.status=1 ORDER BY f.name ASC");
 	}
+
 	@Override
 	public List<CityWarehouse> listCityWareHouse() {
 		// TODO Auto-generated method stub
 		System.out.println("Inside utildao  listCityWareHouse");
-		
-		return list("FROM CityWarehouse cw ORDER BY cw.batchNo"); 
+
+		return list("FROM CityWarehouse cw ORDER BY cw.batchNo");
 	}
-	
+
 	@Override
 	public List<FarmCrops> listFarmCrops() {
 		// TODO Auto-generated method stub
 		return list("FROM FarmCrops fc ORDER BY fc.blockName");
 	}
-	
+
 	public List<ShipmentDetails> findShipmentDetailById(Long id) {
-	/*	Session session = getSessionFactory().openSession();
-		Query query = session.createSQLQuery("Select * FROM importpermitApplication_detail pl where pl.id='"+id +"' ORDER BY pl.id");	
-		//query.setParameter("id", id);
-		List<ImportPermitApplicationDetail> result = query.list();// TODO Auto-generated method stub
-		session.flush();
-		session.close();*/
-		return  list("FROM ShipmentDetails pl where pl.recallingstatus!='1' and pl.shipment.id='"+id +"' ORDER BY pl.id");
+		/*
+		 * Session session = getSessionFactory().openSession(); Query query =
+		 * session.
+		 * createSQLQuery("Select * FROM importpermitApplication_detail pl where pl.id='"
+		 * +id +"' ORDER BY pl.id"); //query.setParameter("id", id);
+		 * List<ImportPermitApplicationDetail> result = query.list();// TODO
+		 * Auto-generated method stub session.flush(); session.close();
+		 */
+		return list(
+				"FROM ShipmentDetails pl where pl.recallingstatus!='1' and pl.shipment.id='" + id + "' ORDER BY pl.id");
 	}
-	
 
 	@Override
 	public Packhouse findWarehouseByCode(String code) {
 		// TODO Auto-generated method stub
 		return (Packhouse) find("FROM Packhouse wh WHERE wh.code= ?", code);
 	}
-	
+
 	public List<Shipment> listOfShipmentByCustomerId(long id) {
 		Session session = getSessionFactory().openSession();
-		String queryString1 = "select * from shipment cw where cw.CUSTOMER_ID='"+id+"'  and  cw.status=1  ";
+		String queryString1 = "select * from shipment cw where cw.CUSTOMER_ID='" + id + "'  and  cw.status=1  ";
 		Query query = session.createSQLQuery(queryString1).addEntity(Shipment.class);
 		List<Shipment> list = query.list();
 		session.flush();
 		session.close();
 		return list;
 	}
-	
-	public List<String> listPasswordsByTypeAndRefId(String type,long id) {
+
+	public List<String> listPasswordsByTypeAndRefId(String type, long id) {
 		Session session = getSessionFactory().openSession();
-		String queryString1 = "select ph.password from password_history ph where ph.REF_ID='"+id+"' and ph.type='"+type+"' order by createdDate desc limit 3";
+		String queryString1 = "select ph.password from password_history ph where ph.REF_ID='" + id + "' and ph.type='"
+				+ type + "' order by createdDate desc limit 3";
 		Query query = session.createSQLQuery(queryString1);
 		List<String> list = query.list();
 		session.flush();
 		session.close();
 		return list;
 	}
+
 	@Override
 	public List<LocaleProperty> listLocaleProp() {
 		return list("FROM LocaleProperty lp");
 	}
-	
+
 	@Override
 	public Integer findCustomerCount(Date sDate, Date eDate, Long loggedInDealer) {
 		Session session = getSessionFactory().getCurrentSession();
-		if(loggedInDealer>0){
-			return ((Long) session.createQuery("select count(*) from Customer c where  c.status=0 and c.exporter.id=:eid")
+		if (loggedInDealer > 0) {
+			return ((Long) session
+					.createQuery("select count(*) from Customer c where  c.status=0 and c.exporter.id=:eid")
 					.setParameter("eid", loggedInDealer).uniqueResult()).intValue();
-		}else{					
-			return ((Long) session.createQuery("select count(*) from Customer c where  c.status=0").uniqueResult()).intValue();			
+		} else {
+			return ((Long) session.createQuery("select count(*) from Customer c where  c.status=0").uniqueResult())
+					.intValue();
 		}
-		
-		
-				
+
 	}
 
 	@Override
@@ -4585,17 +4635,17 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	public Integer findShipmentsCount(Date sDate, Date eDate, Long loggedInDealer) {
 		Session session = getSessionFactory().openSession();
 		String QueryString = "Select count(*) from Shipment s";
-		if(loggedInDealer>0){
-			QueryString+= " where s.packhouse.exporter.id = " +  loggedInDealer;
-			QueryString+= " AND s.shipmentDate between :startDate AND :endDate and  s.status=1   ";			
-		}else{					
-			QueryString+= " where s.shipmentDate BETWEEN :startDate AND :endDate and  s.status=1   ";			
+		if (loggedInDealer > 0) {
+			QueryString += " where s.packhouse.exporter.id = " + loggedInDealer;
+			QueryString += " AND s.shipmentDate between :startDate AND :endDate and  s.status=1   ";
+		} else {
+			QueryString += " where s.shipmentDate BETWEEN :startDate AND :endDate and  s.status=1   ";
 		}
-		
-		Query query = session.createQuery(QueryString);		
+
+		Query query = session.createQuery(QueryString);
 		query.setParameter("startDate", sDate).setParameter("endDate", eDate);
-				
-		Integer l = ((Long) query.uniqueResult()).intValue();		
+
+		Integer l = ((Long) query.uniqueResult()).intValue();
 		session.flush();
 		session.close();
 		return l;
@@ -4603,29 +4653,30 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 
 	@Override
 	public String findPlantingArea(Date sDate, Date eDate, Long loggedInDealer) {
-		
+
 		Session session = getSessionFactory().getCurrentSession();
-		String q="select COALESCE(sum(p.cultiArea),'0') from Planting p join p.farmCrops fc join fc.farm fm where fc.status=1 and fm.status=1  and  fm.farmer.status=1 and p.plantingDate BETWEEN :startDate AND :endDate  ";
-		if(loggedInDealer>0){
-			q+="  and  fc.exporter.id="+loggedInDealer;
+		String q = "select COALESCE(sum(p.cultiArea),'0') from Planting p join p.farmCrops fc join fc.farm fm where fc.status=1 and fm.status=1  and  fm.farmer.status=1 and p.plantingDate BETWEEN :startDate AND :endDate  ";
+		if (loggedInDealer > 0) {
+			q += "  and  fc.exporter.id=" + loggedInDealer;
 		}
-		return ((String) session.createQuery(q).setParameter("startDate", sDate).setParameter("endDate", eDate).uniqueResult());
+		return ((String) session.createQuery(q).setParameter("startDate", sDate).setParameter("endDate", eDate)
+				.uniqueResult());
 	}
 
 	@Override
 	public Integer findScoutingCount(Date sDate, Date eDate, Long loggedInDealer) {
 		Session session = getSessionFactory().openSession();
 		String QueryString = "Select count(*) from Scouting s";
-		if(loggedInDealer>0){			
-			QueryString+= " where s.farmCrops.exporter.id = " +  loggedInDealer;
-			QueryString+= " AND s.receivedDate BETWEEN :startDate AND :endDate  and  s.status=0   ";			
-		}else{					
-			QueryString+= " where s.receivedDate BETWEEN :startDate AND :endDate and  s.status=0   ";			
+		if (loggedInDealer > 0) {
+			QueryString += " where s.farmCrops.exporter.id = " + loggedInDealer;
+			QueryString += " AND s.receivedDate BETWEEN :startDate AND :endDate  and  s.status=0   ";
+		} else {
+			QueryString += " where s.receivedDate BETWEEN :startDate AND :endDate and  s.status=0   ";
 		}
-		
-		Query query = session.createQuery(QueryString);		
+
+		Query query = session.createQuery(QueryString);
 		query.setParameter("startDate", sDate).setParameter("endDate", eDate);
-				
+
 		Integer l = ((Long) query.uniqueResult()).intValue();
 		session.flush();
 		session.close();
@@ -4636,16 +4687,16 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 	public Integer findSprayingCount(Date sDate, Date eDate, Long loggedInDealer) {
 		Session session = getSessionFactory().openSession();
 		String QueryString = "Select count(s.id) from SprayAndFieldManagement s";
-		if(loggedInDealer>0){			
-			QueryString+= " where s.farmCrops.exporter.id = " +  loggedInDealer;
-			QueryString+= " AND s.dateOfSpraying BETWEEN :startDate AND :endDate  and  s.deleteStatus=0   ";			
-		}else{					
-			QueryString+= " where s.dateOfSpraying BETWEEN :startDate AND :endDate and  s.deleteStatus=0   ";			
+		if (loggedInDealer > 0) {
+			QueryString += " where s.farmCrops.exporter.id = " + loggedInDealer;
+			QueryString += " AND s.dateOfSpraying BETWEEN :startDate AND :endDate  and  s.deleteStatus=0   ";
+		} else {
+			QueryString += " where s.dateOfSpraying BETWEEN :startDate AND :endDate and  s.deleteStatus=0   ";
 		}
-		
-		Query query = session.createQuery(QueryString);		
+
+		Query query = session.createQuery(QueryString);
 		query.setParameter("startDate", sDate).setParameter("endDate", eDate);
-				
+
 		Integer l = ((Long) query.uniqueResult()).intValue();
 		session.flush();
 		session.close();
@@ -4654,17 +4705,18 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 
 	@Override
 	public Double findShipmentQuantity(Date sDate, Date eDate, Long loggedInDealer) {
-			
+
 		Session session = getSessionFactory().getCurrentSession();
-		String q="select COALESCE(sum(s.totalShipmentQty),'0') from Shipment s where s.shipmentDate  BETWEEN :startDate AND :endDate and  s.status=1  ";
-		if(loggedInDealer>0){
-			q+=" and s.packhouse.exporter.id="+loggedInDealer;
+		String q = "select COALESCE(sum(s.totalShipmentQty),'0') from Shipment s where s.shipmentDate  BETWEEN :startDate AND :endDate and  s.status=1  ";
+		if (loggedInDealer > 0) {
+			q += " and s.packhouse.exporter.id=" + loggedInDealer;
 		}
-		return ((Double) session.createQuery(q).setParameter("startDate", sDate).setParameter("endDate", eDate).uniqueResult());
+		return ((Double) session.createQuery(q).setParameter("startDate", sDate).setParameter("endDate", eDate)
+				.uniqueResult());
 	}
-	
+
 	@Override
-	public List<ProcurementGrade> listProcurementGradeByProcurementVarietyIdGradeid(Long id,String IdGrades) {
+	public List<ProcurementGrade> listProcurementGradeByProcurementVarietyIdGradeid(Long id, String IdGrades) {
 		List<Long> ids = Arrays.asList(IdGrades.split(",")).stream()
 				.filter(u -> u != null && StringUtil.isLong(u.trim())).map(u -> Long.valueOf(u.trim()))
 				.collect(Collectors.toList());
@@ -4681,17 +4733,18 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		return questions;
 
 	}
-	
+
 	@Override
 	public List<Object[]> listCustomerIdAndNameByExporter(Long id) {
-		return list("SELECT DISTINCT c.id,c.customerName from Customer c where c.status=0 and c.exporter.id= ?",id);
+		return list("SELECT DISTINCT c.id,c.customerName from Customer c where c.status=0 and c.exporter.id= ?", id);
 	}
-	
+
 	@Override
 	public List<Packhouse> listActivePackhouse() {
-		return list("FROM Packhouse f  WHERE f.status=1 and f.exporter.status=1 and f.exporter.isActive=0 ORDER BY f.name ASC");
+		return list(
+				"FROM Packhouse f  WHERE f.status=1 and f.exporter.status=1 and f.exporter.isActive=0 ORDER BY f.name ASC");
 	}
-	
+
 	@Override
 	public Agent findAgentByProfileAndBranchIdActive(String agentID, String branchID) {
 		Session session = getSessionFactory().openSession();
@@ -4699,67 +4752,71 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 		if (!ObjectUtil.isEmpty(branchFilter)) {
 			session.disableFilter(ISecurityFilter.BRANCH_FILTER);
 		}
-		Query query = session.createQuery("From Agent agent where agent.profileId=:agentId and agent.exporter.status=1 and agent.exporter.isActive=0");
+		Query query = session.createQuery(
+				"From Agent agent where agent.profileId=:agentId and agent.exporter.status=1 and agent.exporter.isActive=0");
 		query.setParameter("agentId", agentID);
-		List<Agent> aglis =query.list();
-		Agent agent = aglis!=null && aglis.size()>0 ? (Agent) query.list().get(0) :null;
+		List<Agent> aglis = query.list();
+		Agent agent = aglis != null && aglis.size() > 0 ? (Agent) query.list().get(0) : null;
 		session.flush();
 		session.close();
 		return agent;
 	}
-	
-	public void processShipmentandharvest(ExporterRegistration expReg){
+
+	public void processShipmentandharvest(ExporterRegistration expReg) {
 		// TODO Auto-generated method stub
-				
-				
-				Session session = getSessionFactory().openSession();
-				Query query = session.createQuery("update Shipment s set s.status=1 where s.packhouse.exporter.id ='" + expReg.getId() + "' and s.status != 2");
-				Query query1 = session.createQuery("update Harvest h set h.status=1 where h.farmCrops.exporter.id ='" + expReg.getId() + "' and h.status != 2");
-				
-				session.flush();
-				session.close();
-						
-				
+
+		Session session = getSessionFactory().openSession();
+		Query query = session.createQuery("update Shipment s set s.status=1 where s.packhouse.exporter.id ='"
+				+ expReg.getId() + "' and s.status != 2");
+		Query query1 = session.createQuery("update Harvest h set h.status=1 where h.farmCrops.exporter.id ='"
+				+ expReg.getId() + "' and h.status != 2");
+
+		session.flush();
+		session.close();
+
 	}
-	
-	public void processShipmentInactive(Integer long1,List<Shipment> sh){
+
+	public void processShipmentInactive(Integer long1, List<Shipment> sh) {
 		// TODO Auto-generated method stub
 		Session session = getSessionFactory().openSession();
 		sh.stream().forEach(uu -> {
-		Query query = session.createQuery("update Shipment s set s.status=:status where s.id = :expId and s.status != 2");
-		query.setParameter("status", long1 );
-		query.setParameter("expId", uu.getId() );
-		int result = query.executeUpdate();
-		session.flush();
+			Query query = session
+					.createQuery("update Shipment s set s.status=:status where s.id = :expId and s.status != 2");
+			query.setParameter("status", long1);
+			query.setParameter("expId", uu.getId());
+			int result = query.executeUpdate();
+			session.flush();
 		});
 		session.close();
-				
+
 	}
-	
-	public void processHarvestInactive(Integer long1,List<Harvest> long2){
+
+	public void processHarvestInactive(Integer long1, List<Harvest> long2) {
 		// TODO Auto-generated method stub
 		Session session = getSessionFactory().openSession();
 		long2.stream().forEach(uu -> {
-		Query query = session.createQuery("update Harvest h set h.status=:status where h.id = :expId and h.status != 2");
-		query.setParameter("status", long1 );
-		query.setParameter("expId", uu.getId() );
-		int result = query.executeUpdate();
-		session.flush();
+			Query query = session
+					.createQuery("update Harvest h set h.status=:status where h.id = :expId and h.status != 2");
+			query.setParameter("status", long1);
+			query.setParameter("expId", uu.getId());
+			int result = query.executeUpdate();
+			session.flush();
 		});
 		session.close();
-				
+
 	}
-	
+
 	public Planting findPlantingById(Long id) {
 
 		return (Planting) find("FROM Planting fc WHERE fc.id = ?", id);
 	}
-	
+
 	@Override
-	public String findExporterNameById(String table,String id) {
+	public String findExporterNameById(String table, String id) {
 		// TODO Auto-generated method stub
 		Session sessions = getSessionFactory().openSession();
-		Query query = sessions.createSQLQuery("SELECT group_concat(p.COMPANY_NAME) as name FROM "+table+" p WHERE p.id IN ("+id+")");
+		Query query = sessions.createSQLQuery(
+				"SELECT group_concat(p.COMPANY_NAME) as name FROM " + table + " p WHERE p.id IN (" + id + ")");
 		List<Object> list = query.list();
 		sessions.flush();
 		sessions.close();
@@ -4767,10 +4824,368 @@ public class UtilDAO extends ESEDAO implements IUtilDAO {
 			return (String) list.get(0);
 		return null;
 	}
-	
+
 	@Override
 	public List<Planting> listPlantingByFarmCropsId(Long farmid) {
 		return list("FROM Planting f  where f.farmCrops.id=?  and f.status=1 ORDER BY f.id ASC", farmid);
-	}	
+	}
+
+	@Override
+	public ProductTransfer findProductTransferById(Long id) {
+		ProductTransfer productTransfer = (ProductTransfer) find(
+				"FROM ProductTransfer productTransfer  WHERE productTransfer.id = ?", id);
+		return productTransfer;
+	}
+
+	@Override
+	public List<Packhouse> listOfPackhouseByExporterId(Long exporterId) {
+		return list("FROM Packhouse pack  where pack.exporter.id=?  and pack.status=1 ORDER BY pack.id ASC",
+				exporterId);
+	}
+
+	@Override
+	public List<PackhouseIncoming> listOfIncomingShipmentbasedOnPackhouse(long packHouseId) {
+		return list("FROM PackhouseIncoming pack  where pack.packhouse.id=?  and pack.status=1 ORDER BY pack.id ASC",
+				packHouseId);
+	}
+
+	@Override
+	public List<ProductTransfer> listOfProductTransfer() {
+		// TODO Auto-generated method stub
+		return list("FROM ProductTransfer pt where pt.status=1 AND pt.type=0 ORDER BY pv.id");
+	}
+
+	@Override
+	public List<ProductTransfer> listOfProductTransferByCityWareHouseBatches(List<String> batches) {
+
+		Session session = getSessionFactory().openSession();
+		Query query = session.createQuery(
+				"FROM ProductTransfer prodt where prodt.batchNo in (:batches) and prodt.status=1 and prodt.type=0");
+		query.setParameterList("batches", batches);
+		List<ProductTransfer> questions = query.list();
+		session.flush();
+		session.close();
+		return questions;
+
+	}
+
+	@Override
+	public List<Object[]> getBuyerCountry(String id) {
+		Session session = getSessionFactory().openSession();
+		/*
+		 * Query query = session.createSQLQuery(
+		 * "select c.id, co.name , co.code from CUSTOMER c join city ci on ci.id=c.TALUK_ID join location_detail ld on ld.id=ci.LOCATION_ID join state s on s.id=ld.STATE_ID join COUNTRY co on co.id=s.COUNTRY_ID where c.id=:id"
+		 * );
+		 */
+		Query query = session.createSQLQuery("select c.id, c.COUNTRY from CUSTOMER c where c.id=:id");
+
+		query.setParameter("id", id);
+		List<Object[]> val = query.list();
+		session.flush();
+		session.close();
+		return val;
+	}
+
+	@Override
+	public List<Object[]> getScoutingRecomm(String plantingId) {
+		Session session = getSessionFactory().openSession();
+		// Query query = session.createSQLQuery(" select s.id,
+		// s.SCTRECOMMENDATION from scouting s where s.PLANTING_ID=:id ORDER BY
+		// ID DESC LIMIT 1");
+		// Query query = session.createSQLQuery("SELECT
+		// t.PLANTING_ID,t.SCTRECOMMENDATION,t.DATE FROM ( SELECT id, MAX(DATE)
+		// as MaxTime FROM scouting GROUP BY PLANTING_ID) r INNER JOIN scouting
+		// t ON t.DATE = r.MaxTime AND t.DATE = r.MaxTime where
+		// t.PLANTING_ID=:id ORDER BY t.ID DESC LIMIT 1");
+		Query query = session.createSQLQuery(
+				"SELECT t.PLANTING_ID,t.SCTRECOMMENDATION,t.DATE FROM ( SELECT id, MAX(DATE) as MaxTime FROM scouting GROUP BY PLANTING_ID) r INNER JOIN scouting t ON t.DATE = r.MaxTime AND t.DATE = r.MaxTime where t.PLANTING_ID=:id  ORDER BY t.DATE DESC, t.ID DESC LIMIT 1");
+
+		query.setParameter("id", plantingId);
+		List<Object[]> val = query.list();
+		session.flush();
+		session.close();
+		return val;
+	}
+
+	/*
+	 * public List<T> getAuditRecords(Class<T> entityClass, Long entityId) {
+	 * AuditReader auditReader =
+	 * AuditReaderFactory.get(getSessionFactory().getCurrentSession());
+	 * AuditQuery auditQuery = auditReader.createQuery()
+	 * .forRevisionsOfEntity(entityClass, false, true)
+	 * .add(AuditEntity.id().eq(entityId))
+	 * .addOrder(AuditEntity.revisionNumber().desc());
+	 *
+	 * return auditQuery.getResultList(); }
+	 */
+
+	@Override
+	public Municipality findCityByVillageId(Long valueOf) {
+		Municipality city = (Municipality) find("FROM Municipality city left join fetch city.villages v WHERE v.id = ?",
+				valueOf);
+		return city;
+
+	}
+
+	@Override
+	public Locality findLocalityByVillageId(Long valueOf) {
+		Locality l = (Locality) find(
+				"FROM Locality l left join fetch l.municipalities m  left join fetch m.villages v WHERE v.id = ?",
+				valueOf);
+		return l;
+	}
+
+	@Override
+	public State findStateByVillageId(Long valueOf) {
+		State s = (State) find(
+				"FROM State s left join fetch s.localities l  left join fetch l.municipalities m  left join fetch m.villages v WHERE v.id = ?",
+				valueOf);
+		return s;
+	}
+
+	@Override
+	public Country findCountryByVillageId(Long valueOf) {
+		Country l = (Country) find(
+				"FROM Country c left join fetch c.states s left join fetch s.localities l left join fetch l.municipalities m  left join fetch m.villages v WHERE v.id = ?",
+				valueOf);
+		return l;
+	}
+
+	@Override
+	public Locality findLocalityByCityId(Long valueOf) {
+		Locality l = (Locality) find("FROM Locality l left join fetch l.municipalities m   WHERE m.id = ?", valueOf);
+		return l;
+	}
+
+	@Override
+	public State findStateByCityId(Long valueOf) {
+		State s = (State) find(
+				"FROM State s left join fetch s.localities l  left join fetch l.municipalities m   WHERE m.id = ?",
+				valueOf);
+		return s;
+	}
+
+	@Override
+	public Country findCountryByCityId(Long valueOf) {
+		Country l = (Country) find(
+				"FROM Country c left join fetch c.states s left join fetch s.localities l left join fetch l.municipalities m   WHERE m.id = ?",
+				valueOf);
+		return l;
+	}
+
+	@Override
+	public String findDataByTableFieldById(String table, String code, String field) {
+		Session sessions = getSessionFactory().openSession();
+		Query query = sessions.createSQLQuery(
+				"SELECT group_concat(p." + field + ") as name FROM " + table + " p WHERE p.id IN (" + code + ")");
+		List<Object> list = query.list();
+		sessions.flush();
+		sessions.close();
+		if (!ObjectUtil.isListEmpty(list))
+			return (String) list.get(0);
+		return null;
+	}
+
+	@Override
+	public String findObjectIdFromTableByFieldIdAndRevId(String table, String fieldValue, String audId) {
+		Session sessions = getSessionFactory().openSession();
+		Query query = sessions.createSQLQuery("SELECT group_concat(p." + fieldValue + ") as name FROM " + table
+				+ " p WHERE p.rev IN (" + audId + ")");
+		List<Object> list = query.list();
+		sessions.flush();
+		sessions.close();
+		if (!ObjectUtil.isListEmpty(list))
+			return (String) list.get(0);
+		return null;
+	}
+
+	@Override
+	public <T> List<T> getAuditRecordsWithRelations(String string, List<String> s, Long id) {
+		return null;
+	}
+
+	Object previousObje;
+	RevisionType rtObje1;
+
+	@Override
+	public void saveOrUpdatecitywarehouse(CityWarehouse cw) {
+		Session session = getSessionFactory().getCurrentSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
+		// session.merge(cw.getCityWarehouseDetails());
+		session.saveOrUpdate(cw);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		// session.close();
+
+	}
+
+	@Override
+	public List getAuditRecords(String entityClassName, Long entityId) {
+		try {
+			Class<T> entityClass = (Class<T>) Class.forName(entityClassName);
+			AuditReader auditReader = AuditReaderFactory.get(getSessionFactory().getCurrentSession());
+			AuditQuery auditQuery = auditReader.createQuery().forRevisionsOfEntity(entityClass, false, true)
+					.add(AuditEntity.id().eq(entityId)).addOrder(AuditEntity.revisionNumber().asc());
+			List<Object[]> returlLi = new ArrayList<>();
+			List<Object[]> arrayL = auditQuery.getResultList();
+			Map<String, JSONObject> yesMap = allClassMetadata.get(entityClassName);
+
+			previousObje = null;
+			rtObje1 = null;
+			if (yesMap != null && !yesMap.isEmpty()) {
+				arrayL.stream().forEach(obj -> {
+
+					DefaultRevisionEntity revisionNumber = (DefaultRevisionEntity) obj[1];
+					Object auditObj = obj[0];
+
+					auditObj = handleManyToOne(yesMap, entityId, obj, auditReader, entityClass);
+					auditObj = handleOneToMany(yesMap, entityId, obj, auditReader, entityClass);
+					rtObje1 = (RevisionType) obj[2];
+					Byte b = new Byte("0");
+					// (rtObje1 != null &&
+					// rtObje1.getRepresentation().equals(b)) ||
+					if (previousObje == null || (!ObjectUtil.deepEquals(auditObj, previousObje,new HashSet<>()))) {
+						returlLi.add(Stream.of(auditObj, obj[1], obj[2]).toArray());
+						previousObje = auditObj;
+
+					}
+
+				});
+
+			} else {
+
+				returlLi.addAll(arrayL);
+			}
+			List<Object[]> revArrayList = new ArrayList<>();
+			for (int i = returlLi.size() - 1; i >= 0; i--) {
+
+				// Append the elements in reverse order
+				revArrayList.add(returlLi.get(i));
+			}
+			return revArrayList;
+		} catch (ClassNotFoundException e) {
+			// Handle the exception if the entity class is not found
+			e.printStackTrace();
+			return Collections.emptyList(); // Or any other appropriate action
+		}
+	}
+
+	
+
+	private Object handleManyToOne(Map<String, JSONObject> yesMap, Long entityId, Object[] obj, AuditReader auditReader,
+			Class<T> entityClass) {
+		DefaultRevisionEntity revisionNumber = (DefaultRevisionEntity) obj[1];
+		Object auditObj = obj[0];
+		String ee = yesMap.entrySet().stream().filter(u -> u.getValue().get("RelationType").equals("MO"))
+				.map(u -> u.getValue().get("TargetColumn").toString()).collect(Collectors.joining(","));
+		String audTable = yesMap.entrySet().stream().map(u -> u.getValue().get("Table").toString()).distinct()
+				.findFirst().get();
+
+		if (audTable.trim().equals("agent_prof")) {
+			audTable = ",PERS_INFO_ID,CONT_INFO_ID,EXPORTER_ID from agent_prof_aud ap join prof_aud e on e.id =ap.prof_id  ";
+		} else {
+
+			audTable = " from " + audTable + "_aud e";
+		}
+		Object relatedEntities = (Object) getSessionFactory().getCurrentSession()
+				.createSQLQuery("SELECT " + ee + audTable
+						+ " WHERE e.id  = :recordId and e.rev<=:revNo order by e.rev desc limit 1")
+				.setParameter("recordId", entityId).setParameter("revNo", revisionNumber.getId()).uniqueResult();
+		AtomicInteger ii = new AtomicInteger(0);
+
+		yesMap.entrySet().stream().filter(u -> u.getValue().get("RelationType").equals("MO")).forEach(uu -> {
+			JSONObject js = uu.getValue();
+
+			String entityName = js.get("Entity").toString();
+			String propertyName = js.get("Relation").toString();
+			String RelationType = js.get("RelationType").toString();
+			String Table = js.get("Table").toString();
+			String AssEntity = js.get("AssEntity").toString();
+			String Column = js.get("Column").toString();
+			String TargetColumn = js.get("TargetColumn").toString();
+
+			Object[] fields = relatedEntities instanceof BigInteger ? new Object[] { relatedEntities }
+					: (Object[]) relatedEntities;
+			try {
+				Class<T> eentoty = (Class<T>) Class.forName(AssEntity);
+				AuditQuery query = auditReader.createQuery().forEntitiesAtRevision(eentoty, revisionNumber.getId())
+						.add(AuditEntity.id().eq(((BigInteger) fields[ii.get()]).longValue()));
+				Object auditedEntity = null;
+				if (query != null) {
+					auditedEntity = (Object) query.getSingleResult();
+					Map<String, JSONObject> jss = allClassMetadata.get(AssEntity);
+
+					if (jss.entrySet().stream()
+							.anyMatch(u -> u.getValue().get("RelationType").toString().equals("MO"))) {
+						auditedEntity = handleManyToOne(jss, (Long) ReflectUtil.getFieldValue(auditedEntity, "id"),
+								Stream.of(auditedEntity, obj[1]).toArray(), auditReader, eentoty);
+					}
+				}
+				// Set the Many-to-One property of the audit object
+				Field field = entityClass.getDeclaredField(propertyName);
+				field.setAccessible(true);
+				field.set(auditObj, auditedEntity);
+				ii.incrementAndGet();
+			} catch (Exception e) {
+				e.printStackTrace();
+			}
+		});
+
+		return auditObj;
+	}
+
+	private Object handleOneToMany(Map<String, JSONObject> yesMap, Long entityId, Object[] obj, AuditReader auditReader,
+			Class<T> entityClass) {
+		DefaultRevisionEntity revisionNumber = (DefaultRevisionEntity) obj[1];
+		Object auditObj = obj[0];
+
+		yesMap.entrySet().stream().filter(u -> u.getValue().get("RelationType").equals("OM")).forEach(uu -> {
+			JSONObject js = uu.getValue();
+
+			String entityName = js.get("Entity").toString();
+			String propertyName = js.get("Relation").toString();
+			String RelationType = js.get("RelationType").toString();
+			String Table = js.get("Table").toString();
+			String AssEntity = js.get("AssEntity").toString();
+			String Column = js.get("Column").toString();
+			String TargetColumn = js.get("TargetColumn").toString();
+			Map<String, JSONObject> jss = allClassMetadata.get(AssEntity);
+			JSONObject hjss = jss.entrySet().stream()
+					.anyMatch(u -> u.getValue().get("AssEntity").toString().equals(entityName))
+							? jss.entrySet().stream()
+									.filter(u -> u.getValue().get("AssEntity").toString().equals(entityName))
+									.findFirst().get().getValue()
+							: null;
+			if (hjss != null) {
+				try {
+					Class<T> eentoty = (Class<T>) Class.forName(AssEntity);
+					String joinCOlumn = hjss.get("Relation").toString();
+					AuditQuery query = auditReader.createQuery().forEntitiesAtRevision(eentoty, revisionNumber.getId())
+							.add(AuditEntity.relatedId(joinCOlumn).eq(entityId));
+
+					List<Object> auditedEntity = (List<Object>) query.getResultList();
+					Field field = entityClass.getDeclaredField(propertyName);
+					field.setAccessible(true);
+					// Call handleManyToOne for Many-to-One Relationships
+					if (jss.entrySet().stream()
+							.anyMatch(u -> u.getValue().get("RelationType").toString().equals("MO"))) {
+						auditedEntity = auditedEntity.stream()
+								.map(auditedObj -> handleManyToOne(jss,
+										(Long) ReflectUtil.getFieldValue(auditedObj, "id"),
+										Stream.of(auditedObj, obj[1]).toArray(), auditReader, eentoty))
+								.collect(Collectors.toList());
+					}
+					field.set(auditObj, auditedEntity.stream().collect(Collectors.toSet()));
+
+				} catch (Exception e) {
+					e.printStackTrace();
+				}
+			}
+
+		});
+		return auditObj;
+	}
 
 }

@@ -222,7 +222,7 @@ td {
 			           <s:if test="shipmentPrintMap['checkIncomingOrSorting']=='sort0'">
 			            <p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Type Of Transport: &nbsp;<b><s:property
 			value="shipmentPrintMap['tructId']" /></b>&nbsp;</p>
-					<p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Vehicle No: &nbsp;<b><s:property
+					<p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Number Plate: &nbsp;<b><s:property
 			value="shipmentPrintMap['vehicleno']" /></b>&nbsp;</p>
 					<p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Driver Name: &nbsp;<b><s:property
 			value="shipmentPrintMap['driverName']" /></b>&nbsp;</p>
@@ -236,7 +236,7 @@ td {
                  <h2 class="heading" style=" margin-bottom: 2px; margin-top: 5px;"><b>Delivery Note</b></h2>
                    <p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Type Of Transport: &nbsp;<b><s:property
 			value="shipmentPrintMap['tructId']" /></b>&nbsp;</p>
-					<p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Vehicle No: &nbsp;<b><s:property
+					<p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Number Plate: &nbsp;<b><s:property
 			value="shipmentPrintMap['vehicleno']" /></b>&nbsp;</p>
 					<p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Driver Name: &nbsp;<b><s:property
 			value="shipmentPrintMap['driverName']" /></b>&nbsp;</p>
@@ -295,6 +295,7 @@ td {
 				     <th><s:text name="packing.packedquantity" /></th>	
 				     <th><s:text name="packing.rejectWt" /></th>
 				     <th><s:text name="packing.price" /></th>	
+				     <th><s:text name="packing.totalprice" /></th>	
 				     <th><s:text name="packing.bestBeforeDate" /></th>	
 				     <th><s:text name="packing.countryOfOrigin" /></th>	
 				</s:if>	
@@ -334,6 +335,7 @@ td {
 						<td style="word-break: break-all;text-align: right;width: 55px;"><s:property value="packingPackedquantity" /></td>
 						<td style="word-break: break-all;;text-align: right;width: 55px;"><s:property value="rejectWt" /></td>
 						<td style="word-break: break-all;;text-align: right;width: 55px;"><s:property value="packingPrice" /></td>
+						<td style="word-break: break-all;;text-align: right;width: 55px;"><s:property value="productValue" /></td>
 						<td style="word-break: break-all;width: 77px;"><s:property value="packingbestBeforeDate" /></td>
 						<td style="word-break: break-all;width: 80px;"><s:property value="packingCountryOfOrigin" /></td>
 						<%-- <td class="alnRht"  style="text-align: right;"><s:property value="netWeight" /></td> --%>
@@ -382,6 +384,9 @@ td {
 					<!-- <td class="alnRht">&nbsp;</td> -->
 					<td class="alnRht"  style="text-align: right;"><s:property
 						value="shipmentPrintMap['totalInfo'].rejectedWTSum" /></td>	
+						<td class="alnRht">&nbsp;</td>
+					<td class="alnRht"  style="text-align: right;"><s:property
+						value="shipmentPrintMap['totalInfo'].totalSum" /></td>	
 					<td class="alnRht">&nbsp;</td>
 					<td class="alnRht">&nbsp;</td>
 				</s:if>	

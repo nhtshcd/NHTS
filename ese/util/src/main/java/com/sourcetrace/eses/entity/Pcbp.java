@@ -1,5 +1,6 @@
 package com.sourcetrace.eses.entity;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -9,16 +10,18 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name="pcbp")
 @Getter
 @Setter
+@Audited
 public class Pcbp extends ParentEntity {
 
 	private static final long serialVersionUID = 1L;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER,cascade=CascadeType.ALL)
 	@JoinColumn(name = "CROP_VARIETY")
 	private ProcurementGrade cropvariety;
 	

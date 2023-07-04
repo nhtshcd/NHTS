@@ -28,7 +28,7 @@ import org.hibernate.annotations.UpdateTimestamp;
 @Table(name = "DOCUMENT_UPLOAD")
 public class DocumentUpload implements java.io.Serializable {
 	 public static enum docType{
-	    	Farmer,DealerInspection,PermitApplication,PremisesInspection,Fumigator,FumigatorProof,FieldInspection,LicenseCopy,PaymentProof,Signature,BorderPointInspection,CROP_IMAGE, IMPORT_APP, BREEDER_SEED,SeedCertificationServices,VARIETY_INCLUSION,farmer,FARM_INSPECTION_PHOTO,FARM_INSPECTION_SIGN
+	    	Farmer,DealerInspection,PermitApplication,PremisesInspection,Fumigator,FumigatorProof,FieldInspection,LicenseCopy,PaymentProof,Signature,BorderPointInspection,CROP_IMAGE, IMPORT_APP, BREEDER_SEED,SeedCertificationServices,VARIETY_INCLUSION,farmer,FARM_INSPECTION_PHOTO,FARM_INSPECTION_SIGN,SHIPMENT
 	    	,SPRAY_FIELD_MANAGEMENT
 	 }
 	    

@@ -82,6 +82,8 @@ public interface ISequenceDAO extends IESEDAO {
 	public static final int FARM_TASK_LENGTH = 3;
 	public static final int FARMCROP_TASK_LENGTH = 3;
 	public static final int FARMER_ID_LENGTH = 6;
+	public static final int PRODUCT_TRANSFER_ID_LENGTH = 6;
+	public static final int PRODUCT_RECEPTION_ID_LENGTH = 6;
 	public static final int FARMER_SEQ_RANGE = 1000;
 	public static final int FARMER_RESERVE_INDEX = 100;
 	public static final int FARMER_ID_MAX_RANGE = 999999;
@@ -89,6 +91,8 @@ public interface ISequenceDAO extends IESEDAO {
 	/** ID Sequence Tables */
 	public static final String AGENT_INTERNAL_ID_SEQ = "AGENT_INTERNAL_ID_SEQ";
 	public static final String FARMER_ID_SEQ = "FARMER_ID_SEQ";
+	public static final String PRODUCT_TRANSFER_ID_SEQ = "PRODUCT_TRANSFER_ID_SEQ";
+	public static final String PRODUCT_RECEPTION_ID_SEQ = "PRODUCT_RECEPTION_ID_SEQ";
 	public static final String TXN_ID_SEQ = "TXN_ID_SEQ";
 	public static final String HAMLET_CODE_SEQ = "HAMLET_CODE_SEQ";
 	public static final String VILLAGE_CODE_SEQ = "VILLAGE_CODE_SEQ";
@@ -664,5 +668,9 @@ public interface ISequenceDAO extends IESEDAO {
 	public Long getProcurementVarietyIdSeq();
 
 	public Long getProcurementGradeIdSeq();
+	
+	String getProductTransferIdSeq();
+	
+	String getProductReceptionIdSeq();
 
 }

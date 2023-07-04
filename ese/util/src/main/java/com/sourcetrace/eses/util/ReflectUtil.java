@@ -161,6 +161,20 @@ public class ReflectUtil {
 		return field;
 	}
 
+
+	private static Field getField(Class<?> clazz, String fieldName) throws NoSuchFieldException {
+		try {
+			return clazz.getDeclaredField(fieldName);
+		} catch (NoSuchFieldException e) {
+			Class<?> superclass = clazz.getSuperclass();
+			if (superclass != null) {
+				return getField(superclass, fieldName);
+			} else {
+				throw e;
+			}
+		}
+	}
+
 	public static Object getFieldValue(Object object, String fieldName) {
 		if (object instanceof Object[]) {
 			if (ObjectUtil.isLong(fieldName)) {
@@ -169,7 +183,7 @@ public class ReflectUtil {
 			}
 		} else {
 			try {
-				Field field = object.getClass().getDeclaredField(fieldName);
+				Field field = getField(object.getClass(), fieldName);
 				field.setAccessible(true);
 				return field.get(object);
 			} catch (SecurityException e) {
@@ -469,6 +483,27 @@ public class ReflectUtil {
 		}
 
 		return null;
+	}
+
+	public static void setFieldValue(Object object, String fieldName, Object value) throws NoSuchFieldException, IllegalAccessException {
+		Class<?> clazz = object.getClass();
+		Field field = null;
+
+		while (clazz != null) {
+			try {
+				field = clazz.getDeclaredField(fieldName);
+				break;
+			} catch (NoSuchFieldException e) {
+				clazz = clazz.getSuperclass();
+			}
+		}
+
+		if (field == null) {
+			throw new NoSuchFieldException("Field not found: " + fieldName);
+		}
+
+		field.setAccessible(true);
+		field.set(object, value);
 	}
 
 }

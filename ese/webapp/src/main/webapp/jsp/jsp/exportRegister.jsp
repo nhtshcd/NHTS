@@ -40,12 +40,22 @@
 							var whid=$.trim('<s:property value="expRegis.wareHouses"/>');
 							$('#wareHouses').val(JSON.parse(JSON.stringify(whid.replace(/\s/g,'').split(",")))).select2();
 							} */
-						 
+						if(command=='update'){
+							var selectedExporterStatusFlag = '<s:property value="selectedExporterStatusFlag"/>';
+							$('#selectedExporterStatusFlag').val(selectedExporterStatusFlag);
+							var exportersStatus = '<s:property value="selectedExporterStatus"/>';
+							$('#exporterStatus > option[value='+exportersStatus+']').prop("selected","selected");
+							 $("#exporterStatus").select2();
+							if(exportersStatus=='2'){
+								$("#exporterStatus").prop('disabled', true);
+							}} 
 						$("#bAdd,#bUpdate").on(
 								'click',
 								function(event) {
 									event.preventDefault();
 									$("#buttonAdd1").prop('disabled', true);
+									
+									$("#esIds").val($("#exporterStatus").val());
 							
 									if (!validateAndSubmit("target", url)) {
 										$("#buttonAdd1")
@@ -86,7 +96,7 @@
 						
 						var cropvar=$.trim('<s:property value="expRegis.scattered"/>');
 						$('#scattered').val(JSON.parse(JSON.stringify(cropvar.replace(/\s/g,'').split(",")))).select2();
-								
+						$('#scattered').change();
 						loadDependancy();
 						
 						
@@ -510,7 +520,7 @@ function loadHsCode(val){
 	//alert("Selected Product***********"+val);
 
 	 var procUnit="";
- $($("#farmerHaveFarms").val()).each(function(k, v) {
+ $($("#scattered").val()).each(function(k, v) {
 procUnit += v + ",";
 	});
 	
@@ -551,6 +561,8 @@ function getFirstAndlastValCaps(id) {
 		<s:hidden key="id" />
 		<s:hidden id="proofFile1" name="proofFile1" />
 		<s:hidden name="sessionId" id="sessionid" />
+		<s:hidden name="selectedExporterStatus" id="esIds" />
+		<s:hidden name="selectedExporterStatusFlag" id="selectedExporterStatusFlag" />
 		
 		<s:if test='"update".equalsIgnoreCase(command)'>
 			<s:hidden name="expRegis.id" />
@@ -673,7 +685,7 @@ function getFirstAndlastValCaps(id) {
 							<s:select class="form-control select2" id="farmerHaveFarms"
 								name="expRegis.farmerHaveFarms" maxlength="20" listKey="id"
 								listValue="name" multiple="true" list="{}"
-								onchange="listProGrade(this.value);loadHsCode(this.value);"/>
+								onchange="listProGrade(this.value);"/>
 						</div>
 					</div>
 
@@ -684,7 +696,7 @@ function getFirstAndlastValCaps(id) {
 						<div class="form-element">
 							<s:select class="form-control  select2" id="scattered"
 								name="expRegis.scattered" maxlength="20" listKey="id"
-								listValue="name" multiple="true" list="{}" />
+								listValue="name" multiple="true" list="{}" onchange="loadHsCode(this.value);" />
 						</div>
 					</div>
 
@@ -971,6 +983,18 @@ function getFirstAndlastValCaps(id) {
 					</div>
 				</div>
 
+                <s:if test='#session.isAdmin =="true" && command =="update"'>
+                   <div class="flexform-item">
+						<label for="txt"><s:text name="exporterRegistr.exporterStatus" /><sup
+							style="color: red;">*</sup></label>
+						<div class="form-element">
+							<s:select class="form-control select2" id="exporterStatus"
+								name="selectedExporterStatus1" listKey="key"
+								listValue="value" list="#{'0':'Applied','1':'Verified','2':'Approved'}"
+								headerValue="%{getText('txt.select')}" headerKey="" />
+						</div>
+					</div>
+					</s:if>
 
 
 				<div class="margin-top-10">

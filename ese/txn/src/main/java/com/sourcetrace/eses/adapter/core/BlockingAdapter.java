@@ -26,7 +26,7 @@ import com.sourcetrace.eses.util.DateUtil;
 import com.sourcetrace.eses.util.StringUtil;
 
 @Component
-public class BlockingAdapter implements ITxnAdapter{
+public class BlockingAdapter implements ITxnAdapter {
 	@Autowired
 	private IUtilService utilService;
 	@Autowired
@@ -37,7 +37,7 @@ public class BlockingAdapter implements ITxnAdapter{
 		Map response = new LinkedHashMap<>();
 		Head head = (Head) reqData.get(TransactionProperties.HEAD);
 		Agent ag = utilService.findAgentByAgentId(head.getAgentId());
-		
+
 		String farmCode = (String) reqData.get("farmCode");
 		String blockname = (String) reqData.get("blockname");
 		String cultiArea = (String) reqData.get("cultiArea");
@@ -47,7 +47,7 @@ public class BlockingAdapter implements ITxnAdapter{
 		String lons = (String) head.getLon();
 		Farm fm = farmerService.findFarmbyFarmCode(farmCode);
 		String farmSeq = (String) reqData.get("seq");
-		
+
 		Long existId = (Long) farmerService.findObjectById(" select id from FarmCrops fc where fc.msgNo=?",
 				new Object[] { head.getMsgNo() });
 		if (existId != null && existId > 0) {
@@ -70,14 +70,18 @@ public class BlockingAdapter implements ITxnAdapter{
 		f.setStatus(1);
 		f.setMsgNo(head.getMsgNo());
 		f.setRevisionNo(DateUtil.getRevisionNumber());
-		
-		if (ag != null && ag.getExporter() != null) {
+
+		if (ag != null && ag.getPackhouse() != null && ag.getPackhouse().getExporter() != null) {
+			f.setExporter(ag.getPackhouse().getExporter());
+		} else {
 			f.setExporter(ag.getExporter());
 		}
 
-		/*String midLat = (String) reqData.get("fLon");
-		String midLon = (String) reqData.get("fLat");*/
-	    String midLat = (String) reqData.get("lon");
+		/*
+		 * String midLat = (String) reqData.get("fLon"); String midLon =
+		 * (String) reqData.get("fLat");
+		 */
+		String midLat = (String) reqData.get("lon");
 		String midLon = (String) reqData.get("lat");
 		f.setRevisionNo(DateUtil.getRevisionNumber());
 		f.setPlottingStatus("0");
@@ -110,7 +114,7 @@ public class BlockingAdapter implements ITxnAdapter{
 			coordMa.setMidLatitude(midLat);
 			coordMa.setMidLongitude(midLon);
 			f.setPlotting(coordMa);
-		}else{
+		} else {
 			String midLat1 = (String) head.getLat();
 			String midLon2 = (String) head.getLon();
 			CoordinatesMap coordMa = new CoordinatesMap();
@@ -129,7 +133,7 @@ public class BlockingAdapter implements ITxnAdapter{
 		} else {
 			f.setFarmCropId(farmSeq);
 		}
-		
+
 		utilService.save(f);
 
 		return response;

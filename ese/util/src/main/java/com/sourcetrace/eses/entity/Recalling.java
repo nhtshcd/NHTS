@@ -14,11 +14,13 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name="recalling")
 @Getter
 @Setter
+@Audited
 public class Recalling extends ParentEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -29,7 +31,7 @@ public class Recalling extends ParentEntity {
 	@Column(name="REC_ENTITY")
 	private String recEntity;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER,cascade=CascadeType.ALL)
 	@JoinColumn(name = "SHIPMENT_ID")
 	private Shipment shipment;
 	
@@ -88,4 +90,7 @@ public class Recalling extends ParentEntity {
 	
 	@Column(name = "ATTACHMENT", length = 50, columnDefinition = "VARCHAR(255)")
 	private String attachment;
+	
+	@Column(name = "SHIPMENT_DESTINATION")
+	private String shipmentDestination;
 }

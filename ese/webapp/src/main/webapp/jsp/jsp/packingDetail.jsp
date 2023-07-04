@@ -64,10 +64,18 @@
 			<div class="fullwidth">
 				<div class="flexWrapper"> -->
 					<div class="flexLeft appContentWrapper" id="printableArea">
-						<div class="formContainerWrapper dynamic-form-con">
+						<div class="formContainerWrapper">
+						<div class="aPanel farmer_info">
+							<div class="aTitle">
 							<h2>
 								<s:property value="%{getLocaleProperty('info.packing')}" />
+								<div class="pull-right">
+											<a class="aCollapse" href="#"><i
+												class="fa fa-chevron-right"></i></a>
+										</div>
 							</h2>
+							</div>
+							<div class="aContent dynamic-form-con">
 							<s:if test='branchId==null'>
 								<div class="dynamic-flexItem">
 									<p class="flexItem">
@@ -146,6 +154,8 @@
 												value="%{getLocaleProperty('packing.rejectWt')}" /></th>
 										<th><s:property
 												value="%{getLocaleProperty('packing.price')}" /></th>
+										<th><s:property
+												value="%{getLocaleProperty('packing.totalprice')}" /></th>
 										<%-- <th><s:property
 												value="%{getLocaleProperty('packing.rejectWt')}" /></th> --%>
 										<th><s:property
@@ -170,6 +180,7 @@
 											<td class=" pquantity"><s:property value="quantity" /></td>
 											<td class="rejectWt"><s:property value="rejectWt" /></td>
 											<td class=" price"><s:property value="price" /></td>
+											<td class=" totalprice"><s:property value="totalprice" /></td>
 											<%-- <td class="rejectWt"><s:property value="rejectWt" /></td> --%>
 											<td class=" bestBefore"><p class="flexItem"> <s:date name="bestBefore" format="dd-MM-yyyy" />
 												</p></td>
@@ -181,6 +192,41 @@
 							</table>
 							</div>
 						</div>
+						</div>
+					<s:if test='#session.isAdmin =="true"'>
+							<s:iterator value="ex" var="innerList">
+								<div class="aPanel audit_history">
+									<div class="aTitle">
+										<h2>
+								<s:if
+									test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+									<s:property value="#innerList[0].createdUser" />
+								</s:if>
+								<s:else>
+									<s:property value="#innerList[0].updatedUser" />
+								</s:else>
+								-
+
+								<s:date name="#innerList[1].revisionDate"
+									format="dd/MM/yyyy hh:mm:ss" />
+								-
+								<s:property
+									value="%{getLocaleProperty('default'+#innerList[2])}" />
+								<div class="pull-right">
+									<a class="aCollapse "
+										href="#<s:property value="#innerList[1].id" />
+										"><i
+										class="fa fa-chevron-right"></i></a>
+								</div>
+							</h2>
+									</div>
+									<div class="aContent dynamic-form-con"
+										id="<s:property value="#innerList[1].id" />">
+										<jsp:include page='/jsp/jsp/auditPackingDetail.jsp' />
+									</div>
+								</div>
+							</s:iterator> 
+						</s:if>
 						<div class="margin-top-10">
 
 							<span id="cancel" class=""><span class="first-child"><button
@@ -189,6 +235,7 @@
 										<b><FONT color="#FFFFFF"><s:text name="back.button" />
 										</font></b>
 									</button></span></span>
+						</div>
 						</div>
 					</div>
 			<!-- 	</div>

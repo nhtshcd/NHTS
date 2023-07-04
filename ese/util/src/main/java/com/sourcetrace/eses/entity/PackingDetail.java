@@ -2,6 +2,8 @@ package com.sourcetrace.eses.entity;
 
 import static javax.persistence.GenerationType.IDENTITY;
 import java.util.Date;
+
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -15,11 +17,12 @@ import javax.transaction.TransactionScoped;
 
 import org.hibernate.annotations.OrderBy;
 import lombok.Data;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "packing_detail")
 @Data
-
+@Audited
 public class PackingDetail implements java.io.Serializable {
 	private static final long serialVersionUID = 1L;
 
@@ -31,7 +34,7 @@ public class PackingDetail implements java.io.Serializable {
 	private Long id;
 
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne
 	@JoinColumn(name = "BlOCK_ID")
 	private FarmCrops blockId;
 
@@ -50,19 +53,24 @@ public class PackingDetail implements java.io.Serializable {
 	@Column(name = "BEST_BEFORE", length = 50, columnDefinition = "Date")
 	private Date bestBefore;
 
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "PACKING_ID")
 	private Packing packing;
 	
 	@Column(name = "QR_CODE_ID")
 	private String qrCodeId;
 	
+	@Column(name = "TOTAL_PRICE")
+	private String totalprice;
+	
 	@Transient
 	private CityWarehouse ctt;
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "PLANTING_ID")
 	private Planting planting;
 
+	@Column(name = "Farm")
+	private String qrUnique;
 
 }

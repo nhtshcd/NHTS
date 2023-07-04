@@ -74,6 +74,10 @@ public class PostRecallInspectionAction extends SwitchAction {
 	@Getter
 	@Setter
 	private Recalling recalling;
+	
+	@Getter
+	@Setter
+	private String roleID;
 
 	public String create() throws Exception {
 		if (postRecallInspection == null) {
@@ -186,6 +190,9 @@ public class PostRecallInspectionAction extends SwitchAction {
 
 	}
 
+	@Getter
+	@Setter
+	List<Object[]> ex;
 	public String detail() throws Exception {
 		String view = null;
 		if (id != null && !id.equals("")) {
@@ -203,6 +210,9 @@ public class PostRecallInspectionAction extends SwitchAction {
 			postRecallInspection.setNatureOfRecall(getNatureOfRecall().get(postRecallInspection.getNatureOfRecall()));
 			recalling = (Recalling) farmerService.findObjectById("FROM Recalling where id=?",
 					new Object[] { postRecallInspection.getRecall().getId() });
+			roleID = getLoggedInRoleID();
+			 ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.PostRecallInspection", postRecallInspection.getId());
+			
 			command = UPDATE;
 			view = DETAIL;
 			request.setAttribute(HEADING, getText("postRecallInspectionDetail"));

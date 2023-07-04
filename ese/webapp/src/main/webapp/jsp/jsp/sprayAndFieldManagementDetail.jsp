@@ -45,10 +45,24 @@
 			<div class="fullwidth">
 				<div class="flexWrapper">
 					<div class="flexLeft appContentWrapper">
-						<div class="formContainerWrapper dynamic-form-con">
+						<%-- <div class="formContainerWrapper dynamic-form-con">
 							<h2>
 								<s:text name="info.sprayAndFieldManagementDetails" />
-							</h2>
+							</h2> --%>
+							
+							<div class="formContainerWrapper">
+							<div class="aPanel farmer_info">
+								<div class="aTitle">
+									<h2>
+										<s:property value="%{getLocaleProperty('info.sprayAndFieldManagementDetails')}" />
+										<div class="pull-right">
+											<a class="aCollapse" href="#"><i
+												class="fa fa-chevron-right"></i></a>
+										</div>
+									</h2>
+								</div>
+						<div class="aContent dynamic-form-con">
+							
 							<s:if test='branchId==null'>
 								<div class="dynamic-flexItem">
 									<p class="flexItem">
@@ -65,7 +79,7 @@
 									<s:text name="farmer.fcode" />
 								</p>
 								<p class="flexItem">
-									<s:property value="sprayAndFieldManagement.farmCrops.farm.farmer.farmerId" />
+									<s:property value="sprayAndFieldManagement.planting.farmCrops.farm.farmer.farmerId" />
 								</p>
 							</div>
 							
@@ -75,7 +89,7 @@
 								</p>
 								<p class="flexItem">
 									<s:property
-										value="sprayAndFieldManagement.farmCrops.farm.farmer.firstName" />
+										value="sprayAndFieldManagement.planting.farmCrops.farm.farmer.firstName" />
 								</p>
 							</div>
 							
@@ -84,7 +98,7 @@
 									<s:text name="farmCode" />
 								</p>
 								<p class="flexItem">
-									<s:property value="sprayAndFieldManagement.farmCrops.farm.farmCode" />
+									<s:property value="sprayAndFieldManagement.planting.farmCrops.farm.farmCode" />
 								</p>
 							</div>
 							<div class="dynamic-flexItem">
@@ -93,7 +107,7 @@
 								</p>
 								<p class="flexItem">
 									<s:property
-										value="sprayAndFieldManagement.farmCrops.farm.farmName" />
+										value="sprayAndFieldManagement.planting.farmCrops.farm.farmName" />
 								</p>
 							</div>
 							<div class="dynamic-flexItem">
@@ -101,7 +115,7 @@
 									<s:text name="block" />
 								</p>
 								<p class="flexItem">
-									<s:property value="sprayAndFieldManagement.farmCrops.blockName" />
+									<s:property value="sprayAndFieldManagement.planting.farmCrops.blockName" />
 								</p>
 							</div>
 
@@ -111,7 +125,7 @@
 									<s:text name="blockIds" />
 								</p>
 								<p class="flexItem">
-									<s:property value="sprayAndFieldManagement.farmCrops.blockId" />
+									<s:property value="sprayAndFieldManagement.planting.farmCrops.blockId" />
 								</p>
 
 							</div>
@@ -216,6 +230,24 @@
 								<p class="flexItem">
 								
 							 <s:property value="%{getCatalgueNameByCode(sprayAndFieldManagement.uom)}" /> 
+								</p>
+
+							</div>
+							<div class="dynamic-flexItem">
+								<p class="flexItem">
+									<s:text name="sprayAndFieldManagement.activeIngredient" />
+								</p>
+								<p class="flexItem">
+									<s:property value="sprayAndFieldManagement.activeIngredient" />
+								</p>
+
+							</div>
+							<div class="dynamic-flexItem">
+								<p class="flexItem">
+									<s:property value="%{getLocaleProperty('sprayAndFieldManagement.recommen')}" />
+								</p>
+								<p class="flexItem">
+									<s:property value="sprayAndFieldManagement.recommen" />
 								</p>
 
 							</div>
@@ -328,6 +360,38 @@
 							</div>
 
 						</div>
+						</div>
+						<s:if test="roleID.trim().equalsIgnoreCase('2')">
+						<s:iterator value="ex" var="innerList">
+								<div class="aPanel audit_history">
+									<div class="aTitle">
+										<h2>
+											<s:if test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+													<s:property value="#innerList[0].createdUser" />
+											</s:if>
+											<s:else>
+													 <s:property value="#innerList[0].updatedUser" />
+											 </s:else>
+											-
+											<s:date name="#innerList[1].revisionDate" format="dd/MM/yyyy hh:mm:ss" />
+											-
+											<s:property value="%{getLocaleProperty('default'+#innerList[2])}" />
+											<div class="pull-right">
+												<a class="aCollapse "
+													href="#<s:property value="#innerList[1].id" />"><i
+													class="fa fa-chevron-right"></i></a>
+											</div>
+										</h2>
+									</div>
+									<div class="aContent dynamic-form-con"
+										id="<s:property value="#innerList[1].id" />">
+										<jsp:include page='/jsp/jsp/auditSprayAndFieldManagementDetail.jsp' />
+									</div>
+								</div>
+							</s:iterator> 
+							</s:if>
+						</div>
+						
 						<div>
 							<span id="cancel" class=""><span class="first-child"><button
 										type="button" class="back-btn btn btn-sts"

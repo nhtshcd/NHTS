@@ -102,17 +102,19 @@
 			if(isEmpty(activity) || activity=='Select'){
 				$("#validateError").text('<s:property value="%{getLocaleProperty('empty.landPreparation.activity')}" />');
 				return false;
-			}else if(isEmpty(activityMode) || activityMode=='Select'){
+			}
+			/* else if(isEmpty(activityMode) || activityMode=='Select'){
 				$("#validateError").text('<s:property value="%{getLocaleProperty('empty.landPreparation.activityMode')}" />');
 		   		return false;
-		   	}else if(isEmpty(noOfLabourers)){
+		   	} */
+			else if(isEmpty(noOfLabourers)){
 				$("#validateError").text('<s:property value="%{getLocaleProperty('empty.landPreparation.noOfLabourers')}" />');
 		   		return false;
 		   	}	
 			
 		   	var tableRow="<tr id=row"+(++rowCounter)+">";
 		   	tableRow+="<td class='activity'>"+activity+"</td>";		   	
-		  	tableRow+="<td class='activityMode'>"+activityMode+"</td>";
+		  	//tableRow+="<td class='activityMode'>"+activityMode+"</td>";
 			tableRow+="<td class='noOfLabourers'>"+noOfLabourers+"</td>";
 			tableRow+="<td><i style='cursor: pointer; font-size: 150%; color: blue;' class='fa fa-pencil-square-o' aria-hidden='true' onclick='editRow("+rowCounter+")' ></i>&nbsp;&nbsp;&nbsp;&nbsp;<i style='cursor: pointer; font-size: 150%; color: black;' class='fa fa-trash-o' aria-hidden='true' onclick='deleteDtl("+rowCounter+")'></td>";
 		   	tableRow+="</tr>";
@@ -170,10 +172,11 @@
 						if(isEmpty(activity)){
 							$("#validateError").text('<s:property value="%{getLocaleProperty('empty.landPreparation.activity')}" />');
 							return false;
-						}else if(isEmpty(activityMode)){
+						}
+						/* else if(isEmpty(activityMode)){
 							$("#validateError").text('<s:property value="%{getLocaleProperty('empty.landPreparation.activityMode')}" />');
 					   		return false;
-					   	} 
+					   	}  */
 						 var activityValue = $.map(activityOption ,function(option) {
 							 	if(activity==option.text)
 							    	return option.value;
@@ -184,8 +187,8 @@
 							    	return option.value;				    
 							});
 						landPreparationDtl+=activityValue; //0
-						landPreparationDtl+="#"+activityModeValue; //2
-						landPreparationDtl+="#"+jQuery(this).find(".noOfLabourers").text()+"@";		
+						landPreparationDtl+="#"+jQuery(this).find(".noOfLabourers").text(); //2
+						landPreparationDtl+="#"+activityModeValue+"@";		
  
 		});		
 	 
@@ -344,7 +347,7 @@ $(document).ready(function() {
 							<tr>
 								<th><s:property
 										value="%{getLocaleProperty('landPreparation.activity')}" /></th>
-								<th><s:property
+								<th class="hide"><s:property
 										value="%{getLocaleProperty('landPreparation.activityMode')}" /></th>
 								<th><s:property
 										value="%{getLocaleProperty('landPreparation.noOfLabourers')}" /></th>
@@ -359,7 +362,7 @@ $(document).ready(function() {
 										headerKey="" headerValue="%{getText('txt.select')}"
 										listKey="key" listValue="value" id="activity"
 										class="form-control select2" name="activity" /></td>
-								<td><s:select
+								<td class="hide"><s:select
 										list="getCatList(getLocaleProperty('activityModeList'))"
 										headerKey="" headerValue="%{getText('txt.select')}"
 										listKey="key" listValue="value" id="activityMode"
@@ -385,7 +388,7 @@ $(document).ready(function() {
 								<tr id="row<s:property	value="#incr.index" />">
 									<td class="activity"><s:property
 											value="%{getCatalgueNameByCode(activity)}" /></td>
-									<td class="activityMode"><s:property
+									<td class="activityMode hide"><s:property
 											value="%{getCatalgueNameByCode(activityMode)}" /></td>
 									<td class="noOfLabourers"><s:property
 											value="noOfLabourers" /></td>

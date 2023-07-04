@@ -124,16 +124,45 @@
 							<s:property value="%{getCatalgueNameByCode(pcbp.uom)}" />
 						</p>
 					</div>
-				<%-- 	<div class="dynamic-flexItem">
-						<p class="flexItem">
-							<s:property value="%{getLocaleProperty('pcbp.chemicalName')}" />
-						</p>
-						<p class="flexItem">
-							<s:property value="pcbp.chemicalName" />
-							<s:property value="%{getCatalgueNameByCode(pcbp.chemicalName)}" />
-						</p>
-					</div> --%>
+				
 				</div>
+				
+								<s:iterator value="pcdpaudit" var="auditList">
+											<div class="aPanel audit_history">
+												<div class="aTitle">
+													<h2>
+														<s:if
+									test="#auditList[2].toString().trim().equalsIgnoreCase('ADD')">
+									<s:property value="#auditList[0].createdUser" />
+								</s:if>
+								<s:else>
+									<s:property value="#auditList[0].updatedUser" />
+								</s:else>
+								-
+
+								<s:date name="#auditList[1].revisionDate"
+									format="dd/MM/yyyy hh:mm:ss" />
+								-
+								<s:property
+									value="%{getLocaleProperty('default'+#auditList[2])}" />
+								<div class="pull-right">
+									<a class="aCollapse "
+										href="#<s:property value="#auditList[1].id" />
+										"><i
+										class="fa fa-chevron-right"></i></a>
+								</div>
+													</h2>
+												</div>
+												 <div class="aContent dynamic-form-con"
+													id="<s:property value="#auditList[1].id" />">
+
+													<jsp:include page='/jsp/jsp/auditpcdpDetail.jsp' />
+
+												</div> 
+
+
+											</div>
+										</s:iterator>
 			</div>
 
 			<div class="flex-layout flexItemStyle">

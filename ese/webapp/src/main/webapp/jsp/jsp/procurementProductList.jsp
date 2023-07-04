@@ -186,6 +186,101 @@ function isNumber(evt) {
 }
 
 
+function detailPopupV(idd){
+	
+	$("#detailDataTitle").empty();
+				$("#detailDataHead").empty();
+	$("#detailDataBody").empty();
+	
+	var head='<s:property value="%{getLocaleProperty('varietyDetailHead')}" />';
+	var crop="variety";
+		if (head != '') {		
+			var tr = $("<tr/>");
+			var headArrs = head.split(',');
+			$.each(headArrs, function(a, val) {				
+				var td = $("<td/>");
+				td.text(val);
+				tr.append(td);
+			});
+			$("#detailDataHead").append(tr);		
+		}
+	try {
+	$.ajax({
+		 url:'procurementVariety_populateDetail.action?id='+idd,
+		 type: 'post',
+	     dataType: 'json',
+	     processData: false,
+	     contentType: false,
+	      success : function(result) {
+				var jsonValue = result;
+				$.each(jsonValue, function(k, value) {
+					var tr = $("<tr/>");
+					$.each(value, function(a, val) {
+						var td = $("<td/>");
+						td.text(val);
+						tr.append(td);
+					});
+					$("#detailDataBody").append(tr);
+				});
+			} ,
+	     error: function(result) {
+	    	 showPopup(result.msg,result.title);
+	     }
+	}); 
+	document.getElementById("enableDetailPopup").click();
+	} catch (e) {
+		alert(e);
+	}
+}
+
+function detailPopupG(idd){
+	
+	$("#detailDataTitle").empty();
+				$("#detailDataHead").empty();
+	$("#detailDataBody").empty();
+	
+	var head='<s:property value="%{getLocaleProperty('gradeDetailHead')}" />';
+	var crop="variety";
+		if (head != '') {		
+			var tr = $("<tr/>");
+			var headArrs = head.split(',');
+			$.each(headArrs, function(a, val) {				
+				var td = $("<td/>");
+				td.text(val);
+				tr.append(td);
+			});
+			$("#detailDataHead").append(tr);		
+		}
+	try {
+	$.ajax({
+		 url:'procurementGrade_populateDetail.action?id='+idd,
+		 type: 'post',
+	     dataType: 'json',
+	     processData: false,
+	     contentType: false,
+	      success : function(result) {
+				var jsonValue = result;
+				$.each(jsonValue, function(k, value) {
+					var tr = $("<tr/>");
+					$.each(value, function(a, val) {
+						var td = $("<td/>");
+						td.text(val);
+						tr.append(td);
+					});
+					$("#detailDataBody").append(tr);
+				});
+			} ,
+	     error: function(result) {
+	    	 showPopup(result.msg,result.title);
+	     }
+	}); 
+	document.getElementById("enableDetailPopup").click();
+	} catch (e) {
+		alert(e);
+	}
+}
+
+
 function isDecimal(evt) {
 
 	 evt = (evt) ? evt : window.event;
@@ -195,8 +290,58 @@ function isDecimal(evt) {
 	  }
 	  return true;
 }
+function buttonDataCancel(id) {
+	document.getElementById(id).click();
+}
 
- 
+
+function detailPopup(idd){
+	
+	$("#detailDataTitle").empty();
+				$("#detailDataHead").empty();
+	$("#detailDataBody").empty();
+	
+	var head='<s:property value="%{getLocaleProperty('procDetailHead')}" />';
+	
+		if (head != '') {		
+			var tr = $("<tr/>");
+			var headArrs = head.split(',');
+			$.each(headArrs, function(a, val) {				
+				var td = $("<td/>");
+				td.text(val);
+				tr.append(td);
+			});
+			$("#detailDataHead").append(tr);		
+		}
+	try {
+	$.ajax({
+		 url:'procurementProductEnroll_populateDetail.action?id='+idd,
+	     type: 'post',
+	     dataType: 'json',
+	     processData: false,
+	     contentType: false,
+	     
+	      success : function(result) {
+				var jsonValue = result;
+				$.each(jsonValue, function(k, value) {
+					var tr = $("<tr/>");
+					$.each(value, function(a, val) {
+						var td = $("<td/>");
+						td.text(val);
+						tr.append(td);
+					});
+					$("#detailDataBody").append(tr);
+				});
+			} ,
+	     error: function(result) {
+	    	 showPopup(result.msg,result.title);
+	     }
+	}); 
+	document.getElementById("enableDetailPopup").click();
+	} catch (e) {
+		alert(e);
+	}
+}
 
 function resetData()
 {
@@ -411,7 +556,7 @@ function addVariety(val)
 	var variety=$("#varietyName").val();
 	var varietyCode=$("#varietyCode").val();
 	var selectedCrop=$("#selectedCrop").val();
-	var cropHScode=$("#cropHScode").val();
+	
 	
 	
 	if(!selectedCrop.trim()|| selectedCrop==null)
@@ -420,16 +565,13 @@ function addVariety(val)
 	}
 	else if(varietyCode=="" || varietyCode==null)
 	{
-		document.getElementById("validateErrorVariety").innerHTML='<s:text name="empty.code"/>';
+		document.getElementById("validateErrorVariety").innerHTML='<s:text name="empty.internalCode"/>';
 	}
 	else if(variety=="" || variety==null)
 	{
-		document.getElementById("validateErrorVariety").innerHTML='<s:text name="empty.name"/>';
+		document.getElementById("validateErrorVariety").innerHTML='<s:text name="empty.cropNameEnt"/>';
 	}
-	else if(cropHScode=="" || cropHScode==null)
-	{
-		document.getElementById("validateErrorVariety").innerHTML='<s:text name="empty.cropHScode"/>';
-	}
+	
 	
 	else
 	{
@@ -441,7 +583,6 @@ function addVariety(val)
 		var dataa =new FormData();
  		dataa.append( 'varietyName', variety );
  		dataa.append( 'varietyCode', varietyCode );
- 		dataa.append( 'cropHScode', cropHScode );
  		dataa.append( 'procurementProductId', selectedCrop );
  		console.log(dataa); 	
  	 	var url ='procurementVariety_create.action';
@@ -490,10 +631,10 @@ function addGrade(val)
 	var selectedCrop=$("#procurementProductId").val();
 	var selectedVariety=$("#selectedVariety").val();
 	var gradeName=$("#gradeName").val();
-	var gradeCode=$("#gradeCode").val();
 	var selectedCropcycle=$("#cropCycle").val();
 	var selectedYield=$("#yield").val();
 	var selectedHarvestDays=$("#harvestDays").val();
+	var cropHScode=$("#cropHScode").val();
 
 	if(selectedCrop=="" || selectedCrop==null)
 	{
@@ -503,17 +644,17 @@ function addGrade(val)
 	
 	 else if(selectedVariety=="" || selectedVariety==null || isEmpty(selectedVariety))
 	{
-		 document.getElementById("validateErrorGrade").innerHTML='<s:property value="%{getLocaleProperty('empty.variety')}" />';
+		 document.getElementById("validateErrorGrade").innerHTML='<s:property value="%{getLocaleProperty('empty.farmCropName')}" />';
 	}
-	
-	else if(gradeCode=="" || gradeCode==null)
-	{
-		document.getElementById("validateErrorGrade").innerHTML='<s:text name="empty.code"/>';
-	}
+	 else if(cropHScode=="" || cropHScode==null)
+		{
+			document.getElementById("validateErrorGrade").innerHTML='<s:text name="empty.cropHscode"/>';
+		}
 	else if(gradeName=="" || gradeName==null)
 	{
-		document.getElementById("validateErrorGrade").innerHTML='<s:text name="empty.name"/>';
+		document.getElementById("validateErrorGrade").innerHTML='<s:text name="empty.cropVarEnt"/>';
 	}
+	
 	else if(selectedCropcycle=="" || selectedCropcycle==null)
 	{
 		document.getElementById("validateErrorGrade").innerHTML='<s:text name="empty.cropCycle"/>';
@@ -531,11 +672,12 @@ function addGrade(val)
 		
 		var dataa =new FormData();
  		dataa.append( 'gradeName', gradeName );
- 		dataa.append( 'gradeCode', gradeCode );
  		dataa.append( 'procurementVarietyId', selectedVariety );
  		dataa.append( 'ccycle', selectedCropcycle );
  		dataa.append( 'yieldkg', selectedYield );
  		dataa.append( 'harvestday', selectedHarvestDays );
+ 		dataa.append( 'cropHScode', cropHScode );
+ 		
  		console.log(dataa); 	
  	 	var url ='procurementGrade_create.action';
  	 	if(val==2){
@@ -666,13 +808,14 @@ function ediFunctionG(val){
 		populateVariety(son.crop,son.variety);
 		//$('#selectedVariety').val(son.variety).select2();
 		// $("#selectedVariety option[value='"+ grower.trim() + "']").prop("selected", true).trigger('change');
-		jQuery('#gradeCode').prop("disabled",true);
-		$('#gradeCode').val(son.code);
+	/* 	jQuery('#gradeCode').prop("disabled",true); */
+		/* $('#gradeCode').val(son.code); */
 		$('#gradeName').val(son.name);
 		$('#gid').val(son.id);
 		$('#addg').addClass("hide");
 		$('#editg').removeClass("hide");
 		$('#cropCycle').val(son.cropCycle);
+		$('#cropHScode').val(son.cropHScode);
 		$('#yield').val(son.yield);
 		$('#harvestDays').val(son.harvestDays);
 		
@@ -692,7 +835,7 @@ function ediFunctionV(val){
 		$('#selectedCrop').val(son.crop).select2();
 		$('#varietyName').val(son.name);
 		
-		$('#cropHScode').val(son.cropHScode);
+		
 		$('#vid').val(son.id);
 		$('#addv').addClass("hide");
 		$('#editv').removeClass("hide");
@@ -710,14 +853,15 @@ function onResetAddVariety(){
 	 $("#selectedCrop option[value='']").prop("selected", true).trigger('change');
 	 $('#varietyName').val('');
 	 $('#varietyCode').val('');
-	 $('#cropHScode').val('');
+	 
 	
 }
 function onResetAddGrade(){
 	 $("#procurementProductId option[value='']").prop("selected", true).trigger('change');
 	 $("#selectedVariety").val("").select2();
+	 $('#cropHScode').val('');
 	 $('#gradeName').val('');
-	 $('#gradeCode').val('');
+	 /* $('#gradeCode').val(''); */
 	
 }
 
@@ -861,6 +1005,8 @@ $(document).ready(function(){
 								name="cropType" /></th>
 						<%-- <th width="20%" id="unit" class="hd"><s:text
 								name="product.unit" /></th> --%>
+						<th width="20%" id="audit" class="hd noexp"><s:text
+								name="Audit" /></th>
 						<th width="20%" id="edit" class="hd noexp"><s:text
 								name="action" /></th>
 
@@ -908,7 +1054,7 @@ $(document).ready(function(){
 
 						<div class="flexItem">
 							<label for="txt"><s:property
-									value="%{getLocaleProperty('cropcatCode')}" /><sup
+									value="%{getLocaleProperty('crop.internalCode')}" /><sup
 								style="color: red;">*</sup></label>
 							<div class="form-element">
 								<s:textfield name="varietyCode" theme="simple" maxlength="45"
@@ -919,7 +1065,7 @@ $(document).ready(function(){
 
 						<div class="flexItem">
 							<label for="txt"><s:property
-									value="%{getLocaleProperty('procurementVariety.name')}" /><sup
+									value="%{getLocaleProperty('export.cropname')}" /><sup
 								style="color: red;">*</sup></label>
 							<div class="form-element">
 								<s:textfield name="varietyName" theme="simple" maxlength="45"
@@ -929,16 +1075,7 @@ $(document).ready(function(){
 						</div>
 
 
-						<div class="flexItem">
-							<label for="txt"><s:property
-									value="%{getLocaleProperty('procurementVariety.cropHScode')}" /><sup
-								style="color: red;">*</sup></label>
-							<div class="form-element">
-								<s:textfield name="cropHScode" theme="simple" maxlength="45"
-									id="cropHScode" />
-
-							</div>
-						</div>
+						
 
 						<div class="flexItem" style="margin-top: 20px;">
 							<button type="button" class="btn btn-sts " data-toggle="modal"
@@ -967,14 +1104,13 @@ $(document).ready(function(){
 					<tr id="headerrow">
 
 						<th width="20%" id="code" class="hd"><s:text
-								name="procurementVariety.code" /></th>
+								name="crop.internalCode" /></th>
 						<th width="20%" id="name" class="hd"><s:text
-								name="procurementVariety.name" /></th>
+								name="export.cropname" /></th>
 						<th width="20%" id="prodName" class="hd"><s:text
 								name="seedcrop.Spec" /></th>
-						<th width="20%" id="cropHScode" class="hd"><s:text
-								name="procurementVariety.cropHScode" /></th>
-
+						<th width="20%" id="audit" class="hd noexp"><s:text
+								name="Audit" /></th>
 						<th width="20%" id="edit" class="hd noexp"><s:text
 								name="action" /></th>
 
@@ -1035,6 +1171,16 @@ $(document).ready(function(){
 						</div>
 
 						<div class="flexItem">
+							<label for="txt"><s:property
+									value="%{getLocaleProperty('procurementVariety.cropHScode')}" /><sup
+								style="color: red;">*</sup></label>
+							<div class="form-element">
+								<s:textfield name="cropHScode" theme="simple" maxlength="45"
+									id="cropHScode" />
+
+							</div>
+						</div>
+						<div class="flexItem hide" >
 							<label for="txt"><s:text name="cropcatCode" /><sup
 								style="color: red;">*</sup></label>
 							<div class="form-element">
@@ -1043,7 +1189,7 @@ $(document).ready(function(){
 							</div>
 						</div>
 						<div class="flexItem">
-							<label for="txt"><s:text name="procurementGrade.name" /><sup
+							<label for="txt"><s:text name="qualityName" /><sup
 								style="color: red;">*</sup></label>
 							<div class="form-element">
 								<s:textfield name="gradeName" theme="simple" maxlength="45"
@@ -1104,10 +1250,12 @@ $(document).ready(function(){
 				<thead>
 					<tr id="headerrow">
 
-						<th width="20%" id="code" class="hd"><s:text
-								name="procurementVariety.code" /></th>
+						<%-- <th width="20%" id="code" class="hd"><s:text
+								name="procurementVariety.code" /></th> --%>
+						<th width="20%" id="cropHScode" class="hd"><s:text
+								name="procurementVariety.cropHScode" /></th>
 						<th width="20%" id="name" class="hd"><s:text
-								name="procurementVariety.name" /></th>
+								name="qualityName" /></th>
 						<th width="20%" id="variety" class="hd"><s:text
 								name="variety" /></th>
 						<th width="20%" id="prodName" class="hd"><s:text
@@ -1118,6 +1266,8 @@ $(document).ready(function(){
 								name="procurementGrade.yield" /></th>
 						<%-- <th width="20%" id="harvestDays" class="hd"><s:text
 								name="procurementGrade.harvestDays" /></th> --%>
+						<th width="20%" id="audit" class="hd noexp"><s:text
+								name="Audit" /></th>
 						<th width="20%" id="edit" class="hd noexp"><s:text
 								name="action" /></th>
 

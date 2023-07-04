@@ -23,6 +23,7 @@ import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "recall_details")
@@ -30,6 +31,7 @@ import lombok.Setter;
 @Setter
 @Builder
 @AllArgsConstructor
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class RecallDetails implements Serializable, Comparable<RecallDetails> {
 
 	@Id

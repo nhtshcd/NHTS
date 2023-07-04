@@ -203,8 +203,7 @@ public class ProcurementProductDownload implements ITxnAdapter {
 						procurementVariety.getCode());
 				varietyDataList.put(TxnEnrollmentProperties.PROCUREMENT_PRODUCT_VARIETY_NAME,
 						procurementVariety.getName());
-				varietyDataList.put("hsCode",
-						procurementVariety.getCropHScode());
+				
 
 				if (varietyList != null && !ObjectUtil.isEmpty(varietyList) && !ObjectUtil.isEmpty(lpMap)) {
 					varietyDataList.put(TransactionProperties.LANG_LIST,
@@ -257,8 +256,10 @@ public class ProcurementProductDownload implements ITxnAdapter {
 				Map gardeObj = new HashMap();
 				gardeObj.put(TxnEnrollmentProperties.PROCUREMENT_PRODUCT_GRADE_CODE, procurementGrade.getCode());
 				gardeObj.put(TxnEnrollmentProperties.PROCUREMENT_PRODUCT_GRADE_NAME, procurementGrade.getName());
+				gardeObj.put("hsCode",procurementGrade.getCropHScode()== null  ? "" :procurementGrade.getCropHScode());
 				gardeObj.put(TxnEnrollmentProperties.PROCUREMENT_PRODUCT_GRADE_PRICE,procurementGrade.getPrice()!=null ? String.valueOf(procurementGrade.getPrice()) : "0");
 				gardeObj.put("cropCycle", procurementGrade.getCropCycle() == null  ? "" :procurementGrade.getCropCycle() );
+				
 				gardeObj.put(TxnEnrollmentProperties.ESTIMATION_HARVEST_DAYS, procurementGrade.getHarvestDays() == null  ? "" :procurementGrade.getHarvestDays() );
 
 				gardeObj.put(TxnEnrollmentProperties.ESTIMATED_ACREAGE, procurementGrade.getYield() == null  ? "" :procurementGrade.getYield() );

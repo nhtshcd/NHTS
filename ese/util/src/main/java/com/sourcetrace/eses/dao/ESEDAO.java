@@ -16,7 +16,16 @@ public class ESEDAO extends HibernateDaoSupport implements IESEDAO {
 	 */
 	@Transactional(readOnly = false)
 	public void save(Object obj) {
-		getHibernateTemplate().save(obj);
+	//	getHibernateTemplate().save(obj);
+		Session session = getSessionFactory().openSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
+
+		session.save(obj);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		session.close();
 
 	}
 
@@ -27,7 +36,16 @@ public class ESEDAO extends HibernateDaoSupport implements IESEDAO {
 	 */
 	@Transactional(readOnly = false)
 	public void saveOrUpdate(Object obj) {
-		getHibernateTemplate().saveOrUpdate(obj);
+		//getHibernateTemplate().saveOrUpdate(obj);
+		Session session = getSessionFactory().openSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
+
+		session.saveOrUpdate(obj);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		session.close();
 
 	}
 
@@ -37,7 +55,16 @@ public class ESEDAO extends HibernateDaoSupport implements IESEDAO {
 	 * @see com.sourcetrace.eses.dao.IESEDAO#update(java.lang.Object)
 	 */
 	public void update(Object obj) {
-		getHibernateTemplate().update(obj);
+		//getHibernateTemplate().update(obj);
+		Session session = getSessionFactory().openSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
+
+		session.update(obj);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		session.close();
 
 	}
 
@@ -48,7 +75,16 @@ public class ESEDAO extends HibernateDaoSupport implements IESEDAO {
 	 */
 	@Transactional(readOnly = false)
 	public void delete(Object obj) {
-		getHibernateTemplate().delete(obj);
+		//getHibernateTemplate().delete(obj);
+		Session session = getSessionFactory().openSession();
+		org.hibernate.Transaction tx = (org.hibernate.Transaction) session.beginTransaction();
+
+		session.delete(obj);
+		session.flush();
+		session.clear();
+
+		((org.hibernate.Transaction) tx).commit();
+		session.close();
 
 	}
 

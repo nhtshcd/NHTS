@@ -1,17 +1,16 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <beans xmlns="http://www.springframework.org/schema/beans"
-	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
-	xmlns:tx="http://www.springframework.org/schema/tx" xmlns:security="http://www.springframework.org/schema/security"
-	xmlns:lang="http://www.springframework.org/schema/lang" xmlns:aop="http://www.springframework.org/schema/aop"
-	xmlns:util="http://www.springframework.org/schema/util"
-	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-2.5.xsd
-           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-2.5.xsd
-           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-2.5.xsd
-           http://www.springframework.org/schema/lang http://www.springframework.org/schema/lang/spring-lang-2.5.xsd
-           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop.xsd
-           http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util.xsd">
+	   xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	   xmlns:context="http://www.springframework.org/schema/context"
+	   xmlns:tx="http://www.springframework.org/schema/tx"
+	   xmlns:aop="http://www.springframework.org/schema/aop"
+	   xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd
+           http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-4.2.xsd
+           http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-4.2.xsd
+           http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-4.2.xsd">
 
-	<context:annotation-config />
+
+<context:annotation-config />
 
 	<context:property-placeholder location="/META-INF/database.properties" />
 
@@ -42,8 +41,15 @@
 				<entry key="hibernate.tenant_identifier_resolver" value-ref="webSessionTenantIdentifierResolver" />
 				<entry key="hibernate.multi_tenant_connection_provider"
 					value-ref="multiTenantConnectionProvider" />
+				<entry key="org.hibernate.envers.audit_table_suffix" value="_AUD"/>
+				<entry key="org.hibernate.envers.revision_field_name" value="REV"/>
+				<entry key="org.hibernate.envers.revision_type_field_name" value="REVTYPE"/>
+				<entry key="org.hibernate.envers.store_data_at_delete" value="true"/>
+				<entry key="org.hibernate.envers.audit_strategy" value="org.hibernate.envers.strategy.DefaultAuditStrategy"/>
+
 			</map>
 		</property>
+
 		<property name="packagesToScan">
 			<list>
 				<value>com.sourcetrace.eses.util.entity</value>

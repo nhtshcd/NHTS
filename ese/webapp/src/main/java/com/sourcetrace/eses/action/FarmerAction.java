@@ -17,9 +17,11 @@ import org.springframework.stereotype.Component;
 
 import com.sourcetrace.eses.entity.Country;
 import com.sourcetrace.eses.entity.DocumentUpload;
+import com.sourcetrace.eses.entity.ExporterRegistration;
 import com.sourcetrace.eses.entity.Farmer;
 import com.sourcetrace.eses.entity.Locality;
 import com.sourcetrace.eses.entity.Municipality;
+import com.sourcetrace.eses.entity.ProcurementGrade;
 import com.sourcetrace.eses.entity.ProcurementVariety;
 import com.sourcetrace.eses.entity.State;
 import com.sourcetrace.eses.entity.Village;
@@ -115,10 +117,21 @@ public class FarmerAction extends SwitchAction {
 	@Getter
 	@Setter
 	private String selectedProductData;
-	
+
 	@Getter
 	@Setter
 	private String dateOfBirth;
+
+	@Getter
+	@Setter
+	private String varietyId;
+
+	@Getter
+	@Setter
+	private String[] columnNames;
+	@Getter
+	@Setter
+	private String[] columnModels;
 
 	public String create() throws Exception {
 		if (farmer == null) {
@@ -140,6 +153,7 @@ public class FarmerAction extends SwitchAction {
 			farmer.setMobileNo(farmer.getMobileNo());
 			farmer.setCropCategory(farmer.getCropCategory());
 			farmer.setCropName(getProductId());
+			farmer.setCropVariety(getVarietyId());
 			if (farmer.getGender() == null || StringUtil.isEmpty(farmer.getGender())) {
 				farmer.setGender("");
 			}
@@ -238,6 +252,7 @@ public class FarmerAction extends SwitchAction {
 			farmer.setStatus(1);
 			farmer.setStatusCode(0);
 			farmer.setFarmerCat(farmer.getFarmerCat());
+			farmer.setFCat(farmer.getFCat());
 
 			/*
 			 * farmer.setLatitude(getLatitude());
@@ -259,6 +274,11 @@ public class FarmerAction extends SwitchAction {
 		return REDIRECT;
 	}
 
+	@Getter
+	@Setter
+	List<Object[]> ex;
+	
+
 	public String detail() throws Exception {
 		String view = "";
 		if (id != null && !id.equals("")) {
@@ -267,27 +287,35 @@ public class FarmerAction extends SwitchAction {
 				addActionError(NO_RECORD);
 				return REDIRECT;
 			}
-			String hsCode = farmer.getCropName();
+			String hsCode = farmer.getCropVariety();
 			String cropCat = utilService.findCropHierarchyNameById("procurement_product", farmer.getCropCategory());
 			farmer.setCropCategory(cropCat);
 
 			String cropName = utilService.findCropHierarchyNameById("procurement_variety", farmer.getCropName());
 			farmer.setCropName(cropName);
 
-			/*String expName = utilService.findExporterNameById("exporter_registration", farmer.getExporters());
-			farmer.setExporters(expName);*/
+			String varietyName = utilService.findCropHierarchyNameById("procurement_grade", farmer.getCropVariety());
+			farmer.setCropVariety(varietyName);
+
+			/*
+			 * String expName =
+			 * utilService.findExporterNameById("exporter_registration",
+			 * farmer.getExporters()); farmer.setExporters(expName);
+			 */
 
 			// String hsCode1 =
 			// utilService.findCropHierarchyHSCodeById("procurement_product",
 			// hsCode);
-			String hsCode1 = utilService.findCropHsCodeByProcurementProductId("procurement_variety", hsCode);
+			String hsCode1 = utilService.findCropHsCodeByProcurementProductId("procurement_grade", hsCode);
 			setCropHsCode(hsCode1);
-			
+
 			DateFormat genDate = new SimpleDateFormat(getGeneralDateFormat());
 			if (!ObjectUtil.isEmpty(farmer.getDateOfBirth()) && farmer.getDateOfBirth() != null) {
 				dateOfBirth = genDate.format(farmer.getDateOfBirth());
 			}
-
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Farmer", farmer.getId());
+			
+			
 			setCurrentPage(getCurrentPage());
 			command = UPDATE;
 			view = DETAIL;
@@ -304,10 +332,14 @@ public class FarmerAction extends SwitchAction {
 		if (id != null && !id.equals("") && farmer == null) {
 			farmer = utilService.findFarmerById(Long.valueOf(id));
 			setProductId(farmer.getCropName());
+			setVarietyId(farmer.getCropVariety());
+			// ProcurementGrade pg =
+			// utilService.findProcurementGradeById(Long.valueOf(farmer.getCropName()));
+			// setProductId(String.valueOf(pg.getProcurementVariety().getId()));
 			// String hsCode1 =
 			// utilService.findCropHierarchyHSCodeById("procurement_product",
 			// farmer.getCropCategory());
-			String hsCode1 = utilService.findCropHsCodeByProcurementProductId("procurement_variety",
+			String hsCode1 = utilService.findCropHsCodeByProcurementProductId("procurement_grade",
 					farmer.getCropName());
 			setCropHsCode(hsCode1);
 			if (selectedVillage != null && !selectedVillage.isEmpty() && selectedVillage != "") {
@@ -328,7 +360,7 @@ public class FarmerAction extends SwitchAction {
 				SimpleDateFormat sm = new SimpleDateFormat(getGeneralDateFormat());
 				dateOfBirth = sm.format(farmer.getDateOfBirth());
 			}
-			
+
 			command = UPDATE;
 			request.setAttribute(HEADING, getText("farmerupdate"));
 			farmer.setOwnership(farmer.getOwnership());
@@ -352,9 +384,10 @@ public class FarmerAction extends SwitchAction {
 				temp.setAge(farmer.getAge());
 				temp.setNid(farmer.getNid());
 				temp.setMobileNo(farmer.getMobileNo());
-				/*temp.setExporters(farmer.getExporters());*/
+				/* temp.setExporters(farmer.getExporters()); */
 				temp.setCropCategory(farmer.getCropCategory());
 				temp.setCropName(getProductId());
+				temp.setCropVariety(getVarietyId());
 				// setSelectedVillage(farmer.getVillage() != null ?
 				// String.valueOf(farmer.getVillage().getId()) : "");
 				setSelectedCity(
@@ -457,12 +490,13 @@ public class FarmerAction extends SwitchAction {
 				temp.setRevisionNo(DateUtil.getRevisionNumber());
 				temp.setAsset(farmer.getAsset());
 				temp.setFarmerCat(farmer.getFarmerCat());
+				temp.setFCat(farmer.getFCat());
 
 				temp.setCompanyName(farmer.getCompanyName());
 				temp.setKraPin(farmer.getKraPin());
 				temp.setFarmerRegType(farmer.getFarmerRegType());
 				temp.setRegistrationCertificate(farmer.getRegistrationCertificate());
-				
+
 				if (!StringUtil.isEmpty(dateOfBirth)) {
 					temp.setDateOfBirth(DateUtil.convertStringToDate(dateOfBirth, getGeneralDateFormat()));
 				} else {
@@ -499,9 +533,19 @@ public class FarmerAction extends SwitchAction {
 		Map<String, String> errorCodes = new LinkedHashMap<String, String>();
 		if (farmer != null) {
 
-			/*if (farmer == null || StringUtil.isEmpty(farmer.getExporters())) {
-				errorCodes.put("empty.exporter", "empty.exporter");
-			}*/
+			/*
+			 * if (farmer == null || StringUtil.isEmpty(farmer.getExporters()))
+			 * { errorCodes.put("empty.exporter", "empty.exporter"); }
+			 */
+
+			if (farmer.getFCat() == null || StringUtil.isEmpty(farmer.getFCat()) || farmer.getFCat().equals("")) {
+				errorCodes.put("empty.FarmerCat", "empty.FarmerCat");
+			}
+			if (farmer.getFarmerCat() == null || StringUtil.isEmpty(farmer.getFarmerCat())
+					|| farmer.getFarmerCat().equals("")) {
+				errorCodes.put("empty.farmOwnership", "empty.farmOwnership");
+			}
+
 			if (farmer.getFirstName() == null || StringUtil.isEmpty(farmer.getFirstName())
 					|| farmer.getFirstName().equals("")) {
 
@@ -514,13 +558,13 @@ public class FarmerAction extends SwitchAction {
 					errorCodes.put("empty.gender", "empty.gender");
 				}
 			}
-			
+
 			if (farmer.getFarmerRegType().equalsIgnoreCase("0")) {
-			if (dateOfBirth == null || StringUtil.isEmpty(dateOfBirth) || dateOfBirth.equals("")) {
-				errorCodes.put("empty.dob", "empty.dob");
+				if (dateOfBirth == null || StringUtil.isEmpty(dateOfBirth) || dateOfBirth.equals("")) {
+					errorCodes.put("empty.dob", "empty.dob");
+				}
 			}
-			}
-			
+
 			if (farmer.getFarmerRegType().equalsIgnoreCase("0")
 					&& (farmer.getAge() == null || StringUtil.isEmpty(farmer.getAge()) || farmer.getAge().equals(""))) {
 
@@ -532,10 +576,14 @@ public class FarmerAction extends SwitchAction {
 				}
 			}
 
-			if (farmer.getFarmerRegType().equalsIgnoreCase("0")
-					&& (farmer.getNid() == null || StringUtil.isEmpty(farmer.getNid()) || farmer.getNid().equals(""))) {
-				errorCodes.put("pattern.nid", "pattern.nid");
-			} else {
+			/*
+			 * if (farmer.getFarmerRegType().equalsIgnoreCase("0") &&
+			 * (farmer.getNid() == null || StringUtil.isEmpty(farmer.getNid())
+			 * || farmer.getNid().equals(""))) { errorCodes.put("pattern.nid",
+			 * "pattern.nid"); } else
+			 */
+
+			if (farmer.getNid() != null && !StringUtil.isEmpty(farmer.getNid())) {
 				try {
 					if (farmer.getNid() != null && !StringUtil.isEmpty(farmer.getNid())) {
 						Farmer fr = (Farmer) farmerService.findObjectById("from Farmer fc where fc.nid=?",
@@ -591,10 +639,12 @@ public class FarmerAction extends SwitchAction {
 						errorCodes.put("empty.CompanyName", "empty.CompanyName");
 					}
 				}
-				if (farmer.getKraPin() == null || StringUtil.isEmpty(farmer.getKraPin())
-						|| farmer.getKraPin().equals("")) {
-					errorCodes.put("empty.KraPin", "empty.KraPin");
-				}
+				/*
+				 * if (farmer.getKraPin() == null ||
+				 * StringUtil.isEmpty(farmer.getKraPin()) ||
+				 * farmer.getKraPin().equals("")) {
+				 * errorCodes.put("empty.KraPin", "empty.KraPin"); }
+				 */
 
 				if (!StringUtil.isEmpty(farmer.getKraPin())) {
 
@@ -608,9 +658,12 @@ public class FarmerAction extends SwitchAction {
 						boolean resultfirst = first.matches("[a-zA-Z]+");
 						boolean resultLast = last.matches("[a-zA-Z]+");
 
-						/*if (!String.valueOf(first).equals("P") && !String.valueOf(first).equals("A")) {
-							errorCodes.put("krapinfirst.valid", "krapinfirst.valid");
-						} else */
+						/*
+						 * if (!String.valueOf(first).equals("P") &&
+						 * !String.valueOf(first).equals("A")) {
+						 * errorCodes.put("krapinfirst.valid",
+						 * "krapinfirst.valid"); } else
+						 */
 						if (farmer.getFarmerRegType() != null && farmer.getFarmerRegType().equalsIgnoreCase("1")
 								&& !String.valueOf(first).equals("P")) {
 							errorCodes.put("krapinfirstLetterForC.valid", "krapinfirstLetterForC.valid");
@@ -676,6 +729,11 @@ public class FarmerAction extends SwitchAction {
 				errorCodes.put("empty.productId", "empty.productId");
 			}
 
+			if (getVarietyId() == null || StringUtil.isEmpty(getVarietyId()) || getVarietyId().equals("")) {
+
+				errorCodes.put("empty.variety", "empty.variety");
+			}
+
 			if (getSelectedCountry() == null || StringUtil.isEmpty(getSelectedCountry())
 					|| getSelectedCountry().equals("")) {
 
@@ -728,12 +786,6 @@ public class FarmerAction extends SwitchAction {
 			 * errorCodes.put("empty.nidPhoto", "empty.nidPhoto"); } }
 			 */
 
-			if (farmer.getFarmerCat() == null || StringUtil.isEmpty(farmer.getFarmerCat())
-					|| farmer.getFarmerCat().equals("")) {
-
-				errorCodes.put("empty.FarmerCat", "empty.FarmerCat");
-			}
-
 			/*
 			 * if (farmer.getLatitude() == null ||
 			 * StringUtil.isEmpty(farmer.getLatitude()) ||
@@ -778,12 +830,25 @@ public class FarmerAction extends SwitchAction {
 			// String hsCode1 =
 			// utilService.findCropHierarchyHSCodeById("procurement_product",
 			// selectedProduct);
-			String hsCode1 = utilService.findCropHsCodeByProcurementProductId("procurement_variety", cropid);
+			String hsCode1 = utilService.findCropHsCodeByProcurementProductId("procurement_grade", cropid);
 			setCropHsCode(hsCode1);
 			jsonObj.put("hscode", hsCode1);
 		}
 
 		sendAjaxResponse(jsonObj);
+	}
+
+	public void populateGrade() {
+		if (!StringUtil.isEmpty(procurementVariety)) {
+			List<ProcurementGrade> gradeList = utilService
+					.listProcurementGradeByProcurementVarietyIds(procurementVariety);
+			JSONArray gradeArr = new JSONArray();
+			gradeList.stream().filter(obj -> !ObjectUtil.isEmpty(obj)).forEach(obj -> {
+				gradeArr.add(getJSONObject(obj.getId(), obj.getName()));
+			});
+			sendAjaxResponse(gradeArr);
+		}
+
 	}
 
 	public Map<String, String> getFarmerCatList() {
@@ -793,6 +858,14 @@ public class FarmerAction extends SwitchAction {
 		// farmerCatList.put("0", getLocaleProperty("Individual"));
 		// farmerCatList.put("1", getLocaleProperty("Company"));
 		return farmerCatList;
+	}
+
+	public Map<String, String> getFarmerCategoryList() {
+		Map<String, String> farmerCategoryList = new LinkedHashMap<>();
+		farmerCategoryList.put("0", getLocaleProperty("Organic"));
+		farmerCategoryList.put("1", getLocaleProperty("Transition"));
+		farmerCategoryList.put("2", getLocaleProperty("Conventional"));
+		return farmerCategoryList;
 	}
 
 	public void populateState() throws Exception {

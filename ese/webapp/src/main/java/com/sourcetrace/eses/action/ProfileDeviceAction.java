@@ -61,6 +61,9 @@ import com.sourcetrace.eses.util.FileUtil;
 import com.sourcetrace.eses.util.ObjectUtil;
 import com.sourcetrace.eses.util.StringUtil;
 
+import lombok.Getter;
+import lombok.Setter;
+
 /**
  * The Class ProfileDeviceAction.
  */
@@ -260,14 +263,19 @@ public class ProfileDeviceAction extends SwitchValidatorAction {
 					if (agentId != null && !agentId.equalsIgnoreCase("-1")) {
 						Agent agent = utilService.findAgent((Long.parseLong(agentId)));
 						existing.setAgent(agent);
-						if(existing.getExporter() == null || ObjectUtil.isEmpty(existing.getExporter())){
-							ExporterRegistration ex = utilService.findExportRegById(agent.getExporter().getId());
+						if (existing.getExporter() == null || ObjectUtil.isEmpty(existing.getExporter())) {
+							ExporterRegistration ex;
+							if (agent.getPackhouse() != null && agent.getPackhouse().getExporter() != null
+									&& !ObjectUtil.isEmpty(agent.getPackhouse().getExporter()))
+								ex = utilService.findExportRegById(agent.getPackhouse().getExporter().getId());
+							else
+								ex = utilService.findExportRegById(agent.getExporter().getId());
+							// ExporterRegistration ex =
+							// utilService.findExportRegById(agent.getExporter().getId());
 							existing.setExporter(ex);
 						}
 					}
-					
-						
-					
+
 					existing.setLastUpdatedUsername(getUsername());
 					existing.setModifiedTime(new Date());
 					existing.setEnabled(this.getDevice().getEnabled());
@@ -425,7 +433,7 @@ public class ProfileDeviceAction extends SwitchValidatorAction {
 
 		if (!StringUtil.isEmpty(searchRecord.get("serialNo")))
 			filter.setSerialNumber(searchRecord.get("serialNo").trim());
-		
+
 		if (!StringUtil.isEmpty(searchRecord.get("exporter"))) {
 			ExporterRegistration exp = new ExporterRegistration();
 			exp.setName(searchRecord.get("exporter").trim());
@@ -499,9 +507,10 @@ public class ProfileDeviceAction extends SwitchValidatorAction {
 		}
 		if (ObjectUtil.isEmpty(device.getExporter()) || device.getExporter().equals("")) {
 			objDt.put("exporter", getText("NA"));
-			
-		}else{
-			objDt.put("exporter", !StringUtil.isEmpty(device.getExporter()) ? device.getExporter().getName() : getText(""));
+
+		} else {
+			objDt.put("exporter",
+					!StringUtil.isEmpty(device.getExporter()) ? device.getExporter().getName() : getText(""));
 		}
 		objDt.put("version", !StringUtil.isEmpty(device.getAppVersion()) ? device.getAppVersion() : getText(""));
 		objDt.put("lastLogin", !StringUtil.isEmpty(device.getLoginTime()) ? device.getLoginTime() : getText(""));
@@ -546,6 +555,10 @@ public class ProfileDeviceAction extends SwitchValidatorAction {
 		return this.getDevice();
 	}
 
+	@Getter
+	@Setter
+	List<Object[]> ex;
+
 	/**
 	 * Detail.
 	 * 
@@ -554,10 +567,12 @@ public class ProfileDeviceAction extends SwitchValidatorAction {
 	public String detail() {
 
 		if (id != null && !id.equals(EMPTY)) {
+
 			setCommand("detail");
 			request.setAttribute(HEADING, getText(command));
 			setCurrentPage(getCurrentPage());
 			this.setDevice(this.getUtilService().findDeviceById(Long.valueOf(id)));
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Device", this.device.getId());
 			if ((this.device.getAgent() != null) && (device.getAgent().getPersonalInfo() != null)) {
 				agentName = this.device.getAgent().getPersonalInfo().getFirstName() + " "
 						+ this.device.getAgent().getPersonalInfo().getLastName();
@@ -605,12 +620,20 @@ public class ProfileDeviceAction extends SwitchValidatorAction {
 
 		Map<String, String> agentDropDownList = new LinkedHashMap<String, String>();
 		for (Agent agent : agentList) {
-			if(device!=null && device.getExporter()!=null){
-			if(device.getExporter().getId()==agent.getExporter().getId()){
-					agentDropDownList.put(String.valueOf(agent.getId()), (agent.getPersonalInfo().getFirstName() + " " + agent.getPersonalInfo().getLastName() + "-" + agent.getProfileId()));
-			}
-			}else{
-				agentDropDownList.put(String.valueOf(agent.getId()), (agent.getPersonalInfo().getFirstName() + " " + agent.getPersonalInfo().getLastName() + "-" + agent.getProfileId()));
+			if (device != null && device.getExporter() != null) {
+				ExporterRegistration ex;
+				if (agent.getPackhouse() != null && agent.getPackhouse().getExporter() != null
+						&& !ObjectUtil.isEmpty(agent.getPackhouse().getExporter())) {
+					ex = agent.getPackhouse().getExporter();
+				} else
+					ex = agent.getExporter();
+				if (device.getExporter().getId() == ex.getId()) {
+					agentDropDownList.put(String.valueOf(agent.getId()), (agent.getPersonalInfo().getFirstName() + " "
+							+ agent.getPersonalInfo().getLastName() + "-" + agent.getProfileId()));
+				}
+			} else {
+				agentDropDownList.put(String.valueOf(agent.getId()), (agent.getPersonalInfo().getFirstName() + " "
+						+ agent.getPersonalInfo().getLastName() + "-" + agent.getProfileId()));
 			}
 		}
 		return agentDropDownList;
@@ -996,9 +1019,14 @@ public class ProfileDeviceAction extends SwitchValidatorAction {
 			if (agentId != null) {
 				Agent agent = utilService.findAgent((Long.parseLong(agentId)));
 				existing.setAgent(agent);
-				
-				if(existing.getExporter() == null || ObjectUtil.isEmpty(existing.getExporter())){
-					ExporterRegistration ex = utilService.findExportRegById(agent.getExporter().getId());
+
+				if (existing.getExporter() == null || ObjectUtil.isEmpty(existing.getExporter())) {
+					ExporterRegistration ex;
+					if (agent.getPackhouse() != null && agent.getPackhouse().getExporter() != null)
+						ex = utilService.findExportRegById(agent.getPackhouse().getExporter().getId());
+					else
+						ex = utilService.findExportRegById(agent.getExporter().getId());
+
 					existing.setExporter(ex);
 				}
 			}

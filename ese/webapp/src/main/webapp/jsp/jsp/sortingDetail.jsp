@@ -32,7 +32,7 @@
 							<s:property value="%{getLocaleProperty('sorting.farmer')}" />
 						</p>
 						<p class="flexItem">
-							<s:property value="sorting.farmCrops.farm.farmer.firstName" />
+							<s:property value="sorting.planting.farmCrops.farm.farmer.firstName" />
 						</p>
 					</div>
 					
@@ -41,7 +41,7 @@
 							<s:property value="%{getLocaleProperty('farmer.fcode')}" />
 						</p>
 						<p class="flexItem">
-							<s:property value="sorting.farmCrops.farm.farmer.farmerId" />
+							<s:property value="sorting.planting.farmCrops.farm.farmer.farmerId" />
 						</p>
 					</div>
 				
@@ -51,7 +51,7 @@
 							<s:property value="%{getLocaleProperty('farmId')}" />
 						</p>
 						<p class="flexItem">
-							<s:property value="sorting.farmCrops.farm.farmCode" />
+							<s:property value="sorting.planting.farmCrops.farm.farmCode" />
 						</p>
 					</div>
 					
@@ -61,7 +61,7 @@
 							<s:property value="%{getLocaleProperty('sorting.farm')}" />
 						</p>
 						<p class="flexItem">
-							<s:property value="sorting.farmCrops.farm.farmName" />
+							<s:property value="sorting.planting.farmCrops.farm.farmName" />
 						</p>
 					</div>
 
@@ -70,7 +70,7 @@
 							<s:property value="%{getLocaleProperty('sorting.block')}" />
 						</p>
 						<p class="flexItem">
-							<s:property value="sorting.farmCrops.blockName" />
+							<s:property value="sorting.planting.farmCrops.blockName" />
 						</p>
 					</div>
 					
@@ -79,7 +79,7 @@
 							<s:property value="%{getLocaleProperty('sorting.blockId')}" />
 						</p>
 						<p class="flexItem">
-							<s:property value="sorting.farmCrops.blockId" />
+							<s:property value="sorting.planting.farmCrops.blockId" />
 						</p>
 					</div>
 					
@@ -124,7 +124,7 @@
 							<s:property value="%{getLocaleProperty('sorting.cCenter')}" />
 						</p>
 						<p class="flexItem">
-							<s:property value="sorting.farmCrops.farm.farmName" />
+							<s:property value="sorting.planting.farmCrops.farm.farmName" />
 						</p>
 					</div>
 					<div class="dynamic-flexItem">
@@ -166,7 +166,8 @@
 										value="%{getLocaleProperty('sorting.truckType')}" />
 								</p>
 								<p class="flexItem">
-									<s:property value="sorting.truckType" />
+									<%-- <s:property value="sorting.truckType" /> --%>
+									<s:property value='%{getCatlogueValueByCodeArray(sorting.truckType)}' />
 								</p>
 							</div>
 							<div class="dynamic-flexItem ">
@@ -198,6 +199,41 @@
 							</div>
 					
 				</div>
+				
+				<s:if test='#session.isAdmin =="true"'>
+											<s:iterator value="ex" var="innerList">
+												<div class="aPanel audit_history">
+													<div class="aTitle">
+										<h2>
+											<s:if test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+													<s:property value="#innerList[0].createdUser" />
+											</s:if>
+											<s:else>
+													 <s:property value="#innerList[0].updatedUser" />
+											 </s:else>
+											-
+											<s:date name="#innerList[1].revisionDate" format="dd/MM/yyyy hh:mm:ss" />
+											-
+											<s:property value="%{getLocaleProperty('default'+#innerList[2])}" />
+											<div class="pull-right">
+												<a class="aCollapse "
+													href="#<s:property value="#innerList[1].id" />"><i
+													class="fa fa-chevron-right"></i></a>
+											</div>
+										</h2>
+									</div>
+													<div class="aContent dynamic-form-con"
+														id="<s:property value="#innerList[1].id" />">
+
+														<jsp:include page='/jsp/jsp/auditsortingDetail.jsp' />
+
+													</div>
+
+
+												</div>
+											</s:iterator>
+										</s:if>
+				
 			</div>
 			<div class="flex-layout flexItemStyle">
 				<div class="margin-top-10">

@@ -77,6 +77,8 @@
 				<beans:entry key="406" value-ref="packingAdapter" />
 				<beans:entry key="407" value-ref="shipmentAdapter" />
 				<beans:entry key="358" value-ref="passwordChangeAdapter" />
+				<beans:entry key="318" value-ref="productTransferAdapter" />
+				<beans:entry key="489" value-ref="productReceptionAdapter" />
 			</beans:map>
 		</beans:property>
 	</beans:bean>

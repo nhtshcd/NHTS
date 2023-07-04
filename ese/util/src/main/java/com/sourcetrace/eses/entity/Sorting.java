@@ -10,18 +10,18 @@ import javax.persistence.Table;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name="sorting")
 @Getter
 @Setter
+@Audited
 public class Sorting extends ParentEntity {
 
 	private static final long serialVersionUID = 1L;
 	
-	@ManyToOne
-	@JoinColumn(name = "FARM_CROPS_ID")
-	private FarmCrops farmCrops;
+	
 	
 	@Column(name="HARVEST_QTY")
 	private Double qtyHarvested;

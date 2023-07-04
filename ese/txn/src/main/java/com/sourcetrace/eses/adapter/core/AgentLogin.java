@@ -142,7 +142,8 @@ public class AgentLogin implements ITxnAdapter {
 		resp.put(TxnEnrollmentProperties.AGENT_NAME,
 				(ObjectUtil.isEmpty(agent) && ObjectUtil.isEmpty(agent.getPersonalInfo()) ? ""
 						: agent.getPersonalInfo().getAgentName()));
-		resp.put(TransactionProperties.IS_FIRST_LOGIN, agent.getEnrollId()==null || StringUtil.isEmpty( agent.getEnrollId()) ? "1" :agent.getEnrollId() );
+		resp.put(TransactionProperties.IS_FIRST_LOGIN,
+				agent.getEnrollId() == null || StringUtil.isEmpty(agent.getEnrollId()) ? "1" : agent.getEnrollId());
 		resp.put(TransactionProperties.DEVICE_ID, device.getCode());
 		resp.put(TransactionProperties.SYNC_TIME_STAMP, sdf.format(new Date()));
 		resp.put(TransactionProperties.DISPLAY_TS_FORMAT, DateUtil.TXN_DATE_TIME);
@@ -155,19 +156,9 @@ public class AgentLogin implements ITxnAdapter {
 		resp.put(TransactionProperties.AGENT_TYPE,
 				(ObjectUtil.isEmpty(agent) && ObjectUtil.isEmpty(agent.getAgentType()) ? ""
 						: agent.getAgentType().getCode()));
-		resp.put(TransactionProperties.EXPORTER_NAME,
-				agent.getExporter().getName() == null ? "" : agent.getExporter().getName());
-		resp.put(TransactionProperties.EXPORTER_CODE,
-				agent.getExporter().getId() == null ? "" : agent.getExporter().getId());
-		List<ProcurementVariety> cropCodes = farmerService
-				.findProcurementVarietyByIds(StringUtil.convertStringList(agent.getExporter().getFarmerHaveFarms()));
-		resp.put(TxnEnrollmentProperties.VARIETY_CODE,
-				cropCodes != null ? cropCodes.stream().map(u -> u.getCode()).collect(Collectors.joining(",")) : "");
-		List<Long> gradeIds = StringUtil.convertStringList(agent.getExporter().getScattered());
-		List<ProcurementGrade> gradeLis = cropCodes.stream().flatMap(u -> u.getProcurementGrades().stream())
-				.filter(u -> gradeIds.contains(u.getId())).collect(Collectors.toList());
-		resp.put(TxnEnrollmentProperties.GRADE_CODE,
-				gradeLis != null ? gradeLis.stream().map(u -> u.getCode()).collect(Collectors.joining(",")) : "");
+		List<ProcurementVariety> cropCodes;
+		List<Long> gradeIds;
+
 		if (agent.getPackhouse() != null) {
 			resp.put(TransactionProperties.PACKHOUSE_ID,
 					agent.getPackhouse().getId() == null ? "" : agent.getPackhouse().getId());
@@ -175,19 +166,31 @@ public class AgentLogin implements ITxnAdapter {
 					agent.getPackhouse().getName() == null ? "" : agent.getPackhouse().getName());
 			resp.put(TransactionProperties.PACKHOUSE_CODE,
 					agent.getPackhouse().getCode() == null ? "" : agent.getPackhouse().getCode());
-			resp.put(TransactionProperties.EXPORTER_LICENSE,
-					agent.getExporter().getRefLetterNo() == null ? "" : agent.getExporter().getRefLetterNo());
+			resp.put(TransactionProperties.EXPORTER_LICENSE, agent.getPackhouse().getExporter().getRefLetterNo() == null
+					? "" : agent.getPackhouse().getExporter().getRefLetterNo());
 			resp.put(TransactionProperties.EXPORTER_EXP,
-					agent.getExporter().getExpireDate() == null ? "" : DateUtil.convertDateToString(agent.getExporter().getExpireDate(), DateUtil.TXN_DATE_TIME));
-			
-			if(agent.getExporter().getStatus() != null && !StringUtil.isEmpty(agent.getExporter().getStatus()) && agent.getExporter().getIsActive() != null && !StringUtil.isEmpty(agent.getExporter().getIsActive())){
-				if(agent.getExporter().getStatus().equals(1) && agent.getExporter().getIsActive().equals(1l)){
-				resp.put(TransactionProperties.EXPORTER_STATUS,"1");
-				}else{
-					resp.put(TransactionProperties.EXPORTER_STATUS,"0");
+					agent.getPackhouse().getExporter().getExpireDate() == null ? ""
+							: DateUtil.convertDateToString(agent.getPackhouse().getExporter().getExpireDate(),
+									DateUtil.TXN_DATE_TIME));
+			resp.put(TransactionProperties.EXPORTER_NAME, agent.getPackhouse().getExporter().getName() == null ? ""
+					: agent.getPackhouse().getExporter().getName());
+			resp.put(TransactionProperties.EXPORTER_CODE, agent.getPackhouse().getExporter().getId() == null ? ""
+					: agent.getPackhouse().getExporter().getId());
+			cropCodes = farmerService.findProcurementVarietyByIds(
+					StringUtil.convertStringList(agent.getPackhouse().getExporter().getFarmerHaveFarms()));
+			gradeIds = StringUtil.convertStringList(agent.getPackhouse().getExporter().getScattered());
+			if (agent.getPackhouse().getExporter().getStatus() != null
+					&& !StringUtil.isEmpty(agent.getPackhouse().getExporter().getStatus())
+					&& agent.getPackhouse().getExporter().getIsActive() != null
+					&& !StringUtil.isEmpty(agent.getPackhouse().getExporter().getIsActive())) {
+				if (agent.getPackhouse().getExporter().getStatus().equals(1)
+						&& agent.getPackhouse().getExporter().getIsActive().equals(1l)) {
+					resp.put(TransactionProperties.EXPORTER_STATUS, "1");
+				} else {
+					resp.put(TransactionProperties.EXPORTER_STATUS, "0");
 				}
-			}else{
-				resp.put(TransactionProperties.EXPORTER_STATUS,"0");
+			} else {
+				resp.put(TransactionProperties.EXPORTER_STATUS, "0");
 			}
 
 		} else {
@@ -197,7 +200,21 @@ public class AgentLogin implements ITxnAdapter {
 			resp.put(TransactionProperties.EXPORTER_LICENSE, "");
 			resp.put(TransactionProperties.EXPORTER_EXP, "");
 			resp.put(TransactionProperties.EXPORTER_STATUS, "");
+			resp.put(TransactionProperties.EXPORTER_NAME,
+					agent.getExporter().getName() == null ? "" : agent.getExporter().getName());
+			resp.put(TransactionProperties.EXPORTER_CODE,
+					agent.getExporter().getId() == null ? "" : agent.getExporter().getId());
+			cropCodes = farmerService.findProcurementVarietyByIds(
+					StringUtil.convertStringList(agent.getExporter().getFarmerHaveFarms()));
+			gradeIds = StringUtil.convertStringList(agent.getExporter().getScattered());
 		}
+		resp.put(TxnEnrollmentProperties.VARIETY_CODE,
+				cropCodes != null ? cropCodes.stream().map(u -> u.getCode()).collect(Collectors.joining(",")) : "");
+
+		List<ProcurementGrade> gradeLis = cropCodes.stream().flatMap(u -> u.getProcurementGrades().stream())
+				.filter(u -> gradeIds.contains(u.getId())).collect(Collectors.toList());
+		resp.put(TxnEnrollmentProperties.GRADE_CODE,
+				gradeLis != null ? gradeLis.stream().map(u -> u.getCode()).collect(Collectors.joining(",")) : "");
 
 		resp.put(TransactionProperties.TARE_WEIGHT, preferences.getPreferences().get(ESESystem.TARE_WEIGHT));
 		String seasonCode = utilService.findCurrentSeasonCodeByBranchId(branchId);
@@ -225,34 +242,30 @@ public class AgentLogin implements ITxnAdapter {
 				eseSystem.getPreferences().get(ESESystem.AREA_TYPE) != null
 						&& !StringUtil.isEmpty(eseSystem.getPreferences().get(ESESystem.AREA_TYPE))
 								? eseSystem.getPreferences().get(ESESystem.AREA_TYPE) : "");
-		
-		
-		HttpServletRequest httserreq = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+
+		HttpServletRequest httserreq = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+				.getRequest();
 		String url = httserreq.getRequestURL().toString();
 		try {
-		URL aURL;
-		aURL = new URL(url);
-		String path = aURL.getPath();
-		String fullPath[] = path.split("/", 0);
-		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() +"/"+ "nhts/traceabilityViewReport_list.action?layoutType=publiclayout&batchNo=";
-		resp.put(TxnEnrollmentProperties.SHIPMENT_URL, urll);
-		}catch (MalformedURLException e) {
-			e.printStackTrace();
-		}
-		
-		/*try {
-			String url = request.getRequestURL().toString();
 			URL aURL;
 			aURL = new URL(url);
 			String path = aURL.getPath();
 			String fullPath[] = path.split("/", 0);
-			String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
-			System.out.println(urll);
+			String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/"
+					+ "nhts/traceabilityViewReport_list.action?layoutType=publiclayout&batchNo=";
+			resp.put(TxnEnrollmentProperties.SHIPMENT_URL, urll);
 		} catch (MalformedURLException e) {
 			e.printStackTrace();
-		}*/
-		
-		
+		}
+
+		/*
+		 * try { String url = request.getRequestURL().toString(); URL aURL; aURL
+		 * = new URL(url); String path = aURL.getPath(); String fullPath[] =
+		 * path.split("/", 0); String urll = aURL.getProtocol() + "://" +
+		 * aURL.getAuthority() + "/" + fullPath[1]; System.out.println(urll); }
+		 * catch (MalformedURLException e) { e.printStackTrace(); }
+		 */
+
 		/*
 		 * resp.put(TransactionProperties.WAREHOUSE_ID,
 		 * (ObjectUtil.isEmpty(agent) ||
@@ -389,13 +402,12 @@ public class AgentLogin implements ITxnAdapter {
 		Head head = (Head) reqData.get(TransactionProperties.HEAD);
 		String agentId = head.getAgentId();
 		String serialNo = head.getSerialNo();
-		
+
 		if (head.getAgentId().equals("nhtstest123")) {
 
 			return formEmptyResp();
 		}
 
-		
 		Device device = utilService.findDeviceBySerialNumber(serialNo);
 		Agent agent = utilService.findAgentByProfileAndBranchId(agentId, device.getBranchId());
 		Map resp = respMap(reqData, agent, device, true);
@@ -415,8 +427,13 @@ public class AgentLogin implements ITxnAdapter {
 		String mobileModel = (String) reqData.get(TxnEnrollmentProperties.MOBILE_MODEL);
 		device.setAndroidVer(androidVer);
 		device.setMobileModel(mobileModel);
-		if(device.getExporter() == null || ObjectUtil.isEmpty(device.getExporter())){
-			ExporterRegistration ex = utilService.findExportRegById(agent.getExporter().getId());
+		if (device.getExporter() == null || ObjectUtil.isEmpty(device.getExporter())) {
+			ExporterRegistration ex;
+			if (agent.getPackhouse() != null && agent.getPackhouse().getExporter() != null
+					&& !ObjectUtil.isEmpty(agent.getPackhouse().getExporter()))
+				ex = utilService.findExportRegById(agent.getPackhouse().getExporter().getId());
+			else
+				ex = utilService.findExportRegById(agent.getExporter().getId());
 			device.setExporter(ex);
 		}
 		utilService.updateDevice(device);
@@ -515,7 +532,7 @@ public class AgentLogin implements ITxnAdapter {
 		utilService.editAgent(agent);
 		return farmerIdCurrIdSeq + "|" + farmerAllotResIdSeq + "|" + farmerAllotIdLimit;
 	}
-	
+
 	private Map formEmptyResp() {
 		Map resp = new LinkedHashMap<>();
 		Map groupResponse = new LinkedHashMap<>();
@@ -548,7 +565,7 @@ public class AgentLogin implements ITxnAdapter {
 		resp.put(TransactionProperties.CURRENCY, "");
 		resp.put(TransactionProperties.AREA_TYPE, "");
 		resp.put(TxnEnrollmentProperties.SAMITHI_LIST, "");
-		resp.put(TxnEnrollmentProperties.FARMER_DOWNLOAD_REVISION_NO,0);
+		resp.put(TxnEnrollmentProperties.FARMER_DOWNLOAD_REVISION_NO, 0);
 		resp.put(TxnEnrollmentProperties.FARM_DOWNLOAD_REVISION_NO, 0);
 		resp.put(TxnEnrollmentProperties.FARM_CROPS_DOWNLOAD_REVISION_NO, 0);
 		resp.put(TxnEnrollmentProperties.CUSTOMER_PROJECT_REVISION_NO, 0);
@@ -581,16 +598,18 @@ public class AgentLogin implements ITxnAdapter {
 		resp.put(TxnEnrollmentProperties.REMOTE_APK_VERSION, "");
 		resp.put(TxnEnrollmentProperties.REMOTE_CONFIG_VERSION, "");
 		resp.put(TxnEnrollmentProperties.REMOTE_DB_VERSION, "");
-		HttpServletRequest httserreq = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes()).getRequest();
+		HttpServletRequest httserreq = ((ServletRequestAttributes) RequestContextHolder.getRequestAttributes())
+				.getRequest();
 		String url = httserreq.getRequestURL().toString();
 		try {
-		URL aURL;
-		aURL = new URL(url);
-		String path = aURL.getPath();
-		String fullPath[] = path.split("/", 0);
-		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() +"/"+ "nhts/traceabilityViewReport_list.action?layoutType=publiclayout&batchNo=";
-		resp.put(TxnEnrollmentProperties.SHIPMENT_URL, urll);
-		}catch (MalformedURLException e) {
+			URL aURL;
+			aURL = new URL(url);
+			String path = aURL.getPath();
+			String fullPath[] = path.split("/", 0);
+			String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/"
+					+ "nhts/traceabilityViewReport_list.action?layoutType=publiclayout&batchNo=";
+			resp.put(TxnEnrollmentProperties.SHIPMENT_URL, urll);
+		} catch (MalformedURLException e) {
 			e.printStackTrace();
 		}
 
@@ -613,11 +632,10 @@ public class AgentLogin implements ITxnAdapter {
 		resp.put(TransactionProperties.WAREHOUSEDOWNLOAD_SEASON, "");
 		groupResponse.put(TxnEnrollmentProperties.AGENT_LOGIN_RESP_KEY, resp);
 		groupEmptyDownloadTransactionsJson(groupResponse);
-	
-		
+
 		return groupResponse;
 	}
-	
+
 	private void groupEmptyDownloadTransactionsJson(Map res) {
 
 		if (!ObjectUtil.isEmpty(txnMap)) {

@@ -120,7 +120,15 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 	@Getter
 	@Setter
 	private String harvestday;
+	
+	@Getter
+	@Setter
+	private String cropHScode;
 
+	@Getter
+	@Setter
+	private String crop1;
+	
 	/**
 	 * @see com.sourcetrace.esesw.view.SwitchAction#data()
 	 */
@@ -140,9 +148,9 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 		ProcurementVariety procurementVariety = new ProcurementVariety();
 		ProcurementProduct procurementProduct = new ProcurementProduct();
 
-		if (!StringUtil.isEmpty(searchRecord.get("code"))) {
+		/*if (!StringUtil.isEmpty(searchRecord.get("code"))) {
 			filter.setCode(searchRecord.get("code").trim());
-		}
+		}*/
 
 		if (!StringUtil.isEmpty(searchRecord.get("gradeName"))) {
 			filter.setName(searchRecord.get("gradeName").trim());
@@ -152,6 +160,10 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 			procurementVariety.setName(searchRecord.get("procurementVarietyId"));
 			filter.setProcurementVariety(procurementVariety);
 
+		}
+		
+		if (!StringUtil.isEmpty(searchRecord.get("cropHScode"))) {
+			filter.setCropHScode(searchRecord.get("cropHScode").trim());
 		}
 
 		if (!StringUtil.isEmpty(searchRecord.get("gradePrice"))) {
@@ -203,7 +215,7 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 		JSONObject jsonObject = new JSONObject();
 		JSONObject actionOnj = new JSONObject();
 		JSONObject rows = new JSONObject();
-		jsonObject.put("code", "<font color=\"#0000FF\" style=\"cursor:pointer;\">" + variety.getCode() + "</font>");
+		/*jsonObject.put("code", "<font color=\"#0000FF\" style=\"cursor:pointer;\">" + variety.getCode() + "</font>");*/
 
 		if (!ObjectUtil.isEmpty(variety.getProcurementVariety().getProcurementProduct())) {
 			jsonObject.put("prodName", !ObjectUtil.isEmpty(variety.getProcurementVariety().getProcurementProduct())
@@ -212,7 +224,7 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 			jsonObject.put("prodName", !ObjectUtil.isEmpty(variety.getProcurementVariety().getProcurementProduct())
 					? variety.getProcurementVariety().getProcurementProduct().getName() : "");
 		}
-
+		
 		if (!ObjectUtil.isEmpty(variety.getProcurementVariety())) {
 			jsonObject.put("variety", !ObjectUtil.isEmpty(variety.getProcurementVariety())
 					? variety.getProcurementVariety().getName() : "");
@@ -221,7 +233,9 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 					? variety.getProcurementVariety().getName() : "");
 		}
 		jsonObject.put("name", variety.getName());
-		actionOnj.put("code", variety.getCode());
+		jsonObject.put("cropHScode", variety.getCropHScode());
+		actionOnj.put("cropHScode", variety.getCropHScode());
+		/*actionOnj.put("code", variety.getCode());*/
 		actionOnj.put("name", variety.getName());
 		actionOnj.put("variety", variety.getProcurementVariety().getId());
 		actionOnj.put("crop", variety.getProcurementVariety().getProcurementProduct().getId());
@@ -233,6 +247,13 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 		jsonObject.put("harvestDays", variety.getHarvestDays());
 
 		actionOnj.put("id", variety.getId());
+		if (request.getSession().getAttribute("roleId") != null
+				&& request.getSession().getAttribute("roleId").equals(2L)) {
+		jsonObject.put("audit","<button class='fa fa-info' aria-hidden='true' onclick='detailPopupG(\""
+				 + variety.getId() + "\")'></button>");
+		}else{
+			jsonObject.put("audit","No Access");
+		}
 		jsonObject.put("edit",
 				"<a href='#' onclick='ediFunctionG(\"" + StringEscapeUtils.escapeJavaScript(actionOnj.toString())
 						+ "\")' class='fa fa-edit' title='Edit' ></a>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a href='#' onclick='deleteGrade(\""
@@ -263,9 +284,10 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 		getJsonObject().clear();
 		if (!StringUtil.isEmpty(gradeName)) {
 			procurementGrade = new ProcurementGrade();
-			procurementGrade.setCode(gradeCode);
+			procurementGrade.setCode(idGenerator.getProcurementGradeIdSeq());
 			procurementGrade.setName(gradeName);
 			procurementGrade.setCropCycle(ccycle);
+			procurementGrade.setCropHScode(cropHScode);
 			procurementGrade.setYield(yieldkg);
 			procurementGrade.setHarvestDays(harvestday);
 			procurementGrade.setCreatedUser(getUsername());
@@ -316,7 +338,7 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 		if (id != null) {
 			ProcurementGrade temp = utilService.findProcurementGradeById(Long.valueOf(id));
 
-			if (!StringUtil.isEmpty(gradeName)) {
+			if (!StringUtil.isEmpty(gradeName) && !StringUtil.isEmpty(cropHScode)) {
 
 				/*
 				 * ProcurementGradePricingHistory procurementGradePricingHistory
@@ -330,6 +352,7 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 						utilService.findProcurementVarietyById(Long.valueOf(this.getProcurementVarietyId())));
 				temp.setName(gradeName);
 				temp.setCropCycle(ccycle);
+				temp.setCropHScode(cropHScode);
 				temp.setYield(yieldkg);
 				temp.setHarvestDays(harvestday);
 				temp.setUpdatedUser(getUsername());
@@ -471,8 +494,7 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 
 			if (!ObjectUtil.isEmpty(varietyList)) {
 				for (Object[] variety : varietyList) {
-					varietyArr.add(getJSONObject(String.valueOf(variety[0]),
-							String.valueOf(variety[1]) + " - " + String.valueOf(variety[2])));
+					varietyArr.add(getJSONObject(String.valueOf(variety[0]),String.valueOf(variety[2])));
 				}
 			}
 			sendAjaxResponse(varietyArr);
@@ -486,5 +508,37 @@ public class ProcurementGradeAction extends SwitchValidatorAction {
 		jsonObject.put("id", id);
 		jsonObject.put("name", name);
 		return jsonObject;
+	}
+	
+	public String populateDetail() {
+		if(id!=null) {
+			crop1="grade";
+			List<Object[]> Datas = farmerService.findProcurementProductDetailById(Long.valueOf(id),crop1);
+			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+
+			JSONObject jsonObj = new JSONObject();
+			previousObje = null;
+			Datas.stream().forEach(da -> {
+				JSONArray jsonArr = new JSONArray();
+
+				if (previousObje == null || !ObjectUtil.isEquals(da, previousObje)) {
+
+					for (i = 0; i < da.length; i++) {
+						if (da[i] != null) {
+							jsonArr.add(i, da[i].toString());
+						} else {
+							jsonArr.add(i, "");
+						}
+					}
+					jsonObj.put(j, jsonArr);
+					j++;
+					previousObje = da;
+				}
+
+			});
+			printAjaxResponse(jsonObj, "text/html");
+
+		} 
+		return null;
 	}
 }

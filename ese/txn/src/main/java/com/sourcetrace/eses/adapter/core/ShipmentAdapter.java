@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,6 +12,7 @@ import org.springframework.stereotype.Component;
 
 import com.sourcetrace.eses.entity.CityWarehouse;
 import com.sourcetrace.eses.entity.Customer;
+import com.sourcetrace.eses.entity.DocumentUpload;
 import com.sourcetrace.eses.entity.FarmCrops;
 import com.sourcetrace.eses.entity.Packhouse;
 import com.sourcetrace.eses.entity.Planting;
@@ -38,6 +40,8 @@ public class ShipmentAdapter implements ITxnAdapter {
 
 	@Autowired
 	private IUtilService utilService;
+	//String img = null;
+	String img = null;
 
 	@SuppressWarnings({ "unused", "unchecked" })
 	@Override
@@ -50,18 +54,20 @@ public class ShipmentAdapter implements ITxnAdapter {
 		String consignNo = (String) reqData.get("consignNo");
 		String totalQty = (String) reqData.get("totalQty");
 		String traceCode = (String) reqData.get("traceCode");
+	/*	String shipmentDestination = (String) reqData.get("shipmentDestination");*/
+		List<String> shipmentImg = (List<String>) reqData.get("shipmentDocuments");
 
 		String buyer = (String) reqData.get("buyer");
 
 		Shipment shipment = new Shipment();
-		
-		Shipment pi = (Shipment) farmerService.findObjectById(
-				" from Shipment fc where fc.msgNo=?  and fc.status<>2", new Object[] { head.getMsgNo() });
+		 img = null;
+
+		Shipment pi = (Shipment) farmerService.findObjectById(" from Shipment fc where fc.msgNo=?  and fc.status<>2",
+				new Object[] { head.getMsgNo() });
 		if (pi != null) {
 			return insResponse;
 		}
-		
-		
+
 		shipment.setShipmentDetails(new HashSet<>());
 		ArrayList jsonArr = (ArrayList) reqData.get("shipmentList");
 		if (jsonArr != null && jsonArr.size() > 0) {
@@ -86,36 +92,34 @@ public class ShipmentAdapter implements ITxnAdapter {
 					if (fc == null) {
 						throw new TxnFault(ITxnErrorCodes.FARM_CROPS_DOES_NOT_EXIST);
 					}
-					/*if (QRCodeUnq !=null && !StringUtil.isEmpty(QRCodeUnq)) {
-						shipmentDetails.setQrCodeId(QRCodeUnq);
-					}else{
-						shipmentDetails.setQrCodeId(head.getMsgNo());
-					}*/
-					
-					
+					/*
+					 * if (QRCodeUnq !=null && !StringUtil.isEmpty(QRCodeUnq)) {
+					 * shipmentDetails.setQrCodeId(QRCodeUnq); }else{
+					 * shipmentDetails.setQrCodeId(head.getMsgNo()); }
+					 */
 
-					
 					CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
 							"FROM CityWarehouse ct  where ct.planting.id=? and ct.batchNo=? and ct.stockType=? and ct.isDelete=0",
-							new Object[] { fc.getId(), resBatchNo.trim(), CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
+							new Object[] { fc.getId(), resBatchNo.trim(),
+									CityWarehouse.Stock_type.PACKING_STOCK.ordinal() });
 					shipmentDetails.setCityWarehouse(cw);
-					
-					if (cw !=null && !StringUtil.isEmpty(cw.getBatchNo())) {
+
+					if (cw != null && !StringUtil.isEmpty(cw.getBatchNo())) {
 						shipmentDetails.setQrCodeId(String.valueOf(DateUtil.getRevisionNumber()));
 						ShipmentDetails pckinc = (ShipmentDetails) farmerService.findObjectById(
 								"FROM ShipmentDetails where shipment.status!=2 and cityWarehouse.id=?",
-								new Object[] { Long.valueOf(cw.getId())});
-						if(pckinc != null && !StringUtil.isEmpty(pckinc)){
+								new Object[] { Long.valueOf(cw.getId()) });
+						if (pckinc != null && !StringUtil.isEmpty(pckinc)) {
 							shipmentDetails.setStatus(0);
-						}else{
+						} else {
 							shipmentDetails.setStatus(1);
 						}
-						
-					}else{
+
+					} else {
 						shipmentDetails.setQrCodeId(String.valueOf(DateUtil.getRevisionNumber()));
 						shipmentDetails.setStatus(1);
 					}
-					
+
 					shipmentDetails.setPackingUnit(packUnit);
 					shipmentDetails.setPackingQty(packQty);
 					shipmentDetails.setShipment(shipment);
@@ -134,37 +138,60 @@ public class ShipmentAdapter implements ITxnAdapter {
 
 		Customer customer = (Customer) farmerService.findObjectById("FROM Customer c WHERE c.customerId=?",
 				new Object[] { buyer });
-		
-		
 
 		shipment.setCustomer(customer);
 
 		shipment.setBranchId(head.getBranchId());
-		
+
 		shipment.setShipmentDate(DateUtil.convertStringToDate(packDate, DateUtil.DATABASE_DATE_FORMAT));
 		shipment.setPackhouse(ph);
 		shipment.setStatus(1);
-		shipment.getShipmentDetails().stream().filter(uu -> uu != null && uu.getStatus() !=null && uu.getStatus().equals(0)).forEach(uu -> {
-			shipment.setStatus(4);
-		});
-		
-		if (shipment.getStatus() != null  && !StringUtil.isEmpty(shipment.getStatus()) && !shipment.getStatus().equals(4)) {
-			Shipment ship = (Shipment) farmerService.findObjectById("FROM Shipment s WHERE s.pConsignmentNo=? and s.status!=2",new Object[] { consignNo });
-			
-			if (ship != null  && !StringUtil.isEmpty(ship.getId())) {
+		shipment.setShipmentDestination(customer.getCountry());
+		shipment.getShipmentDetails().stream()
+				.filter(uu -> uu != null && uu.getStatus() != null && uu.getStatus().equals(0)).forEach(uu -> {
+					shipment.setStatus(4);
+				});
+
+		if (shipment.getStatus() != null && !StringUtil.isEmpty(shipment.getStatus())
+				&& !shipment.getStatus().equals(4)) {
+			Shipment ship = (Shipment) farmerService.findObjectById(
+					"FROM Shipment s WHERE s.pConsignmentNo=? and s.status!=2", new Object[] { consignNo });
+
+			if (ship != null && !StringUtil.isEmpty(ship.getId())) {
 				shipment.setStatus(4);
-			}else{
+			} else {
 				Packhouse packExp = (Packhouse) farmerService.findObjectById(
 						"FROM Packhouse f where f.id=? and f.exporter.status=1 and f.exporter.isActive=1 and f.status=1  ORDER BY f.name ASC",
 						new Object[] { Long.valueOf(packhouse) });
-				if(packExp == null || StringUtil.isEmpty(packExp)){
+				if (packExp == null || StringUtil.isEmpty(packExp)) {
 					shipment.setStatus(3);
-				}else{
+				} else {
 					shipment.setStatus(1);
 				}
 			}
-			}
-		
+		}
+
+		if (shipmentImg != null && !StringUtil.isEmpty(shipmentImg)) {
+			int len = shipmentImg.size();
+
+			shipmentImg.stream().filter(a -> a != null && !StringUtil.isEmpty(a)).forEach(a -> {
+				DocumentUpload dc = (DocumentUpload) farmerService.findObjectById("from DocumentUpload where refCode=?",
+						new Object[] { a.toString() });
+				if (dc != null) {
+					if (img != null)
+						img = img + "," + dc.getId().toString();
+					else
+						img = dc.getId().toString();
+				}
+			});
+			/*
+			 * for (int i = 0; i <= len; i++) { DocumentUpload dc =
+			 * (DocumentUpload) farmerService.
+			 * findObjectById("from DocumentUpload where refCode=?", new
+			 * Object[] { shipmentImg[i].toString() }); img = img + ","; }
+			 */
+			shipment.setShipmentSupportingFiles(img);
+		}
 		shipment.setPConsignmentNo(consignNo);
 		shipment.setTotalShipmentQty(totalQty != null && !StringUtil.isEmpty(totalQty) ? Double.valueOf(totalQty) : 0d);
 		shipment.setCreatedDate(new Date());

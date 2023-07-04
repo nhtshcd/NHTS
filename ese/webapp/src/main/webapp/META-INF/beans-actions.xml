@@ -246,5 +246,12 @@
 		scope="prototype" parent="eseAction">
 		<property name="reportService" ref="plantingListService" />
 	</bean>
+	
+	  <bean name="productTransferAction" class="com.sourcetrace.eses.action.ProductTransferAction"
+		scope="prototype" parent="eseAction">
+	 </bean>
+	  <bean name="productReceptionAction" class="com.sourcetrace.eses.action.ProductReceptionAction"
+		scope="prototype" parent="eseAction">
+	</bean>
 
 </beans>

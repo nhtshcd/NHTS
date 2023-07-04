@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 
 import com.sourcetrace.eses.entity.Agent;
 import com.sourcetrace.eses.entity.CityWarehouse;
+import com.sourcetrace.eses.entity.ExporterRegistration;
 import com.sourcetrace.eses.interceptor.ITxnErrorCodes;
 import com.sourcetrace.eses.property.TransactionProperties;
 import com.sourcetrace.eses.property.TxnEnrollmentProperties;
@@ -51,8 +52,9 @@ public class FarmCropsDownload implements ITxnAdapter {
 	List<java.lang.Object[]> farmICSConversionList = new ArrayList<>();
 	Map<Long, List<java.lang.Object[]>> farmObject = new HashMap<>();
 	Map<Long, List<java.lang.Object[]>> farmCropsObject = new HashMap<>();
-	
+
 	private static final DecimalFormat df = new DecimalFormat("0.00");
+
 	@SuppressWarnings("unchecked")
 	@Override
 	public Map<?, ?> processJson(Map<?, ?> reqData) {
@@ -70,19 +72,30 @@ public class FarmCropsDownload implements ITxnAdapter {
 
 		Agent ag = utilService.findAgentByAgentId(agentId);
 		List farmerCollection = new ArrayList<>();
-		if (ag != null && ag.getExporter() != null) {
+		if (ag != null && (ag.getExporter() != null || ag.getPackhouse().getExporter() != null)) {
+			ExporterRegistration ex;
+			if(ag.getPackhouse()!=null &&ag.getPackhouse().getExporter()!=null &&!ObjectUtil.isEmpty(ag.getPackhouse().getExporter())){
+				ex=ag.getPackhouse().getExporter();
+			}else
+				ex=ag.getExporter();
 			farmCropsList = (List<Object[]>) farmerService.listObjectById(
 					"select f.id,f.farmCrops.blockId,f.farmCrops.blockName,f.plantingDate,f.farmCrops.farm.farmCode,f.farmCrops.farm.farmer.farmerId,f.status,f.variety.code,f.variety.procurementProduct.code,f.grade.code,f.cultiArea,f.plantingId,f.farmCropId,f.grade.yield,f.revisionNo from Planting f where status in (1,0) and f.farmCrops.exporter.id=? and f.revisionNo > ? order by f.revisionNo desc",
-					new Object[] { ag.getExporter().getId(),Long.valueOf(revisionNo) });
+					new Object[] { ex.getId(),Long.valueOf(revisionNo) });
 			List<Long> fcids =farmCropsList.stream().map(u -> Long.valueOf(u[0].toString().trim())).collect(Collectors.toList());
 			List<Object[]> ibjli= new ArrayList<>();
+			//List<Object[]> plantingWithRecList= new ArrayList<>();
 			
 			if(!StringUtil.isListEmpty(fcids)){
 			ibjli = (List<Object[]>) farmerService.getharvestdateandquantity(CityWarehouse.Stock_type.HARVEST_STOCK.ordinal(),fcids);
+			//plantingWithRecList=(List<Object[]>)farmerService.findListOfScoutingByplantingIds(fcids);
 			}
 			
 			
 			Map<String,Object[]> fcHarData =ibjli.stream().filter(u -> u[0]!=null).collect(Collectors.toMap(u -> u[0].toString().trim(), u ->u));
+			//Map<String,String> plantingWithRecData =plantingWithRecList.stream().filter(u -> u[0]!=null).collect(Collectors.toMap(u -> u[0].toString().trim(), u ->String.valueOf(u[1])));
+			//Map<String,String> plantingWithRecData =plantingWithRecList.stream().filter(u -> u[0]!=null).collect(Collectors.toMap(u -> u[0].toString().trim(), u ->u[1] != null && !StringUtil.isEmpty(u[1]) ? u[1].toString() : ""));
+			//Map<String,Object[]> plantingWithRecData =plantingWithRecList.stream().filter(u -> u[0]!=null).collect(Collectors.toMap(u -> u[0].toString().trim(), u -> u));
+
 			if (!ObjectUtil.isListEmpty(farmCropsList)) {
    
 				farmCropsList.stream().forEach(farm -> {
@@ -115,8 +128,10 @@ public class FarmCropsDownload implements ITxnAdapter {
 					objectMap.put(TxnEnrollmentProperties.GRADE_YIELD,df.format(extyie*yield));
 					objectMap.put(TxnEnrollmentProperties.FARM_CROP_ID,
 							farm[12] != null && !ObjectUtil.isEmpty(farm[12]) ? farm[12].toString().trim() : "");
-					 
-				
+					
+					objectMap.put(TxnEnrollmentProperties.MAX_PHIDATES,
+							farm[0] != null && !ObjectUtil.isEmpty(farm[0]) ? farmerService.findMaximunDateFromSprayingByFarmCropsId(Long.valueOf(farm[0].toString()))!=null ? farmerService.findMaximunDateFromSprayingByFarmCropsId(Long.valueOf(farm[0].toString())) : "" : "");
+					
 					if(fcHarData.containsKey(idd)){
 						Object[] obj =fcHarData.get(idd);
 						objectMap.put("lastHarvetDate",
@@ -135,7 +150,30 @@ public class FarmCropsDownload implements ITxnAdapter {
 						objectMap.put("sortedWeight", "");
 						objectMap.put("lossWeight", "");
 					}
-
+					
+					/*if(plantingWithRecData.containsKey(idd)){
+						//String obj =plantingWithRecData.get(idd);
+						Object[] obj =plantingWithRecData.get(idd);
+						objectMap.put("sctRecommendation",
+								obj != null && !StringUtil.isEmpty(obj)  && obj[1]!=null? obj[1].toString() : "");
+						objectMap.put("scoutDate",
+								obj != null && !StringUtil.isEmpty(obj)&& obj[2]!=null ? obj[2].toString() : "");
+					}else{
+						objectMap.put("sctRecommendation", "");
+						objectMap.put("scoutDate", "");
+					}*/
+					objectMap.put("sctRecommendation","");
+				    objectMap.put("scoutDate","");
+					if(idd != null && !ObjectUtil.isEmpty(idd)){
+						List<Object[]> farmerData = utilService.getScoutingRecomm(idd);
+						if(farmerData != null && !ObjectUtil.isEmpty(farmerData)){
+							farmerData.stream().distinct().forEach(a -> {
+								objectMap.put("sctRecommendation", a != null && !StringUtil.isEmpty(a)  && a[1]!=null? a[1].toString() : "");
+								objectMap.put("scoutDate", a != null && !StringUtil.isEmpty(a)&& a[2]!=null ? a[2].toString() : "");
+							});
+						}
+						}
+					
 					farmerCollection.add(objectMap);
 				});
 
@@ -155,6 +193,5 @@ public class FarmCropsDownload implements ITxnAdapter {
 		return resp;
 		
 	}
-	
 
 }

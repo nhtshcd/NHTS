@@ -302,12 +302,12 @@ function getBlockData(blockid){
 		    var pquantity = jQuery("#pquantity").val();
 		    var date = jQuery("#date").val();
 		    var price = jQuery("#price").val();
+		    var totalprice = jQuery("#totalprice").html();
 		    var rejectWt = jQuery("#rejectWt").val();
 		    var bestBefore = jQuery("#bestBefore").val();
 		    var country = $("#country").html();
 		    var expDaten = $("#expDate").val();
 		    var qrCode = $("#qrCode").val();
-		    
 		    
 		    var createdDatesa;
 		    var packingDatesa;
@@ -416,6 +416,7 @@ function getBlockData(blockid){
 			tableRow+="<td class='pquantity'>"+pquantity+"</td>";
 		 	tableRow+="<td class='rejectWt'>"+rejectWt+"</td>";
 		   	tableRow+="<td class='price'>"+price+"</td>";
+		   	tableRow+="<td class='totalprice'>"+totalprice+"</td>";
 			tableRow+="<td class='bestBefore'>"+bestBefore+"</td>";
 		   	tableRow+="<td class='country'>"+country+"</td>";
 		   	tableRow+="<td class='hide qrCode'>"+qrCode+"</td>";
@@ -446,8 +447,10 @@ function getBlockData(blockid){
 		 
 		$.each(jQuery(id), function(index, value) {
 			var editid = $(this).find(".incoId").val();
-			var farmer = jQuery(this).find(".farmer").text();		
+			var farmer = jQuery(this).find(".farmer").text();	
+			var farmerTxt = jQuery(this).find(".farmer1").text();	
 			var farm = jQuery(this).find(".farm").text();
+			var farmTxt = jQuery(this).find(".farm1").text();
 			var selectedBlock = jQuery(this).find(".selectedBlock").text();
 			
 			var plantingId = $(this).find(".plantingId").text();
@@ -463,6 +466,7 @@ function getBlockData(blockid){
 			var pquantity = jQuery(this).find(".pquantity").text();
 			var hquantity = jQuery(this).find(".hquantity").text();
 			var price = jQuery(this).find(".price").text();
+			var totalprice = jQuery(this).find(".totalprice").text();
 			var rejectWt = jQuery(this).find(".rejectWt").text();
 			var bestBefore = jQuery(this).find(".bestBefore").text();
 			jQuery("#farmer").val(farmer).select2().change();
@@ -472,8 +476,24 @@ function getBlockData(blockid){
 			extcounrty = jQuery(this).find(".extcountry").text();
 			var qrCode = jQuery(this).find(".qrCode").text();
 			
-			 
-			  
+
+			jQuery("#farmer").val(farmer).select2().change();
+						
+						if(jQuery("#farmer").val()==null || jQuery("#farmer").val()==''){
+							 $('#farmer').append(new Option(farmerTxt, farmer));
+							 	$("#farmer").val(farmer);
+							
+						}
+						$("#farmer").trigger("change");
+						 
+jQuery("#farm").val(farm).select2().change();
+						
+						if(jQuery("#farm").val()==null || jQuery("#farm").val()==''){
+							 $('#farm').append(new Option(farmTxt, farm));
+							 	$("#farm").val(farm);
+							
+						}
+						$("#farm").trigger("change");
 			jQuery("#selectedBlock").val(selectedBlock).select2();
 			
 			if(jQuery("#selectedBlock").val()==null || jQuery("#selectedBlock").val()==''){
@@ -502,9 +522,9 @@ function getBlockData(blockid){
 			
 			
 			
-			
 			jQuery("#pquantity").val(pquantity);
 			jQuery("#price").val(price);
+			jQuery("#totalprice").html(totalprice);
 			jQuery("#rejectWt").val(rejectWt);
 			jQuery("#bestBefore").val(bestBefore);
 			jQuery("#qrCode").val(qrCode);
@@ -531,6 +551,7 @@ function getBlockData(blockid){
 			jQuery("#createdDate").html("");
 			jQuery("#pquantity").val("");
 			jQuery("#price").val("");
+			jQuery("#totalprice").html("");
 			jQuery("#rejectWt").val("");
 			jQuery("#qrCode").val("");
 		 	var myDateVal = moment( new Date()).format("DD-MM-YYYY");
@@ -572,7 +593,8 @@ function getBlockData(blockid){
 			productInfo+="#"+jQuery(this).find(".rejectWt").text(); //6
 			productInfo+="#"+jQuery(this).find(".bestBefore").text(); //7
 			productInfo+="#"+jQuery(this).find(".plantingId").text();//8
-			productInfo+="#"+jQuery(this).find(".qrCode").text()+"@"; //9
+			productInfo+="#"+jQuery(this).find(".qrCode").text(); //9
+			productInfo+="#"+jQuery(this).find(".totalprice").text()+"@"; //10
 		});
 		return productInfo;
 	}
@@ -631,6 +653,14 @@ function getBlockData(blockid){
 		}
 	} */
 	
+	function getTotalPrice(){
+		var pquantity = $("#pquantity").val();	
+		var price = $("#price").val();	
+		
+		var total= (pquantity*price).toFixed(2);
+		$("#totalprice").text(total);
+	
+	}
 </script>
 <body>
 
@@ -731,6 +761,9 @@ function getBlockData(blockid){
 									<th><s:property
 											value="%{getLocaleProperty('packing.price')}" /><sup
 										style="color: red;">*</sup></th>
+									<th><s:property
+											value="%{getLocaleProperty('packing.totalprice')}" /><sup
+										style="color: red;">*</sup></th>
 									<%-- <th><s:property
 											value="%{getLocaleProperty('packing.rejectWt')}" /><sup
 										style="color: red;">*</sup></th> --%>
@@ -782,13 +815,16 @@ function getBlockData(blockid){
 									<td><span id="hquantity"></span></td>
 									<td><s:textfield name="pquantity" theme="simple"
 											cssClass="lowercase form-control" id="pquantity"
-											onkeypress="return isDecimal1(event,this)" /></td>
+											onkeypress="return isDecimal1(event,this)"
+											onkeyup="getTotalPrice()" /></td>
 									<td><s:textfield name="rejectWt" theme="simple"
 											cssClass="lowercase form-control" id="rejectWt"
 											onkeypress="return isDecimal1(event,this)" /></td>
 									<td><s:textfield name="price" theme="simple"
 											cssClass="lowercase form-control" id="price"
-											onkeypress="return isDecimal1(event,this)" /></td>
+											onkeypress="return isDecimal1(event,this)"
+											onkeyup="getTotalPrice()" /></td>
+									<td><span id="totalprice"></span></td>
 									<td class="hide"><s:textfield name="expDate"
 											theme="simple" cssClass="lowercase form-control" id="expDate" /></td>
 									<td class="hide"><s:textfield name="qrCode" theme="simple"
@@ -825,9 +861,11 @@ function getBlockData(blockid){
 												value="ctt.id" /></td>
 										<%-- 	<td><s:property value="blockId.farm.farmer.firstName" /></td>
 										<td><s:property value="blockId.farm.farmName" /></td> --%>
-										<td><s:property value="blockId.farm.farmer.firstName" />
-											- <s:property value="blockId.farm.farmer.farmerId" /></td>
-										<td><s:property value="blockId.farm.farmName" /> - <s:property
+										<td class="farmer1"><s:property
+												value="blockId.farm.farmer.firstName" /> - <s:property
+												value="blockId.farm.farmer.farmerId" /></td>
+										<td class="farm1"><s:property
+												value="blockId.farm.farmName" /> - <s:property
 												value="blockId.farm.farmCode" /></td>
 										<td class="exeblocks"><s:property value="blockId.blockId" />
 											- <s:property value="blockId.blockName" /></td>
@@ -859,6 +897,7 @@ function getBlockData(blockid){
 										<td class="pquantity"><s:property value="quantity" /></td>
 										<td class="rejectWt"><s:property value="rejectWt" /></td>
 										<td class="price"><s:property value="price" /></td>
+										<td class="totalprice"><s:property value="totalprice" /></td>
 										<%-- <td class="rejectWt"><s:property value="rejectWt" /></td> --%>
 										<td class="bestBefore"><s:date name="bestBefore"
 												format="%{getGeneralDateFormat()}" /></td>

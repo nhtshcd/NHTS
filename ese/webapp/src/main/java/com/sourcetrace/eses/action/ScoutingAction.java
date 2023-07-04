@@ -133,26 +133,34 @@ public class ScoutingAction extends SwitchAction {
 
 	@Getter
 	@Setter
-	private Blob p1;
-	
-/*	@Getter
-	@Setter
-	protected String selectedCountry;
-	@Getter
-	@Setter
-	protected String selectedState;
-	@Getter
-	@Setter
-	protected String selectedLocality;
-	@Getter
-	@Setter
-	protected String selectedCity;
-	@Getter
-	@Setter
-	protected String selectedVillage;*/
+	private String roleID;
 
-	
-	
+	@Getter
+	@Setter
+	private Blob p1;
+
+	/*
+	 * @Getter
+	 * 
+	 * @Setter protected String selectedCountry;
+	 * 
+	 * @Getter
+	 * 
+	 * @Setter protected String selectedState;
+	 * 
+	 * @Getter
+	 * 
+	 * @Setter protected String selectedLocality;
+	 * 
+	 * @Getter
+	 * 
+	 * @Setter protected String selectedCity;
+	 * 
+	 * @Getter
+	 * 
+	 * @Setter protected String selectedVillage;
+	 */
+
 	/**
 	 * for insertion
 	 * 
@@ -173,18 +181,62 @@ public class ScoutingAction extends SwitchAction {
 				scouting.setReceivedDate(null);
 			}
 
-			if (selectedProduct != null && !StringUtil.isEmpty(selectedProduct)) {
-				FarmCrops fc = utilService.findFarmCropsById(Long.valueOf(selectedProduct.split("~")[0]));
-				scouting.setFarmCrops(fc);
+			/*
+			 * if (selectedProduct != null &&
+			 * !StringUtil.isEmpty(selectedProduct)) { FarmCrops fc =
+			 * utilService.findFarmCropsById(Long.valueOf(selectedProduct.split(
+			 * "~")[0])); scouting.setFarmCrops(fc); }
+			 */
+			if (scouting.getPlanting().getId() != null && !StringUtil.isEmpty(scouting.getPlanting().getId())) {
+				Planting fc = utilService.findPlantingById(Long.valueOf(scouting.getPlanting().getId()));
+				scouting.setPlanting(fc);
 			}
 
-			
 			scouting.setStatus(Scouting.DeleteStatus.NOT_DELETED.ordinal());
 			scouting.setCreatedDate(new Date());
 			scouting.setCreatedUser(getUsername());
 			scouting.setBranchId(getBranchId());
 			scouting.setLatitude(getLatitude());
 			scouting.setLongitude(getLongitude());
+
+			if (scouting.getInsectsObserved() != null && scouting.getInsectsObserved().equals("1")) {
+				scouting.setNameOfInsectsObserved(scouting.getNameOfInsectsObserved() != null
+						&& !StringUtil.isEmpty(scouting.getNameOfInsectsObserved())
+								? scouting.getNameOfInsectsObserved() : "");
+				scouting.setPerOrNumberInsects(scouting.getPerOrNumberInsects() != null
+						&& !StringUtil.isEmpty(scouting.getPerOrNumberInsects()) ? scouting.getPerOrNumberInsects()
+								: "");
+			} else {
+				scouting.setNameOfInsectsObserved("");
+				scouting.setPerOrNumberInsects("");
+			}
+			if (scouting.getDiseaseObserved() != null && scouting.getDiseaseObserved().equals("1")) {
+				scouting.setNameOfDisease(
+						scouting.getNameOfDisease() != null && !StringUtil.isEmpty(scouting.getNameOfDisease())
+								? scouting.getNameOfDisease() : "");
+				scouting.setPerInfection(
+						scouting.getPerInfection() != null && !StringUtil.isEmpty(scouting.getPerInfection())
+								? scouting.getPerInfection() : "");
+			} else {
+				scouting.setNameOfDisease("");
+				scouting.setPerInfection("");
+			}
+			if (scouting.getWeedsObserveds() != null && scouting.getWeedsObserveds().equals("1")) {
+				scouting.setNameOfWeeds(
+						scouting.getNameOfWeeds() != null && !StringUtil.isEmpty(scouting.getNameOfWeeds())
+								? scouting.getNameOfWeeds() : "");
+				scouting.setWeedsPresence(
+						scouting.getWeedsPresence() != null && !StringUtil.isEmpty(scouting.getWeedsPresence())
+								? scouting.getWeedsPresence() : "");
+				scouting.setRecommendations(
+						scouting.getRecommendations() != null && !StringUtil.isEmpty(scouting.getRecommendations())
+								? scouting.getRecommendations() : "");
+			} else {
+				scouting.setNameOfWeeds("");
+				scouting.setWeedsPresence("");
+				scouting.setRecommendations("");
+			}
+
 			utilService.save(scouting);
 		}
 		return REDIRECT;
@@ -198,26 +250,35 @@ public class ScoutingAction extends SwitchAction {
 				setScoutingStr(DateUtil.convertDateToString(scouting.getReceivedDate(), getGeneralDateFormat()));
 			}
 
-			setSelectedProduct(scouting.getFarmCrops().getId() + "~"
+			setSelectedProduct(scouting.getPlanting().getFarmCrops().getId() + "~"
 					+ scouting.getPlanting().getVariety().getProcurementProduct().getId());
 			scouting.setVariety(scouting.getPlanting().getVariety().getId().toString());
-			
-			
 
-			setSelectedVillage(scouting.getFarmCrops().getFarm().getFarmer().getVillage() != null ? String.valueOf(scouting.getFarmCrops().getFarm().getFarmer().getVillage().getId()) : "");
-			setSelectedCity(
-					scouting.getFarmCrops().getFarm().getFarmer().getVillage() != null ? String.valueOf(scouting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getId()) : "");
-			setSelectedLocality(scouting.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(scouting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getId()) : "");
-			setSelectedState(scouting.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(scouting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getId()) : "");
-			setSelectedCountry(scouting.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? scouting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCountry().getName() : "");
+			setSelectedVillage(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? String.valueOf(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getId())
+					: "");
+			setSelectedCity(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? String.valueOf(
+							scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity().getId())
+					: "");
+			setSelectedLocality(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? String.valueOf(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity()
+							.getLocality().getId())
+					: "");
+			setSelectedState(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? String.valueOf(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity()
+							.getLocality().getState().getId())
+					: "");
+			setSelectedCountry(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality()
+							.getState().getCountry().getName()
+					: "");
 			setCurrentPage(getCurrentPage());
-			setSelectedFarm(scouting.getFarmCrops().getFarm() != null ? String.valueOf(scouting.getFarmCrops().getFarm().getId()) : "");
-			setSelectedFarmer(scouting.getFarmCrops().getFarm() != null
-					? String.valueOf(scouting.getFarmCrops().getFarm().getFarmer().getId()) : "");
-		
+			setSelectedFarm(scouting.getPlanting().getFarmCrops().getFarm() != null
+					? String.valueOf(scouting.getPlanting().getFarmCrops().getFarm().getId()) : "");
+			setSelectedFarmer(scouting.getPlanting().getFarmCrops().getFarm() != null
+					? String.valueOf(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getId()) : "");
+
 			command = "update";
 			return INPUT;
 		} else {
@@ -230,35 +291,69 @@ public class ScoutingAction extends SwitchAction {
 				scoutingDetail.setReceivedDate(null);
 			}
 
-			if (selectedProduct != null && !StringUtil.isEmpty(selectedProduct)) {
-				FarmCrops fc = utilService.findFarmCropsById(Long.valueOf(selectedProduct.split("~")[0]));
-				scoutingDetail.setFarmCrops(fc);
-			}
-			
 			if (scouting.getPlanting() != null && scouting.getPlanting().getId() > 0) {
 				Planting ex = utilService.findPlantingById(scouting.getPlanting().getId());
 				scoutingDetail.setPlanting(ex);
 
 			}
 
-		
-			scoutingDetail.setRecommendations(scouting.getRecommendations());
+			// scoutingDetail.setRecommendations(scouting.getRecommendations());
 			scoutingDetail.setAreaIrrrigated(scouting.getAreaIrrrigated());
 			scoutingDetail.setInsectsObserved(scouting.getInsectsObserved());
 			scoutingDetail.setWeedsObserveds(scouting.getWeedsObserveds());
 			scoutingDetail.setDiseaseObserved(scouting.getDiseaseObserved());
 			scoutingDetail.setIrrigationType(scouting.getIrrigationType());
 			scoutingDetail.setIrrigationMethod(scouting.getIrrigationMethod());
-			scoutingDetail.setWeedsPresence(scouting.getWeedsPresence());
-			scoutingDetail.setPerInfection(scouting.getPerInfection());
-			scoutingDetail.setNameOfDisease(scouting.getNameOfDisease());
-			scoutingDetail.setNameOfInsectsObserved(scouting.getNameOfInsectsObserved());
-			scoutingDetail.setPerOrNumberInsects(scouting.getPerOrNumberInsects());
-			scoutingDetail.setNameOfWeeds(scouting.getNameOfWeeds());
+			// scoutingDetail.setWeedsPresence(scouting.getWeedsPresence());
+			// scoutingDetail.setPerInfection(scouting.getPerInfection());
+			// scoutingDetail.setNameOfDisease(scouting.getNameOfDisease());
+			// scoutingDetail.setNameOfInsectsObserved(scouting.getNameOfInsectsObserved());
+			// scoutingDetail.setPerOrNumberInsects(scouting.getPerOrNumberInsects());
+			// scoutingDetail.setNameOfWeeds(scouting.getNameOfWeeds());
 			scoutingDetail.setUpdatedDate(new Date());
 			scoutingDetail.setUpdatedUser(getUsername());
 			scoutingDetail.setSourceOfWater(scouting.getSourceOfWater());
-			scoutingDetail.setFarmCrops(scouting.getFarmCrops());
+			// scoutingDetail.setFarmCrops(scouting.getFarmCrops());
+			scoutingDetail.setSprayingRequired(scouting.getSprayingRequired());
+			scoutingDetail.setSctRecommendation(scouting.getSctRecommendation());
+
+			if (scouting.getInsectsObserved() != null && scouting.getInsectsObserved().equals("1")) {
+				scoutingDetail.setNameOfInsectsObserved(scouting.getNameOfInsectsObserved() != null
+						&& !StringUtil.isEmpty(scouting.getNameOfInsectsObserved())
+								? scouting.getNameOfInsectsObserved() : "");
+				scoutingDetail.setPerOrNumberInsects(scouting.getPerOrNumberInsects() != null
+						&& !StringUtil.isEmpty(scouting.getPerOrNumberInsects()) ? scouting.getPerOrNumberInsects()
+								: "");
+			} else {
+				scoutingDetail.setNameOfInsectsObserved("");
+				scoutingDetail.setPerOrNumberInsects("");
+			}
+			if (scouting.getDiseaseObserved() != null && scouting.getDiseaseObserved().equals("1")) {
+				scoutingDetail.setNameOfDisease(
+						scouting.getNameOfDisease() != null && !StringUtil.isEmpty(scouting.getNameOfDisease())
+								? scouting.getNameOfDisease() : "");
+				scoutingDetail.setPerInfection(
+						scouting.getPerInfection() != null && !StringUtil.isEmpty(scouting.getPerInfection())
+								? scouting.getPerInfection() : "");
+			} else {
+				scoutingDetail.setNameOfDisease("");
+				scoutingDetail.setPerInfection("");
+			}
+			if (scouting.getWeedsObserveds() != null && scouting.getWeedsObserveds().equals("1")) {
+				scoutingDetail.setNameOfWeeds(
+						scouting.getNameOfWeeds() != null && !StringUtil.isEmpty(scouting.getNameOfWeeds())
+								? scouting.getNameOfWeeds() : "");
+				scoutingDetail.setWeedsPresence(
+						scouting.getWeedsPresence() != null && !StringUtil.isEmpty(scouting.getWeedsPresence())
+								? scouting.getWeedsPresence() : "");
+				scoutingDetail.setRecommendations(
+						scouting.getRecommendations() != null && !StringUtil.isEmpty(scouting.getRecommendations())
+								? scouting.getRecommendations() : "");
+			} else {
+				scoutingDetail.setNameOfWeeds("");
+				scoutingDetail.setWeedsPresence("");
+				scoutingDetail.setRecommendations("");
+			}
 			utilService.update(scoutingDetail);
 		}
 		return REDIRECT;
@@ -270,6 +365,9 @@ public class ScoutingAction extends SwitchAction {
 	 * @return
 	 * @throws Exception
 	 */
+	@Getter
+	@Setter
+	List<Object[]> ex;
 
 	public String detail() throws Exception {
 
@@ -279,11 +377,12 @@ public class ScoutingAction extends SwitchAction {
 			if (scouting.getReceivedDate() != null && !ObjectUtil.isEmpty(scouting.getReceivedDate())) {
 				setScoutingStr(DateUtil.convertDateToString(scouting.getReceivedDate(), getGeneralDateFormat()));
 			}
-			scouting.setFarmerFullName(scouting.getFarmCrops().getFarm().getFarmer().getFirstName() + " "
-					+ (scouting.getFarmCrops().getFarm().getFarmer().getLastName() != null
-							&& !StringUtil.isEmpty(scouting.getFarmCrops().getFarm().getFarmer().getLastName())
-									? scouting.getFarmCrops().getFarm().getFarmer().getLastName() : ""));
-
+			scouting.setFarmerFullName(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getFirstName() + " "
+					+ (scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getLastName() != null && !StringUtil
+							.isEmpty(scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getLastName())
+									? scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getLastName() : ""));
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Scouting", scouting.getId());
+			roleID = getLoggedInRoleID();
 			setCommand(DETAIL);
 			return DETAIL;
 
@@ -316,22 +415,20 @@ public class ScoutingAction extends SwitchAction {
 		return result;
 	}
 
-/*	public void populateGrade() throws Exception {
-
-		if (!StringUtil.isEmpty(selectedVariety)) {
-			FarmCrops varierty = utilService.findFarmCropsById(Long.valueOf(selectedVariety.trim()));
-
-			if (!ObjectUtil.isEmpty(varierty) && varierty.getVariety() != null
-					&& varierty.getVariety().getProcurementGrades() != null) {
-				JSONArray gradeArr = new JSONArray();
-
-				varierty.getVariety().getProcurementGrades().stream().forEach(obj -> {
-					gradeArr.add(getJSONObject(obj.getId(), obj.getName()));
-				});
-				sendAjaxResponse(gradeArr);
-			}
-		}
-	}*/
+	/*
+	 * public void populateGrade() throws Exception {
+	 * 
+	 * if (!StringUtil.isEmpty(selectedVariety)) { FarmCrops varierty =
+	 * utilService.findFarmCropsById(Long.valueOf(selectedVariety.trim()));
+	 * 
+	 * if (!ObjectUtil.isEmpty(varierty) && varierty.getVariety() != null &&
+	 * varierty.getVariety().getProcurementGrades() != null) { JSONArray
+	 * gradeArr = new JSONArray();
+	 * 
+	 * varierty.getVariety().getProcurementGrades().stream().forEach(obj -> {
+	 * gradeArr.add(getJSONObject(obj.getId(), obj.getName())); });
+	 * sendAjaxResponse(gradeArr); } } }
+	 */
 
 	private Set<ScoutingDetails> formScoutDetails(Scouting scouting) {
 		Set<ScoutingDetails> ssoDetails = new LinkedHashSet<>();
@@ -377,8 +474,9 @@ public class ScoutingAction extends SwitchAction {
 
 				Date scoutingDate = DateUtil.convertStringToDate(getScoutingStr(), getGeneralDateFormat());
 
-				//FarmCrops fc = utilService.findFarmCropsById(scouting.getFarmCrops().getId());
-				//scouting.setFarmCrops(fc);
+				// FarmCrops fc =
+				// utilService.findFarmCropsById(scouting.getFarmCrops().getId());
+				// scouting.setFarmCrops(fc);
 				Planting fc = utilService.findPlantingById(scouting.getPlanting().getId());
 				scouting.setPlanting(fc);
 				if (fc != null && fc.getPlantingDate().compareTo(scoutingDate) > 0) {
@@ -386,30 +484,41 @@ public class ScoutingAction extends SwitchAction {
 				}
 
 			}
-			
-			if (scouting == null || scouting.getFarmCrops() == null || scouting.getFarmCrops().getFarm() == null
-					|| scouting.getFarmCrops().getFarm().getFarmer() == null
-					|| scouting.getFarmCrops().getFarm().getFarmer().getId() == null) {
+
+			if (scouting == null || scouting.getPlanting() == null || scouting.getPlanting().getFarmCrops() == null
+					|| scouting.getPlanting().getFarmCrops().getFarm() == null
+					|| scouting.getPlanting().getFarmCrops().getFarm().getFarmer() == null
+					|| scouting.getPlanting().getFarmCrops().getFarm().getFarmer().getId() == null) {
 
 				errorCodes.put("empty.farmer", "empty.farmer");
 			}
 
-			if (scouting == null || scouting.getFarmCrops() == null || scouting.getFarmCrops().getFarm() == null
-					|| scouting.getFarmCrops().getFarm().getId() == null) {
+			if (scouting == null || scouting.getPlanting() == null || scouting.getPlanting().getFarmCrops() == null
+					|| scouting.getPlanting().getFarmCrops().getFarm() == null
+					|| scouting.getPlanting().getFarmCrops().getFarm().getId() == null) {
 
 				errorCodes.put("empty.farms", "empty.farms");
 			}
-			
-			if (scouting == null || scouting.getFarmCrops() == null || scouting.getFarmCrops().getId() == null) {
+
+			if (scouting == null || scouting.getPlanting() == null || scouting.getPlanting().getFarmCrops() == null
+					|| scouting.getPlanting().getFarmCrops().getId() == null) {
 
 				errorCodes.put("empty.block", "empty.block");
 			}
-			
+
 			if (scouting == null || scouting.getPlanting() == null || scouting.getPlanting().getId() == null) {
-				
+
 				errorCodes.put("empty.planting", "empty.planting");
 			}
-			
+			if (scouting == null || StringUtil.isEmpty(scouting.getSprayingRequired())
+					|| scouting.getSprayingRequired() == null) {
+
+				errorCodes.put("empty.sprayingRequired", "empty.sprayingRequired");
+			}
+			if (scouting == null || StringUtil.isEmpty(scouting.getSctRecommendation())
+					|| scouting.getSctRecommendation() == null) {
+				errorCodes.put("empty.sctRecommendation", "empty.sctRecommendation");
+			}
 
 			if (scouting == null || StringUtil.isEmpty(scouting.getInsectsObserved())) {
 				errorCodes.put("empty.InsectsObserved", "empty.InsectsObserved");
@@ -469,7 +578,6 @@ public class ScoutingAction extends SwitchAction {
 			if (scouting == null || StringUtil.isEmpty(scouting.getAreaIrrrigated())) {
 				errorCodes.put("empty.AreaIrrrigated", "empty.AreaIrrrigated");
 			}
-			
 
 		} else {
 			errorCodes.put("empty.fields", getLocaleProperty("empty.fields"));
@@ -482,7 +590,7 @@ public class ScoutingAction extends SwitchAction {
 	public Map<String, String> getInsectsObservedMap() {
 		insectsObservedMap.put("1", getText("Yes"));
 		insectsObservedMap.put("0", getText("No"));
-	
+
 		return insectsObservedMap;
 	}
 
@@ -495,7 +603,7 @@ public class ScoutingAction extends SwitchAction {
 	public Map<String, String> getDiseaseObservedMap() {
 		diseaseObservedMap.put("1", getText("Yes"));
 		diseaseObservedMap.put("0", getText("No"));
-		
+
 		return diseaseObservedMap;
 	}
 
@@ -508,7 +616,7 @@ public class ScoutingAction extends SwitchAction {
 	public Map<String, String> getWeedsPresenceMapMap() {
 		weedsPresenceMapMap.put("1", getText("Yes"));
 		weedsPresenceMapMap.put("0", getText("No"));
-		
+
 		return weedsPresenceMapMap;
 	}
 

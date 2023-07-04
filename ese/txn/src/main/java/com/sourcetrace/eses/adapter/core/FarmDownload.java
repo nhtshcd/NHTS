@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.sourcetrace.eses.entity.Agent;
+import com.sourcetrace.eses.entity.ExporterRegistration;
 import com.sourcetrace.eses.entity.Farm;
 import com.sourcetrace.eses.entity.FarmCrops;
 import com.sourcetrace.eses.entity.LanguagePreferences;
@@ -68,7 +69,7 @@ public class FarmDownload implements ITxnAdapter {
 
 		Agent ag = utilService.findAgentByAgentId(agentId);
 		List farmerCollection = new ArrayList<>();
-		if (ag != null && ag.getExporter() != null) {
+		if (ag != null && (ag.getExporter() != null || ag.getPackhouse().getExporter() != null)) {
 			farmerList = (List<Object[]>) farmerService.listObjectById(
 					"select f.id,f.farmCode,f.farmName,f.farmer.farmerId,f.status,f.latitude,f.longitude,f.totalLandHolding,f.proposedPlanting ,f.farmId,f.farmer.village.city.locality.state.name,f.farmer.village.city.locality.state.code,f.farmer.village.city.locality.state.country.name,f.farmer.village.city.locality.state.country.code,f.farmer.village.city.code,f.farmer.village.city.name,f.farmer.village.city.locality.code,f.farmer.village.city.locality.name,f.farmer.village.code,f.farmer.village.name,f.revisionNo from Farm f where status in (1,0) and f.revisionNo > ? order by f.revisionNo desc",
 					new Object[] { Long.valueOf(revisionNo) });
@@ -160,7 +161,12 @@ public class FarmDownload implements ITxnAdapter {
 		String agentId = head.getAgentId();
 		if (!ObjectUtil.isListEmpty(varietyList)) {
 			Agent ag = utilService.findAgentByAgentId(agentId);
-			varietyList.stream().filter(ff -> ff.getExporter() != null && !StringUtil.isEmpty(ff.getExporter().getId()) && ff.getExporter().getId().equals(ag.getExporter().getId()) && ff.getStatus() != 3).forEach(uu -> {
+			ExporterRegistration ex;
+			if(ag.getPackhouse()!=null &&ag.getPackhouse().getExporter()!=null &&!ObjectUtil.isEmpty(ag.getPackhouse().getExporter())){
+				ex=ag.getPackhouse().getExporter();
+			}else
+				ex=ag.getExporter();
+			varietyList.stream().filter(ff -> ff.getExporter() != null && !StringUtil.isEmpty(ff.getExporter().getId()) && ff.getExporter().getId().equals(ex.getId()) && ff.getStatus() != 3).forEach(uu -> {
 				Map varietyDataList = new HashMap();
 				
 				

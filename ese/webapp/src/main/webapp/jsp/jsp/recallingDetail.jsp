@@ -29,9 +29,17 @@
 		</s:if>
 		<div class="appContentWrapper marginBottom">
 			<div class="formContainerWrapper">
+			<div class="aPanel farmer_info">
+				<div class="aTitle">
 				<h2>
 					<s:text name="info.recalling" />
+					<div class="pull-right">
+											<a class="aCollapse" href="#"><i
+												class="fa fa-chevron-right"></i></a>
+										</div>
 				</h2>
+				</div>
+				<div class="aContent ">
 				<div class="flexform">
 					<div class="dynamic-flexItem ">
 						<p class="flexItem">
@@ -57,6 +65,14 @@
 						</p>
 						<p class="flexItem">
 							<s:property value="custname" />
+						</p>
+					</div>
+					<div class="dynamic-flexItem ">
+						<p class="flexItem">
+							<s:property value="%{getLocaleProperty('shipment.shipmentDestination')}" />
+						</p>
+						<p class="flexItem">
+							<s:property value="recalling.shipmentDestination" />
 						</p>
 					</div>
 					<div class="dynamic-flexItem ">
@@ -183,7 +199,7 @@
 				</div>
 			</div>
 			
-			<div class="formContainerWrapper">
+			<div class="formContainerWrapper aContent ">
 				<h2>
 					<s:text name="info.operatorInfo" />
 				</h2>
@@ -207,7 +223,7 @@
 					</div>
 				</div>
 			</div>
-			<div class="formContainerWrapper">
+			<div class="formContainerWrapper aContent ">
 				<h2>
 					<s:text name="info.shippingInfo" />
 				</h2>
@@ -262,8 +278,47 @@
 							<s:property value="recalling.actionByStakeholders" />
 						</p>
 					</div>
+					</div>
 				</div>
 			</div>
+			<s:if test="roleID.trim().equalsIgnoreCase('2')">
+			<s:iterator value="ex" var="innerList">
+								<div class="aPanel audit_history">
+									<div class="aTitle">
+										<h2>
+											<s:if
+									test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+									<s:property value="#innerList[0].createdUser" />
+								</s:if>
+								<s:else>
+									<s:property value="#innerList[0].updatedUser" />
+								</s:else>
+								-
+
+								<s:date name="#innerList[1].revisionDate"
+									format="dd/MM/yyyy hh:mm:ss" />
+								-
+								<s:property
+									value="%{getLocaleProperty('default'+#innerList[2])}" />
+								<div class="pull-right">
+									<a class="aCollapse "
+										href="#<s:property value="#innerList[1].id" />
+										"><i
+										class="fa fa-chevron-right"></i></a>
+								</div>
+										</h2>
+									</div>
+									<div class="aContent dynamic-form-con"
+										id="<s:property value="#innerList[1].id" />">
+										<jsp:include page='/jsp/jsp/auditRecallingDetail.jsp' />
+									</div>
+								</div>
+							</s:iterator>
+							</s:if>
+			</div>
+			
+			
+			
 			<div class="flex-layout flexItemStyle">
 				<div class="margin-top-10">
 					<span id="cancel" class=""><span class="first-child"><button
@@ -276,7 +331,7 @@
 			</div>
 		</div>
 	</s:form>
-	<s:form id="fileDownload" action="user_populateDownload">
+	<s:form id="fileDownload" action="recalling_populateDownload">
 					<s:hidden id="loadId" name="idd" />
 
 

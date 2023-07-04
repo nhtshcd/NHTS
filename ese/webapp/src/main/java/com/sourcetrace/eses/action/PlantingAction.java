@@ -1,6 +1,7 @@
 package com.sourcetrace.eses.action;
 
 import java.util.Comparator;
+import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
@@ -40,7 +41,6 @@ import lombok.Setter;
 @Scope(value = "prototype")
 
 public class PlantingAction extends SwitchAction {
-
 
 	/**
 	 * 
@@ -128,7 +128,7 @@ public class PlantingAction extends SwitchAction {
 	@Getter
 	@Setter
 	private String expHarvestWeek;
-	
+
 	@Getter
 	@Setter
 	private String cropva;
@@ -136,14 +136,14 @@ public class PlantingAction extends SwitchAction {
 	@Getter
 	@Setter
 	private String cropgra;
-	
+
 	@Getter
 	@Setter
 	private String exporterGradeId;
 
 	@Autowired
 	private IUniqueIDGenerator idGenerator;
-	
+
 	@Getter
 	@Setter
 	private String selectedFarmCrops;
@@ -153,11 +153,14 @@ public class PlantingAction extends SwitchAction {
 		if (planting == null) {
 			setCommand(CREATE);
 			planting = new Planting();
-			Farmer farmer=utilService.findFarmerById(Long.valueOf(farmerId));
-			/*ExporterRegistration exporter=utilService.findExportRegById(farmer.getExporter().getId());
-			setCropva(exporter.getFarmerHaveFarms());
-			setCropgra(exporter.getScattered());*/
-			
+			Farmer farmer = utilService.findFarmerById(Long.valueOf(farmerId));
+			/*
+			 * ExporterRegistration
+			 * exporter=utilService.findExportRegById(farmer.getExporter().getId
+			 * ()); setCropva(exporter.getFarmerHaveFarms());
+			 * setCropgra(exporter.getScattered());
+			 */
+
 			request.setAttribute(HEADING, getText("farmCrops.page"));
 			return INPUT;
 		} else {
@@ -176,14 +179,17 @@ public class PlantingAction extends SwitchAction {
 					planting.getCropCategory() != null && !StringUtil.isEmpty(planting.getCropCategory())
 							? planting.getCropCategory() : null);
 
-			if (selectedProduct != null && !selectedProduct.isEmpty() && selectedProduct != "") {
-
-				ProcurementProduct gro = utilService.findProcurementProductById(Long.valueOf(selectedProduct));
-				if (gro != null && !ObjectUtil.isEmpty(gro)) {
-					planting.setSpecies(gro);
-
-				}
-			}
+			/*
+			 * if (selectedProduct != null && !selectedProduct.isEmpty() &&
+			 * selectedProduct != "") {
+			 * 
+			 * ProcurementProduct gro =
+			 * utilService.findProcurementProductById(Long.valueOf(
+			 * selectedProduct)); if (gro != null && !ObjectUtil.isEmpty(gro)) {
+			 * planting.setSpecies(gro);
+			 * 
+			 * } }
+			 */
 			if (!StringUtil.isEmpty(plantingDate)) {
 				planting.setPlantingDate(DateUtil.convertStringToDate(plantingDate, getGeneralDateFormat()));
 			} else {
@@ -213,19 +219,25 @@ public class PlantingAction extends SwitchAction {
 
 			FarmCrops farm = utilService.findFarmCropsById(Long.valueOf(planting.getFarmCrops().getId()));
 			planting.setFarmCropId(farm.getPlanting() == null || farm.getPlanting().size() == 0 ? "1"
-					: String.valueOf(farm.getPlanting().stream().mapToInt(u -> Integer.valueOf(u.getFarmCropId()))
-							.max().getAsInt() + 1));
-			/*planting.setBlockId(farm.getFarmer().getVillage().getCity().getLocality().getState().getCode() + "_"
-					+ farm.getFarmer().getVillage().getCity().getLocality().getCode() + "_"
-					+ farm.getFarmer().getVillage().getCity().getCode() + "_" + farm.getFarmer().getFarmerId() + "_"
-					+ StringUtil.appendZeroPrefix(String.valueOf(farm.getFarmId()), 3) + "_"
-					+ StringUtil.appendZeroPrefix(String.valueOf(planting.getFarmCropId()), 3));*/
-			//planting.setFarmCropId(idGenerator.getFarmCropIdSeq());
+					: String.valueOf(farm.getPlanting().stream().mapToInt(u -> Integer.valueOf(u.getFarmCropId())).max()
+							.getAsInt() + 1));
+			/*
+			 * planting.setBlockId(farm.getFarmer().getVillage().getCity().
+			 * getLocality().getState().getCode() + "_" +
+			 * farm.getFarmer().getVillage().getCity().getLocality().getCode() +
+			 * "_" + farm.getFarmer().getVillage().getCity().getCode() + "_" +
+			 * farm.getFarmer().getFarmerId() + "_" +
+			 * StringUtil.appendZeroPrefix(String.valueOf(farm.getFarmId()), 3)
+			 * + "_" +
+			 * StringUtil.appendZeroPrefix(String.valueOf(planting.getFarmCropId
+			 * ()), 3));
+			 */
+			// planting.setFarmCropId(idGenerator.getFarmCropIdSeq());
 			planting.setPlantingId(planting.getFarmCrops().getBlockId() + "_"
 					+ StringUtil.appendZeroPrefix(String.valueOf(planting.getFarmCropId()), 3));
 			planting.setUnit(planting.getUnit());
 			planting.setRevisionNo(DateUtil.getRevisionNumber());
-			if (latLonJsonString != null && !StringUtil.isEmpty(latLonJsonString) && latLonJsonString.length()>2) {
+			if (latLonJsonString != null && !StringUtil.isEmpty(latLonJsonString) && latLonJsonString.length() > 2) {
 				CoordinatesMap cc = formCoord(latLonJsonString);
 				planting.setPlotting(cc);
 			}
@@ -234,6 +246,8 @@ public class PlantingAction extends SwitchAction {
 
 			planting.setRevisionNo(DateUtil.getRevisionNumber());
 			planting.setPlottingStatus("0");
+			planting.setCreatedDate(new Date());
+			planting.setCreatedUser(getUsername());
 			utilService.save(planting);
 			return "farmerDetail";
 		}
@@ -280,6 +294,9 @@ public class PlantingAction extends SwitchAction {
 	 * @throws Exception
 	 *             the exception
 	 */
+	@Getter
+	@Setter
+	List<Object[]> ex;
 
 	public String detail() throws Exception {
 		if (id != null && !StringUtil.isEmpty(id) && StringUtil.isLong(id)) {
@@ -293,6 +310,7 @@ public class PlantingAction extends SwitchAction {
 					setCommand(DETAIL);
 
 				}
+				ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Planting", planting.getId());
 			}
 			return DETAIL;
 		} else {
@@ -320,14 +338,18 @@ public class PlantingAction extends SwitchAction {
 			if (planting.getPlantingDate() != null && !ObjectUtil.isEmpty(planting.getPlantingDate())) {
 				setPlantingDate(DateUtil.convertDateToString(planting.getPlantingDate(), getGeneralDateFormat()));
 			}
-			Farmer farmer=utilService.findFarmerById(Long.valueOf(planting.getFarmCrops().getFarm().getFarmer().getId()));
-			/*ExporterRegistration exporter=utilService.findExportRegById(farmer.getExporter().getId());
-			setCropva(exporter.getFarmerHaveFarms());
-			setCropgra(exporter.getScattered());*/
-			
+			Farmer farmer = utilService
+					.findFarmerById(Long.valueOf(planting.getFarmCrops().getFarm().getFarmer().getId()));
+			/*
+			 * ExporterRegistration
+			 * exporter=utilService.findExportRegById(farmer.getExporter().getId
+			 * ()); setCropva(exporter.getFarmerHaveFarms());
+			 * setCropgra(exporter.getScattered());
+			 */
+
 			planting.setCultiArea(planting.getCultiArea() != null && !StringUtil.isEmpty(planting.getCultiArea())
 					? planting.getCultiArea() : null);
-			
+
 			command = "update";
 			return INPUT;
 		} else {
@@ -341,15 +363,17 @@ public class PlantingAction extends SwitchAction {
 				}
 			}
 
-			if (selectedProduct != null && !selectedProduct.isEmpty() && selectedProduct != "") {
-
-				ProcurementProduct gro = utilService.findProcurementProductById(Long.valueOf(selectedProduct));
-				if (gro != null && !ObjectUtil.isEmpty(gro)) {
-					temp.setSpecies(gro);
-
-				}
-			}
-
+			/*
+			 * if (selectedProduct != null && !selectedProduct.isEmpty() &&
+			 * selectedProduct != "") {
+			 * 
+			 * ProcurementProduct gro =
+			 * utilService.findProcurementProductById(Long.valueOf(
+			 * selectedProduct)); if (gro != null && !ObjectUtil.isEmpty(gro)) {
+			 * temp.setSpecies(gro);
+			 * 
+			 * } }
+			 */
 			if (selectedVariety != null && !selectedVariety.isEmpty() && selectedVariety != "") {
 
 				ProcurementVariety var = utilService.findProcurementVarietyById(Long.valueOf(selectedVariety));
@@ -378,28 +402,38 @@ public class PlantingAction extends SwitchAction {
 
 			temp.setSeedSource(planting.getSeedSource() != null && !StringUtil.isEmpty(planting.getSeedSource())
 					? planting.getSeedSource() : null);
-			temp.setUnit(planting.getUnit() != null && !StringUtil.isEmpty(planting.getUnit()) ? planting.getUnit()
-					: null);
+			temp.setUnit(
+					planting.getUnit() != null && !StringUtil.isEmpty(planting.getUnit()) ? planting.getUnit() : null);
 			temp.setRevisionNo(DateUtil.getRevisionNumber());
 			// temp.setStatus(farmCrops.getStatus());
 			temp.setRevisionNo(DateUtil.getRevisionNumber());
-			/*Farm farm = utilService.findFarmById(Long.valueOf(planting.getFarm().getId()));*/
-			
-			/*temp.setBlockId(farm.getFarmer().getVillage().getCity().getLocality().getState().getCode() + "_"
-					+ farm.getFarmer().getVillage().getCity().getLocality().getCode() + "_"
-					+ farm.getFarmer().getVillage().getCity().getCode() + "_00" + farm.getFarmId() + "_" + "00"
-					+ temp.getFarmCropId());*/
-			
-			
-			/*temp.setBlockId(farm.getFarmer().getVillage().getCity().getLocality().getState().getCode() + "_"
-					+ farm.getFarmer().getVillage().getCity().getLocality().getCode() + "_"
-					+ farm.getFarmer().getVillage().getCity().getCode() + "_" + farm.getFarmer().getFarmerId() + "_"
-					+ StringUtil.appendZeroPrefix(String.valueOf(farm.getFarmId()), 3) + "_"
-					+ StringUtil.appendZeroPrefix(String.valueOf(temp.getFarmCropId()), 3));*/
-			
-			
-			
-			//temp.setBlockName(planting.getBlockName());
+			/*
+			 * Farm farm =
+			 * utilService.findFarmById(Long.valueOf(planting.getFarm().getId())
+			 * );
+			 */
+
+			/*
+			 * temp.setBlockId(farm.getFarmer().getVillage().getCity().
+			 * getLocality().getState().getCode() + "_" +
+			 * farm.getFarmer().getVillage().getCity().getLocality().getCode() +
+			 * "_" + farm.getFarmer().getVillage().getCity().getCode() + "_00" +
+			 * farm.getFarmId() + "_" + "00" + temp.getFarmCropId());
+			 */
+
+			/*
+			 * temp.setBlockId(farm.getFarmer().getVillage().getCity().
+			 * getLocality().getState().getCode() + "_" +
+			 * farm.getFarmer().getVillage().getCity().getLocality().getCode() +
+			 * "_" + farm.getFarmer().getVillage().getCity().getCode() + "_" +
+			 * farm.getFarmer().getFarmerId() + "_" +
+			 * StringUtil.appendZeroPrefix(String.valueOf(farm.getFarmId()), 3)
+			 * + "_" +
+			 * StringUtil.appendZeroPrefix(String.valueOf(temp.getFarmCropId()),
+			 * 3));
+			 */
+
+			// temp.setBlockName(planting.getBlockName());
 			temp.setLotNo(planting.getLotNo());
 			temp.setChemQty(planting.getChemQty());
 			temp.setChemUsed(planting.getChemUsed());
@@ -412,7 +446,9 @@ public class PlantingAction extends SwitchAction {
 			temp.setModeApp(planting.getModeApp());
 			temp.setExpHarvestWeek(planting.getExpHarvestWeek());
 			temp.setExpHarvestQty(planting.getExpHarvestQty());
-
+			temp.setFieldType(planting.getFieldType());
+			temp.setUpdatedDate(new Date());
+			temp.setUpdatedUser(getUsername());
 			if (latLonJsonString != null && !StringUtil.isEmpty(latLonJsonString)) {
 				CoordinatesMap cc = formCoord(latLonJsonString);
 				temp.setPlotting(cc);
@@ -436,10 +472,9 @@ public class PlantingAction extends SwitchAction {
 				qry = "SELECT DISTINCT f.id,f.farmCode,f.farmName from FarmCrops fc join fc.farm f where f.status=1 and f.farmer.id=? and fc.status=1 and fc.exporter.id=?";
 				param.add(Long.valueOf(getLoggedInDealer()));
 			}
-			
-			List<Object[]> dataList = (List<Object[]>) farmerService.listObjectById(qry,param.toArray());
-			
-			
+
+			List<Object[]> dataList = (List<Object[]>) farmerService.listObjectById(qry, param.toArray());
+
 			if (dataList != null && !ObjectUtil.isEmpty(dataList)) {
 				dataList.stream().distinct().forEach(f -> {
 					farmerArr.add(getJSONObject(f[0].toString(), f[1].toString() + "-" + f[2].toString()));
@@ -449,7 +484,7 @@ public class PlantingAction extends SwitchAction {
 			sendAjaxResponse(farmerArr);
 		}
 	}
-	
+
 	public void populateFarmCropsByFarm() throws Exception {
 		if (!StringUtil.isEmpty(selectedFarmCrops)) {
 			LinkedList<Object> parame = new LinkedList();
@@ -461,7 +496,7 @@ public class PlantingAction extends SwitchAction {
 			}
 
 			List<FarmCrops> growerList = (List<FarmCrops>) farmerService.listObjectById(qry, parame.toArray());
-			
+
 			Map<String, String> farmList = new LinkedHashMap<>();
 			JSONArray varietyArr = new JSONArray();
 			if (!ObjectUtil.isEmpty(growerList)) {
@@ -475,56 +510,50 @@ public class PlantingAction extends SwitchAction {
 		}
 	}
 
-/*	public void populateGrade() throws Exception {
-		if (!StringUtil.isEmpty(selectedVariety)) {
-			List<ProcurementGrade> growerList = utilService
-					.listProcurementGradeByProcurementVarietyId(Long.valueOf(selectedVariety));
-			JSONArray varietyArr = new JSONArray();
-			if (!ObjectUtil.isEmpty(growerList)) {
-				for (ProcurementGrade pv : growerList) {
-					varietyArr.add(getJSONObject(pv.getId(), pv.getName()));
-				}
-			}
-
-			sendAjaxResponse(varietyArr);
-		}
-	}*/
-/*	public void populateGrade() throws Exception {
-		if (!StringUtil.isEmpty(selectedVariety)) {
-			List<ProcurementGrade> growerList = utilService
-					.listProcurementGradeByProcurementVarietyId(Long.valueOf(selectedVariety));
-			JSONArray varietyArr = new JSONArray();
-			if (!ObjectUtil.isEmpty(growerList)) {
-				
-				String expGradeid[]=exporterGradeId.split(",");
-				
-				for (ProcurementGrade pv : growerList) {
-					
-					for(int i=0;i<expGradeid.length;i++){
-						if(expGradeid[i].trim().equalsIgnoreCase(String.valueOf(pv.getId()))){
-							varietyArr.add(getJSONObject(pv.getId(), pv.getName()));
-						}
-					}
-				}
-			}
-			sendAjaxResponse(varietyArr);
-		}
-	}*/
+	/*
+	 * public void populateGrade() throws Exception { if
+	 * (!StringUtil.isEmpty(selectedVariety)) { List<ProcurementGrade>
+	 * growerList = utilService
+	 * .listProcurementGradeByProcurementVarietyId(Long.valueOf(selectedVariety)
+	 * ); JSONArray varietyArr = new JSONArray(); if
+	 * (!ObjectUtil.isEmpty(growerList)) { for (ProcurementGrade pv :
+	 * growerList) { varietyArr.add(getJSONObject(pv.getId(), pv.getName())); }
+	 * }
+	 * 
+	 * sendAjaxResponse(varietyArr); } }
+	 */
+	/*
+	 * public void populateGrade() throws Exception { if
+	 * (!StringUtil.isEmpty(selectedVariety)) { List<ProcurementGrade>
+	 * growerList = utilService
+	 * .listProcurementGradeByProcurementVarietyId(Long.valueOf(selectedVariety)
+	 * ); JSONArray varietyArr = new JSONArray(); if
+	 * (!ObjectUtil.isEmpty(growerList)) {
+	 * 
+	 * String expGradeid[]=exporterGradeId.split(",");
+	 * 
+	 * for (ProcurementGrade pv : growerList) {
+	 * 
+	 * for(int i=0;i<expGradeid.length;i++){
+	 * if(expGradeid[i].trim().equalsIgnoreCase(String.valueOf(pv.getId()))){
+	 * varietyArr.add(getJSONObject(pv.getId(), pv.getName())); } } } }
+	 * sendAjaxResponse(varietyArr); } }
+	 */
 	public void populateGrade() throws Exception {
 		if (!StringUtil.isEmpty(selectedVariety)) {
-			
+
 			FarmCrops fc = (FarmCrops) farmerService.findObjectById("from FarmCrops fc where fc.id=?",
 					new Object[] { Long.valueOf(exporterGradeId) });
-			
-			ExporterRegistration exporter=utilService.findExportRegById(Long.valueOf(fc.getExporter().getId()));
-			
-			List<ProcurementGrade> growerList = utilService
-					.listProcurementGradeByProcurementVarietyIdGradeid(Long.valueOf(selectedVariety),exporter.getScattered());
+
+			ExporterRegistration exporter = utilService.findExportRegById(Long.valueOf(fc.getExporter().getId()));
+
+			List<ProcurementGrade> growerList = utilService.listProcurementGradeByProcurementVarietyIdGradeid(
+					Long.valueOf(selectedVariety), exporter.getScattered());
 			JSONArray varietyArr = new JSONArray();
 			if (!ObjectUtil.isEmpty(growerList)) {
-				
+
 				for (ProcurementGrade pv : growerList) {
-							varietyArr.add(getJSONObject(pv.getId(), pv.getName()));
+					varietyArr.add(getJSONObject(pv.getId(), pv.getName()));
 				}
 			}
 			sendAjaxResponse(varietyArr);
@@ -556,40 +585,46 @@ public class PlantingAction extends SwitchAction {
 		Map<String, String> errorCodes = new LinkedHashMap<String, String>();
 		if (planting != null) {
 
-			/*if (StringUtil.isEmpty(planting.getFarm()) || planting.getFarm().equals("")
-					|| planting.getFarm().equals(null) || planting.getFarm().getId() == null) {
+			/*
+			 * if (StringUtil.isEmpty(planting.getFarm()) ||
+			 * planting.getFarm().equals("") || planting.getFarm().equals(null)
+			 * || planting.getFarm().getId() == null) {
+			 * 
+			 * errorCodes.put("empty.farms", "empty.farms"); }
+			 * 
+			 * if (planting.getBlockName() == null ||
+			 * StringUtil.isEmpty(planting.getBlockName()) ||
+			 * planting.getBlockName().equals("")) {
+			 * errorCodes.put("empty.blockName", "empty.blockName"); } else {
+			 * 
+			 * FarmCrops fr = (FarmCrops) farmerService.findObjectById(
+			 * " from FarmCrops fc where fc.blockName=?  and fc.status=1 and fc.farm.id=?"
+			 * , new Object[] {
+			 * planting.getBlockName(),planting.getFarm().getId() }); if (fr !=
+			 * null && (planting.getId() == null ||
+			 * !planting.getId().equals(fr.getId()))) {
+			 * 
+			 * errorCodes.put("unique.blockName", "unique.blockName"); //
+			 * 
+			 * } else {
+			 * 
+			 * }
+			 * 
+			 * }
+			 */
 
-				errorCodes.put("empty.farms", "empty.farms");
-			}
-
-			if (planting.getBlockName() == null || StringUtil.isEmpty(planting.getBlockName())
-					|| planting.getBlockName().equals("")) {
-				errorCodes.put("empty.blockName", "empty.blockName");
-			} else {
-
-				FarmCrops fr = (FarmCrops) farmerService.findObjectById(
-						" from FarmCrops fc where fc.blockName=?  and fc.status=1 and fc.farm.id=?",
-						new Object[] { planting.getBlockName(),planting.getFarm().getId() });
-				if (fr != null && (planting.getId() == null || !planting.getId().equals(fr.getId()))) {
-
-					errorCodes.put("unique.blockName", "unique.blockName");
-					//
-
-				} else {
-
-				}
-
-			}*/
-			
 			if (StringUtil.isEmpty(selectedVariety) || selectedVariety == null) {
 				errorCodes.put("empty.selectedVariety", "empty.selectedVariety");
 			}
 			if (StringUtil.isEmpty(selectedGradename) || selectedGradename == null) {
 				errorCodes.put("empty.selectedGradename", "empty.selectedGradename");
 			}
-			
+
 			if (StringUtil.isEmpty(planting.getSeedSource()) || planting.getSeedSource() == null) {
 				errorCodes.put("empty.plantingmaterial", "empty.plantingmaterial");
+			}
+			if (StringUtil.isEmpty(planting.getFieldType()) || planting.getFieldType() == null) {
+				errorCodes.put("empty.fieldType", "empty.fieldType");
 			}
 			if (StringUtil.isEmpty(plantingDate) || plantingDate == null) {
 				errorCodes.put("empty.pltDate", "empty.pltDate");
@@ -597,7 +632,8 @@ public class PlantingAction extends SwitchAction {
 
 			if (StringUtil.isEmpty(planting.getCultiArea()) || planting.getCultiArea().equals(null)) {
 				errorCodes.put("empty.PlantingArea", "empty.PlantingArea");
-			}else if(planting.getCultiArea()!=null && StringUtil.isDouble(planting.getCultiArea())  && Double.valueOf(planting.getCultiArea())<=0){
+			} else if (planting.getCultiArea() != null && StringUtil.isDouble(planting.getCultiArea())
+					&& Double.valueOf(planting.getCultiArea()) <= 0) {
 				errorCodes.put("invalid.PlantingArea", "invalid.PlantingArea");
 			}
 
@@ -608,18 +644,23 @@ public class PlantingAction extends SwitchAction {
 			if (planting.getFarmCrops() != null && planting.getFarmCrops().getId() != null) {
 				FarmCrops farm = utilService.findFarmCropsById(Long.valueOf(planting.getFarmCrops().getId()));
 				planting.setFarmCrops(farm);
-			
+
 				if (farm != null && !StringUtil.isEmpty(planting.getCultiArea())) {
 					if (planting.getId() == null || StringUtil.isEmpty(planting.getId())) {
-					Double exiscrop =farm.getPlanting().stream().filter(u -> u.getCultiArea()!=null).collect(Collectors.summingDouble(u -> Double.valueOf(u.getCultiArea())));
-					exiscrop = exiscrop==null ? Double.valueOf(farm.getCultiArea()) : Double.valueOf(farm.getCultiArea())- exiscrop;
-					if (exiscrop < Double.valueOf(planting.getCultiArea())) {
-						errorCodes.put("empty.PPCplanting", "empty.PPCplanting");
-					}
-					}else{
-						Double exiscrop =farm.getPlanting().stream().filter(u -> u.getCultiArea()!=null && !u.getId().equals(planting.getId())).collect(Collectors.summingDouble(u -> Double.valueOf(u.getCultiArea())));
-						exiscrop = exiscrop==null ? Double.valueOf(farm.getCultiArea()) : Double.valueOf(farm.getCultiArea())- exiscrop;
-						
+						Double exiscrop = farm.getPlanting().stream().filter(u -> u.getCultiArea() != null)
+								.collect(Collectors.summingDouble(u -> Double.valueOf(u.getCultiArea())));
+						exiscrop = exiscrop == null ? Double.valueOf(farm.getCultiArea())
+								: Double.valueOf(farm.getCultiArea()) - exiscrop;
+						if (exiscrop < Double.valueOf(planting.getCultiArea())) {
+							errorCodes.put("empty.PPCplanting", "empty.PPCplanting");
+						}
+					} else {
+						Double exiscrop = farm.getPlanting().stream()
+								.filter(u -> u.getCultiArea() != null && !u.getId().equals(planting.getId()))
+								.collect(Collectors.summingDouble(u -> Double.valueOf(u.getCultiArea())));
+						exiscrop = exiscrop == null ? Double.valueOf(farm.getCultiArea())
+								: Double.valueOf(farm.getCultiArea()) - exiscrop;
+
 						if (exiscrop < Double.valueOf(planting.getCultiArea())) {
 							errorCodes.put("empty.PPCplanting", "empty.PPCplanting");
 						}
@@ -627,15 +668,16 @@ public class PlantingAction extends SwitchAction {
 				}
 			}
 
-
 			if (StringUtil.isEmpty(planting.getCropCategory()) || planting.getCropCategory().equals(null)) {
 				errorCodes.put("empty.cropcategory", "empty.cropcategory");
 			}
-			
-		/*	if (latLonJsonString == null || StringUtil.isEmpty(latLonJsonString) || latLonJsonString.length() == 2) {
-				errorCodes.put("empty.plotting", getLocaleProperty("empty.plotting"));
-			}*/
-			
+
+			/*
+			 * if (latLonJsonString == null ||
+			 * StringUtil.isEmpty(latLonJsonString) || latLonJsonString.length()
+			 * == 2) { errorCodes.put("empty.plotting",
+			 * getLocaleProperty("empty.plotting")); }
+			 */
 
 		} else {
 			errorCodes.put("empty.fields", getLocaleProperty("empty.fields"));
@@ -678,7 +720,6 @@ public class PlantingAction extends SwitchAction {
 			procurementVariety.setName(searchRecord.get("pv.name").trim());
 			filter.setVariety(procurementVariety);
 		}
-		
 
 		if (!StringUtil.isEmpty(searchRecord.get("farmCropName"))) {
 			FarmCrops tempFarm = new FarmCrops();
@@ -718,10 +759,12 @@ public class PlantingAction extends SwitchAction {
 		objDt.put("blockId", farmCrops.getFarmCrops() == null ? "" : farmCrops.getFarmCrops().getBlockId());
 		objDt.put("plId", farmCrops.getPlantingId() == null ? "" : farmCrops.getPlantingId());
 		objDt.put("date", code);
-		objDt.put("blName", farmCrops.getFarmCrops().getBlockName() == null ? "" : farmCrops.getFarmCrops().getBlockName());
+		objDt.put("blName",
+				farmCrops.getFarmCrops().getBlockName() == null ? "" : farmCrops.getFarmCrops().getBlockName());
 		objDt.put("season", farmCrops.getCropSeason() == null ? "" : farmCrops.getCropSeason());
-
-		//objDt.put("area", "");
+		objDt.put("fieldType", farmCrops.getFieldType() == null ? "" : getCatalgueNameByCode(farmCrops.getFieldType()));
+		actionOnj.put("fieldType", (farmCrops.getFieldType()));
+		// objDt.put("area", "");
 		objDt.put("area", farmCrops.getCultiArea());
 
 		actionOnj.put("id", farmCrops.getId());
@@ -751,34 +794,35 @@ public class PlantingAction extends SwitchAction {
 		sendAjaxResponse(jsonObj);
 
 	}
-	
+
 	public List<ProcurementVariety> getProductVarityList() {
 		String idValue = ServletActionContext.getRequest().getParameter("id");
 		String paramValue = ServletActionContext.getRequest().getParameter("farmerId");
 		Farmer farmer = null;
-		if(idValue == null || idValue.isEmpty()){
-			farmer=utilService.findFarmerById(Long.valueOf(paramValue));
-		}else{
-			farmer= (Farmer) farmerService.findObjectById("from Farmer fc where fc.farmerId=?",
+		if (idValue == null || idValue.isEmpty()) {
+			farmer = utilService.findFarmerById(Long.valueOf(paramValue));
+		} else {
+			farmer = (Farmer) farmerService.findObjectById("from Farmer fc where fc.farmerId=?",
 					new Object[] { paramValue });
 		}
-		
-		
-		//List<ProcurementVariety> listProcurementvarity= utilService.listProcurementVarietyBasedOnCropCat(farmer.getExporter().getFarmerHaveFarms());
+
+		// List<ProcurementVariety> listProcurementvarity=
+		// utilService.listProcurementVarietyBasedOnCropCat(farmer.getExporter().getFarmerHaveFarms());
 		List<ProcurementVariety> listProcurementvarity = utilService.listProcurementVariety();
 
 		return listProcurementvarity;
 	}
-	
+
 	public void populateCropNames() throws Exception {
 		JSONArray farmerArr = new JSONArray();
-		
+
 		if (selectedFarmCrops != null && !ObjectUtil.isEmpty(selectedFarmCrops)) {
-			
+
 			FarmCrops fc = (FarmCrops) farmerService.findObjectById("from FarmCrops fc where fc.id=?",
 					new Object[] { Long.valueOf(selectedFarmCrops) });
-			
-			List<ProcurementVariety> dataList= utilService.listProcurementVarietyBasedOnCropCat(fc.getExporter().getFarmerHaveFarms());
+
+			List<ProcurementVariety> dataList = utilService
+					.listProcurementVarietyBasedOnCropCat(fc.getExporter().getFarmerHaveFarms());
 
 			if (dataList != null && !ObjectUtil.isEmpty(dataList)) {
 				dataList.stream().distinct().forEach(f -> {
@@ -789,24 +833,25 @@ public class PlantingAction extends SwitchAction {
 		sendAjaxResponse(farmerArr);
 
 	}
-	
-	public void populateFarmBound(){
-		JSONArray jss =new JSONArray();
-		if(selectedFarm!=null && !StringUtil.isEmpty(selectedFarm) && StringUtil.isLong(selectedFarm)){
-			List<Coordinates> cr = (List<Coordinates>) farmerService.listObjectById("select pc.farmCoordinates from FarmCrops f join f.plotting pc where f.id=?", new Object[]{Long.valueOf(selectedFarm)});
-					if(cr!=null && !cr.isEmpty()){
-						cr.stream().sorted(Comparator.comparingLong(Coordinates::getOrderNo)).forEach(uu ->{
-							JSONObject jsobj =new JSONObject();
-							jsobj.put("latitude", uu.getLatitude());
-							jsobj.put("longitude", uu.getLongitude());
-							jsobj.put("orderNo", uu.getOrderNo());
-							jss.add(jsobj);
-						});
-					}
+
+	public void populateFarmBound() {
+		JSONArray jss = new JSONArray();
+		if (selectedFarm != null && !StringUtil.isEmpty(selectedFarm) && StringUtil.isLong(selectedFarm)) {
+			List<Coordinates> cr = (List<Coordinates>) farmerService.listObjectById(
+					"select pc.farmCoordinates from FarmCrops f join f.plotting pc where f.id=?",
+					new Object[] { Long.valueOf(selectedFarm) });
+			if (cr != null && !cr.isEmpty()) {
+				cr.stream().sorted(Comparator.comparingLong(Coordinates::getOrderNo)).forEach(uu -> {
+					JSONObject jsobj = new JSONObject();
+					jsobj.put("latitude", uu.getLatitude());
+					jsobj.put("longitude", uu.getLongitude());
+					jsobj.put("orderNo", uu.getOrderNo());
+					jss.add(jsobj);
+				});
+			}
 		}
-		
+
 		sendAjaxResponse(jss);
 	}
-
 
 }

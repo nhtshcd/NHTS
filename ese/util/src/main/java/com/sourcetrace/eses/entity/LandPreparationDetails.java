@@ -20,11 +20,13 @@ import org.hibernate.annotations.ParamDef;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "land_preparation_details")
 @Getter
 @Setter
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class LandPreparationDetails implements Serializable, Comparable<LandPreparationDetails> {
 
 	private static final long serialVersionUID = 1L;

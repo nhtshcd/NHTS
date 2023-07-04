@@ -32,7 +32,10 @@
 				loadVarety(cropcat);
 				var cropName=$.trim('<s:property value="productId"/>');
 				$('#procurementProductList').val(JSON.parse(JSON.stringify(cropName.replace(/\s/g,'').split(",")))).select2();
-				loadHsCode(cropName);
+				listProGrade(cropName);
+				var varietyId=$.trim('<s:property value="varietyId"/>');
+				$('#scattered').val(JSON.parse(JSON.stringify(varietyId.replace(/\s/g,'').split(",")))).select2();
+				loadHsCode(varietyId);
 				/*  var farmNam='<s:property value="farmer.exporter.id"/>';
 				$("#exporter option[value='"+ farmNam.trim() + "']").prop("selected", true).trigger('change'); */
 				
@@ -165,7 +168,7 @@ function loadHsCode(val){
 	//alert("Selected Product***********"+selectedProduct);
 
 	 var procUnit="";
- $($("#procurementProductList").val()).each(function(k, v) {
+ $($("#scattered").val()).each(function(k, v) {
 procUnit += v + ",";
 	});
 	
@@ -262,6 +265,39 @@ procUnit += v + ",";
 				         $('#ageHide').val(0);
 				}
 	}
+	
+	function listProGrade(selectedvariety) {
+		
+		var selectedProduct=$("#procurementProductList").val();
+		var rsdata="";
+		var arr=new Array();
+		var rat="";
+		$('#scattered').val("").select2();
+		
+	
+		if(!isEmpty(selectedvariety)){
+			for(var i=0;i<selectedProduct.length;i++)  //iterate through array of selected rows
+		    {
+		       var ret = selectedProduct[i];  
+		       arr.push(ret);
+		    }
+
+		   rsdata=arr.join(",");
+		   rsdata= rsdata.trim();
+		   
+			$.ajax({
+				 type: "POST",
+		        async: false,
+		        url: "farmer_populateGrade.action",
+			        data: {procurementVariety : rsdata},
+		        success: function(result) {
+		        	insertOptionswithoutselect("scattered", $.parseJSON(result));
+		        }
+			});
+		}
+
+		
+	}
 
 </script>
 
@@ -269,7 +305,7 @@ procUnit += v + ",";
 <body>
 
 
-	<s:form id="fileDownload" action="user_populateDownload">
+	<s:form id="fileDownload" action="farmer_populateDownload">
 		<s:hidden id="loadId" name="idd" />
 	</s:form>
 
@@ -300,15 +336,27 @@ procUnit += v + ",";
 
 			<div class=flexform>
 
-				<div class="flexform-item">
-					<label for="txt"><s:text name="farmer.cat" /><sup
+               <div class="flexform-item">
+					<label for="txt"><s:text name="Farmer Category" /><sup
 						style="color: red;">*</sup></label>
+					<div class="form-element">
+						<s:select class="form-control  select2" list="farmerCategoryList"
+							headerKey="" theme="simple" name="farmer.fCat"
+							headerValue="%{getText('txt.select')}" id="fCat" />
+					</div>
+				</div>
+				
+				<div class="flexform-item">
+					<%-- <label for="txt"><s:text name="farmer.cat" /> --%>
+					<label for="txt"><s:text name="Farm Ownership" />
+					<sup style="color: red;">*</sup></label>
 					<div class="form-element">
 						<s:select class="form-control  select2" list="farmerCatList"
 							headerKey="" theme="simple" name="farmer.farmerCat"
 							headerValue="%{getText('txt.select')}" id="fCategory" />
 					</div>
 				</div>
+				
 				<div class="flexform-item">
 					<label for="txt"><s:text name="farmer.farmerRegType" /><sup
 						style="color: red;">*</sup></label>
@@ -356,8 +404,8 @@ procUnit += v + ",";
 				</div> --%>
 				
 				<div class="flexform-item kraPin hide">
-					<label for="txt"><s:text name="farmer.kraPin" /><sup
-						style="color: red;">*</sup></label>
+					<label for="txt"><s:text name="farmer.kraPin" /><!-- <sup
+						style="color: red;">*</sup> --></label>
 					<div class="form-element">
 						<s:textfield name="farmer.kraPin" theme="simple"
 							cssClass="lowercase form-control" id="kraPin"
@@ -455,8 +503,9 @@ procUnit += v + ",";
 				</div>
 
 				<div class="flexform-item">
-					<label for="txt"><s:text name="export.nationalId" /><sup
-						style="color: red;" class="gendermo">*</sup></label>
+					<label for="txt"><s:text name="export.nationalId" />
+					<!-- <sup style="color: red;" class="gendermo">*</sup> -->
+					</label>
 					<div class="form-element">
 						<s:textfield name="farmer.nid" theme="simple" id="natiId"
 							cssClass="lowercase form-control" maxlength="10"
@@ -515,6 +564,18 @@ procUnit += v + ",";
 					<div class="form-element">
 						<s:select name="productId" list="{}" listKey="id" listValue="name"
 							id="procurementProductList" class="form-control  select2 "
+							multiple="true" onchange="listProGrade(this.value);"/>
+
+
+					</div>
+				</div>
+				
+				<div class="flexform-item">
+					<label for="txt"><s:text name="export.cropvariety" /><sup
+						style="color: red;">*</sup></label>
+					<div class="form-element">
+						<s:select name="varietyId" list="{}" listKey="id" listValue="name"
+							id="scattered" class="form-control  select2 "
 							multiple="true" onchange="loadHsCode(this.value)"/>
 
 

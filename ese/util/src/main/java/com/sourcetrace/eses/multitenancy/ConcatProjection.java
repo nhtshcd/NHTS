@@ -38,8 +38,13 @@ public class ConcatProjection extends SimpleProjection {
 
         for (String property : properties) {
             result.add("IFNULL("+criteriaQuery.getColumn(criteria, property)+",'')");
-            result.add("'"+this.delimiter+"'");
+            if(this.delimiter!=null){
+
+                result.add("'"+this.delimiter+"'");
+            }
+
         }
+        if(result.get(result.size()-1).equals(this.delimiter))
         result.remove(result.size()-1);
 
         return result;

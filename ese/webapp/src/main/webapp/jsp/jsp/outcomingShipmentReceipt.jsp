@@ -196,6 +196,8 @@ td {
 			value="outcomeShipmentPrintMap['agentId']" /></b>&nbsp; </p> --%>
                     <p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Buyer:   &nbsp;<b><s:property
 			value="outcomeShipmentPrintMap['agentName']" /></b>&nbsp;</p>
+                    <p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Shipment Destination:   &nbsp;<b><s:property
+			value="outcomeShipmentPrintMap['shipmentDestination']" /></b>&nbsp;</p>
                     <p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Address:   &nbsp;<b><s:property
 			value="outcomeShipmentPrintMap['buyeraddress']" /></b>&nbsp;</p>
                     <p class="sub-heading" style="margin-bottom: 05px;margin-top: 05px;">Mobile No:   &nbsp;<b><s:property

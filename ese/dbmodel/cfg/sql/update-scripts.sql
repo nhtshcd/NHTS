@@ -3493,3 +3493,439 @@ UPDATE `locale_property` SET `code` = 'statuss0', `lang_code` = 'en', `lang_valu
 ALTER TABLE `city_warehouse` 
 ADD COLUMN `PACKING_BATCH` varchar(60);
 
+---------------27-01-2023---------------
+ALTER TABLE `farmer` 
+ADD COLUMN `CROP_VARIETY` varchar(255) NULL AFTER `EXPORTERS`;
+ALTER TABLE `user_active_and_inactive_hostory` 
+ADD COLUMN `EXPORTER` bigint(54) NULL AFTER `IP_ADDR`;
+ALTER TABLE `procurement_grade` 
+ADD COLUMN `Crop_HS_code` varchar(255) NULL AFTER `LON`;
+
+
+---For Product Transfer Server menu -----
+SET FOREIGN_KEY_CHECKS = 1;
+set @parent_id = 3;
+set @menu_order = (SELECT max(ord) FROM ese_menu WHERE PARENT_ID = @parent_id);
+set @menu_order = @menu_order+1;
+
+INSERT INTO `ese_menu` (`ID`, `NAME`, `DES`, `URL`, `ORD`, `PARENT_ID`, `FILTER`, `EXPORT_AVILABILITY`, `PRIORITY`)
+        VALUES (NULL, 'service.productTransfer','Product Transfer', 'dynamicViewReportDT_list.action?id=134', @menu_order, @parent_id, '0', '0','0');
+ 
+SET @max_menu_id = (SELECT MAX(id) FROM ese_menu);
+
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 1);
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 2);
+
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '1');
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '2');
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '3');
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '4');
+
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productTransfer.list');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productTransfer.create');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productTransfer.update');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productTransfer.delete');
+
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.list'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.create'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.update'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.delete'));
+
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.list'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.create'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.update'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productTransfer.delete'));
+
+INSERT INTO `dynamic_report_config`(`ID`, `ALIAS`, `BRANCH_ID`, `DETAIL_METHOD`, `ENTITY_NAME`, `FETCH_TYPE`, `GRID_TYPE`, `GROUP_PROPERTY`, `PARENT_ID`, `REPORT`, `STATUS`, `XLS_FILE`, `subGrid`, `SORTBY`, `CSV_FILE`) VALUES (134, 'tf=transferFrom,tt=transferTo,ex=exporter', NULL, 'productTransfer_create.action$$service.productTransfer.create', 'com.sourcetrace.eses.entity.ProductTransfer', 2, '1', NULL, NULL, 'Product Transfer', '1', 'Product Transfer', NULL, NULL, NULL);
+
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'id', 0, 1, NULL, 0, NULL, 'Id', '', 1, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'branchId', 0, 1, NULL, 1, NULL, 'Branch Id', '', 2, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'batchNo', 0, 1, NULL, 1, NULL, 'Transfer Receipt ID', NULL, 3, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 2, NULL, '5', NULL, 'date', 0, 1, NULL, 1, NULL, 'Date', 'getGeneralDateFormat', 4, 'productTransfer_detail.action?id=', 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'ex.name', 0, 1, NULL, 1, NULL, 'Exporter', NULL, 5, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tf.name', 0, 1, NULL, 1, NULL, 'Transfer From', NULL, 6, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tt.name', 0, 1, NULL, 1, NULL, 'Transfer To', NULL, 7, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'truckNo', 0, 1, NULL, 1, NULL, 'Truck No', NULL, 8, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverName', 0, 1, NULL, 1, NULL, 'Driver Name', NULL, 9, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverLicenseNumber', 0, 1, NULL, 1, NULL, 'Driver License Number', NULL, 10, NULL, 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 28, 'center', NULL, NULL, 'id', 0, 0, NULL, 1, NULL, 'Edit', 'select distinct pt.id, case when pr.id is null THEN	\'true\' ELSE 	\'false\' END  from product_transfer pt left join product_transfer pr on pr.TRANSFER_RECEIPT_ID=pt.BATCH_NO and pr.status=1', 20, 'productTransfer_update.action?id=##service.productTransfer.update', 1, 0, 100, 134, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 23, 'center', NULL, NULL, 'id', 0, 0, NULL, 1, NULL, 'Delete', 'select distinct pt.id, case when pr.id is null THEN	\'true\' ELSE 	\'false\' END  from product_transfer pt left join product_transfer pr on pr.TRANSFER_RECEIPT_ID=pt.BATCH_NO and pr.status=1', 21, 'productTransfer_delete.action?id=##service.productTransfer.delete', 1, 0, 100, 134, NULL);
+
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '1', NULL, 'status~1~1', NULL, 'Status', NULL, 1, 0, 1, 134);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '0', NULL, 'type~1~1', NULL, 'Type', NULL, 2, 0, 1, 134);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, 'dealer', NULL, 'ex.id~1~2', NULL, 'status', NULL, 3, 0, 1, 134);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1711', 'date~11', 1, 'Date', NULL, 9, 1, 4, 134);
+
+
+---For Product Reception Server menu -----
+SET FOREIGN_KEY_CHECKS = 1;
+set @parent_id = 3;
+set @menu_order = (SELECT max(ord) FROM ese_menu WHERE PARENT_ID = @parent_id);
+set @menu_order = @menu_order+1;
+
+INSERT INTO `ese_menu` (`ID`, `NAME`, `DES`, `URL`, `ORD`, `PARENT_ID`, `FILTER`, `EXPORT_AVILABILITY`, `PRIORITY`)
+        VALUES (NULL, 'service.productReception','Product Reception', 'dynamicViewReportDT_list.action?id=135', @menu_order, @parent_id, '0', '0','0');
+ 
+SET @max_menu_id = (SELECT MAX(id) FROM ese_menu);
+
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 1);
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 2);
+
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '1');
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '2');
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '3');
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '4');
+
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productReception.list');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productReception.create');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productReception.update');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'service.productReception.delete');
+
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.list'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.create'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.update'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.delete'));
+
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.list'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.create'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.update'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='service.productReception.delete'));
+
+INSERT INTO `dynamic_report_config`(`ID`, `ALIAS`, `BRANCH_ID`, `DETAIL_METHOD`, `ENTITY_NAME`, `FETCH_TYPE`, `GRID_TYPE`, `GROUP_PROPERTY`, `PARENT_ID`, `REPORT`, `STATUS`, `XLS_FILE`, `subGrid`, `SORTBY`, `CSV_FILE`) VALUES (135, 'tf=transferFrom,tt=transferTo,ex=tt.exporter', NULL, 'productReception_create.action$$service.productReception.create', 'com.sourcetrace.eses.entity.ProductTransfer', 2, '1', NULL, NULL, 'Product Reception', '1', 'Product Reception', NULL, NULL, NULL);
+
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'id', 0, 1, NULL, 0, NULL, 'Id', '', 1, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'branchId', 0, 1, NULL, 1, NULL, 'Branch Id', '', 2, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'transferReceiptID', 0, 1, NULL, 1, NULL, 'Transfer Receipt ID', NULL, 3, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'batchNo', 0, 1, NULL, 1, NULL, 'Batch No', NULL, 4, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 2, NULL, '5', NULL, 'date', 0, 1, NULL, 1, NULL, 'Date', 'getGeneralDateFormat', 5, 'productReception_detail.action?id=', 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'ex.name', 0, 1, NULL, 1, NULL, 'Exporter', NULL, 6, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tf.name', 0, 1, NULL, 1, NULL, 'Transfer From', NULL, 7, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tt.name', 0, 1, NULL, 1, NULL, 'Transfer To', NULL, 8, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'truckNo', 0, 1, NULL, 1, NULL, 'Truck No', NULL, 9, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverName', 0, 1, NULL, 1, NULL, 'Driver Name', NULL, 10, NULL, 1, 0, 100, 135, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverLicenseNumber', 0, 1, NULL, 1, NULL, 'Driver License Number', NULL, 11, NULL, 1, 0, 100, 135, NULL);
+
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '1', NULL, 'status~1~1', NULL, 'Status', NULL, 1, 0, 1, 135);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '1', NULL, 'type~1~1', NULL, 'Type', NULL, 2, 0, 1, 135);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, 'dealer', NULL, 'ex.id~1~2', NULL, 'status', NULL, 3, 0, 1, 135);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1724', 'date~11', 1, 'Date', NULL, 9, 1, 4, 135);
+
+-- ------------------------------ Table structure for product_transfer-- ----------------------------
+DROP TABLE IF EXISTS `product_transfer`;
+CREATE TABLE `product_transfer`  (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `BRANCH_ID` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `BATCH_NO` varchar(50) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `TRANSFER_RECEIPT_ID` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `DATE` date NULL DEFAULT NULL,
+  `TRANSFER_FROM` bigint(45) NULL DEFAULT NULL,
+  `TRANSFER_TO` bigint(45) NULL DEFAULT NULL,
+  `TRUCK_NO` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `DRIVER_NAME` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `DRIVER_LICENSE_NUMBER` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `EXPORTER` bigint(45) NULL DEFAULT NULL,
+  `STATUS` int(11) NULL DEFAULT NULL,
+  `STATUS_CODE` int(11) NULL DEFAULT 0,
+  `VERSION` int(11) NULL DEFAULT 1,
+  `CREATED_USER` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `CREATED_DATE` date NULL DEFAULT NULL,
+  `UPDATED_USER` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `UPDATED_DATE` date NULL DEFAULT NULL,
+  `IP_ADDR` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `LAT` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `LON` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `TYPE` int(1) NULL DEFAULT NULL,
+  `MSG_NO` varchar(55) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  PRIMARY KEY (`ID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+-- ------------------------------ Table structure for product_transfer_detail-- ----------------------------
+DROP TABLE IF EXISTS `product_transfer_detail`;
+CREATE TABLE `product_transfer_detail`  (
+  `ID` bigint(20) NOT NULL AUTO_INCREMENT,
+  `BRANCH_ID` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `BATCH_NO` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `BlOCK_ID` bigint(45) NULL DEFAULT NULL,
+  `PLANTING_ID` bigint(45) NULL DEFAULT NULL,
+  `PRODUCT` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `VARIETY` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `AVAILABLE_WEIGHT` double(45, 5) NULL DEFAULT NULL,
+  `TRANSFERRED_WEIGHT` double(45, 5) NULL DEFAULT NULL,
+  `RECEIVED_WEIGHT` double(45, 5) NULL DEFAULT NULL,
+  `PRODUCT_TRANSFER_ID` bigint(45) NULL DEFAULT NULL,
+  `STATUS` int(11) NULL DEFAULT NULL,
+  `STATUS_CODE` int(11) NULL DEFAULT 0,
+  `VERSION` int(11) NULL DEFAULT 1,
+  `CREATED_USER` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `CREATED_DATE` date NULL DEFAULT NULL,
+  `UPDATED_USER` varchar(255) CHARACTER SET utf8 COLLATE utf8_general_ci NULL DEFAULT NULL,
+  `UPDATED_DATE` date NULL DEFAULT NULL,
+  PRIMARY KEY (`ID`) USING BTREE
+) ENGINE = InnoDB AUTO_INCREMENT = 1 CHARACTER SET = utf8 COLLATE = utf8_general_ci ROW_FORMAT = Compact;
+
+SET FOREIGN_KEY_CHECKS = 1;
+
+INSERT INTO `ese_seq`(`ID`, `SEQ_KEY`, `SEQ_VAL`) VALUES (NULL, 'PRODUCT_TRANSFER_ID_SEQ', 0);
+INSERT INTO `ese_seq`(`ID`, `SEQ_KEY`, `SEQ_VAL`) VALUES (NULL, 'PRODUCT_RECEPTION_ID_SEQ', 0);
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'mssg.edit.service.productTransfer.update', 'en', 'Can\'t Edit');
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'mssg.delete.service.productTransfer.delete', 'en', 'Can\'t Delete');
+
+---For Product Transfer Report menu -----
+SET FOREIGN_KEY_CHECKS = 1;
+set @parent_id = 4;
+set @menu_order = (SELECT max(ord) FROM ese_menu WHERE PARENT_ID = @parent_id);
+set @menu_order = @menu_order+1;
+
+INSERT INTO `ese_menu` (`ID`, `NAME`, `DES`, `URL`, `ORD`, `PARENT_ID`, `FILTER`, `EXPORT_AVILABILITY`, `PRIORITY`)
+        VALUES (NULL, 'report.productTransfer','Product Transfer Report', 'dynamicViewReportDT_list.action?id=136', @menu_order, @parent_id, '0', '0','0');
+ 
+SET @max_menu_id = (SELECT MAX(id) FROM ese_menu);
+
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 1);
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 2);
+
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '1');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'report.productTransfer.list');
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='report.productTransfer.list'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='report.productTransfer.list'));
+
+INSERT INTO `dynamic_report_config`(`ID`, `ALIAS`, `BRANCH_ID`, `DETAIL_METHOD`, `ENTITY_NAME`, `FETCH_TYPE`, `GRID_TYPE`, `GROUP_PROPERTY`, `PARENT_ID`, `REPORT`, `STATUS`, `XLS_FILE`, `subGrid`, `SORTBY`, `CSV_FILE`) VALUES (136, 'tf=transferFrom,tt=transferTo,ex=exporter', NULL, NULL, 'com.sourcetrace.eses.entity.ProductTransfer', 2, '1', NULL, NULL, 'Product Transfer Report', '1', 'Product Transfer Report', NULL, NULL, NULL);
+
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'id', 0, 1, NULL, 0, NULL, 'Id', '', 1, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'branchId', 0, 1, NULL, 1, NULL, 'Branch Id', '', 2, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'batchNo', 0, 1, NULL, 1, NULL, 'Transfer Receipt ID', NULL, 3, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 2, NULL, '4', NULL, 'date', 0, 1, NULL, 1, NULL, 'Date', 'getGeneralDateFormat', 4, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'ex.name', 0, 1, NULL, 1, NULL, 'Exporter', NULL, 5, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tf.name', 0, 1, NULL, 1, NULL, 'Transfer From', NULL, 6, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tt.name', 0, 1, NULL, 1, NULL, 'Transfer To', NULL, 7, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'truckNo', 0, 1, NULL, 1, NULL, 'Truck No', NULL, 8, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverName', 0, 1, NULL, 1, NULL, 'Driver Name', NULL, 9, NULL, 1, 0, 100, 136, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverLicenseNumber', 0, 1, NULL, 1, NULL, 'Driver License Number', NULL, 10, NULL, 1, 0, 100, 136, NULL);
+
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '1', NULL, 'status~1~1', NULL, 'Status', NULL, 1, 0, 1, 136);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '0', NULL, 'type~1~1', NULL, 'Type', NULL, 2, 0, 1, 136);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, 'dealer', NULL, 'ex.id~1~2', NULL, 'status', NULL, 3, 0, 1, 136);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1735', 'date~11', 1, 'Date', NULL, 9, 1, 4, 136);
+
+
+---For Product Reception Report menu -----
+SET FOREIGN_KEY_CHECKS = 1;
+set @parent_id = 4;
+set @menu_order = (SELECT max(ord) FROM ese_menu WHERE PARENT_ID = @parent_id);
+set @menu_order = @menu_order+1;
+
+INSERT INTO `ese_menu` (`ID`, `NAME`, `DES`, `URL`, `ORD`, `PARENT_ID`, `FILTER`, `EXPORT_AVILABILITY`, `PRIORITY`)
+        VALUES (NULL, 'report.productReception','Product Reception Report', 'dynamicViewReportDT_list.action?id=137', @menu_order, @parent_id, '0', '0','0');
+ 
+SET @max_menu_id = (SELECT MAX(id) FROM ese_menu);
+
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 1);
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 2);
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '1');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'report.productReception.list');
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='report.productReception.list'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='report.productReception.list'));
+
+INSERT INTO `dynamic_report_config`(`ID`, `ALIAS`, `BRANCH_ID`, `DETAIL_METHOD`, `ENTITY_NAME`, `FETCH_TYPE`, `GRID_TYPE`, `GROUP_PROPERTY`, `PARENT_ID`, `REPORT`, `STATUS`, `XLS_FILE`, `subGrid`, `SORTBY`, `CSV_FILE`) VALUES (137, 'tf=transferFrom,tt=transferTo,ex=tt.exporter', NULL, NULL, 'com.sourcetrace.eses.entity.ProductTransfer', 2, '1', NULL, NULL, 'Product Reception Report', '1', 'Product Reception Report', NULL, NULL, NULL);
+
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'id', 0, 1, NULL, 0, NULL, 'Id', '', 1, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'branchId', 0, 1, NULL, 1, NULL, 'Branch Id', '', 2, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'transferReceiptID', 0, 1, NULL, 1, NULL, 'Transfer Receipt ID', NULL, 3, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'batchNo', 0, 1, NULL, 1, NULL, 'Batch No', NULL, 4, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'ex.name', 0, 1, NULL, 1, NULL, 'Exporter', NULL, 5, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 2, NULL, '4', NULL, 'date', 0, 1, NULL, 1, NULL, 'Date', 'getGeneralDateFormat', 6, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tf.name', 0, 1, NULL, 1, NULL, 'Transfer From', NULL, 7, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'tt.name', 0, 1, NULL, 1, NULL, 'Transfer To', NULL, 8, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'truckNo', 0, 1, NULL, 1, NULL, 'Truck No', NULL, 9, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverName', 0, 1, NULL, 1, NULL, 'Driver Name', NULL, 10, NULL, 1, 0, 100, 137, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'driverLicenseNumber', 0, 1, NULL, 1, NULL, 'Driver License Number', NULL, 11, NULL, 1, 0, 100, 137, NULL);
+
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '1', NULL, 'status~1~1', NULL, 'Status', NULL, 1, 0, 1, 137);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '1', NULL, 'type~1~1', NULL, 'Type', NULL, 2, 0, 1, 137);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, 'dealer', NULL, 'ex.id~1~2', NULL, 'status', NULL, 3, 0, 1, 137);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1746', 'date~11', 1, 'Date', NULL, 9, 1, 4, 137);
+
+
+---------farmer list page changes--------
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 8, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'farmerCat', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Farm Ownership', `METHOD` = '{\"0\":\"Own\",\"1\":\"Contracted\"}', `ORDERR` = 11, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 2, `SORT_FIELD` = NULL WHERE `ID` = 1492;
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (1754, 8, NULL, NULL, NULL, 'fCat', 0, 1, NULL, 1, NULL, 'Farmer Category', '{\"0\":\"Organic\",\"1\":\"Transition\",\"2\":\"Conventional\"}', 12, NULL, 1, 0, 100, 2, NULL);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (375, NULL, '1754', 'fCat~1~2', NULL, 'Farmer Category', '{\"0\":\"Organic\",\"1\":\"Transition\",\"2\":\"Conventional\"}', 5, 1, 8, 2);
+
+---------farmer failed Report changes--------
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 8, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'farmerCat', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Farm Ownership', `METHOD` = '{\"0\":\"Own\",\"1\":\"Contracted\"}', `ORDERR` = 11, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 131, `SORT_FIELD` = NULL WHERE `ID` = 1649;
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 8, NULL, NULL, NULL, 'fCat', 0, 1, NULL, 1, NULL, 'Farmer Category', '{\"0\":\"Organic\",\"1\":\"Transition\",\"2\":\"Conventional\"}', 12, NULL, 1, 0, 100, 131, NULL);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1754', 'fCat~1~2', NULL, 'Farmer Category', '{\"0\":\"Organic\",\"1\":\"Transition\",\"2\":\"Conventional\"}', 5, 1, 8, 131);
+
+----------------Farmer Category field added in farmer-------------------------
+ALTER TABLE `farmer` 
+ADD COLUMN `FARMER_CATEGORY` varchar(255) NULL AFTER `CROP_VARIETY`;
+
+-------------------22-02-2023------backUp for the Exporter------------------------
+UPDATE `eses_nhts`.`exporter_registration` SET `BRANCH_ID` = 'nhts', `COMPANY_NAME` = 'VA Exporters', `REG_PROOF` = NULL, `VILLAGE` = 22, `ADDRESS` = NULL, `MOBILE_NO` = '9600418030', `EMAIL_ID` = '', `REASON` = NULL, `DOC` = NULL, `INSP_ID` = NULL, `EXPIRE_DATE` = '2023-06-30', `IS_ACTIVE` = 0, `CREATED_DATE` = '2022-09-01 09:06:52', `APPROVAL_DATE` = NULL, `CREATED_USER` = NULL, `UPDATED_DATE` = '2022-11-16 12:56:43', `UPDATED_USER` = 'sts', `VERSION` = '37', `Status` = 1, `CMPY_ORIENTATION` = '1', `REG_NUMBER` = 'P051353949H', `UGANDA_EXPORT` = '2', `REF_LETTERNO` = 'LA11/1002133', `Farmer_HaveFarms` = '3, 2', `SCATTERED` = '1, 2, 3', `Pack_GpsLoc` = 'CN001,CN002', `PACKHOUSE` = '1', `Exp_TinNumber` = 'Street1', `TIN` = 'vanitha@sourcetrace.com', `REX_No` = '', `farm_ToPackhouse` = '', `Pack_ToExitPoint` = '0', `Reg_No` = NULL, `WAREHOUSE` = NULL, `OTHER_SCATTERED` = NULL, `IP_ADDR` = NULL, `LON` = ', , , , , ', `LAT` = ', , , , , ', `STATUS_MSG` = 'RECORD NOT FOUND' WHERE `ID` = 2;
+UPDATE `eses_nhts`.`exporter_registration` SET `BRANCH_ID` = 'nhts', `COMPANY_NAME` = 'Test', `REG_PROOF` = NULL, `VILLAGE` = 22, `ADDRESS` = NULL, `MOBILE_NO` = '960014852222', `EMAIL_ID` = '', `REASON` = NULL, `DOC` = NULL, `INSP_ID` = NULL, `EXPIRE_DATE` = NULL, `IS_ACTIVE` = 0, `CREATED_DATE` = '2022-09-02 12:39:10', `APPROVAL_DATE` = NULL, `CREATED_USER` = 'sts', `UPDATED_DATE` = '2022-11-16 12:56:43', `UPDATED_USER` = 'sts', `VERSION` = '16', `Status` = 2, `CMPY_ORIENTATION` = '1', `REG_NUMBER` = 'P011212', `UGANDA_EXPORT` = '2', `REF_LETTERNO` = '', `Farmer_HaveFarms` = '2', `SCATTERED` = '3', `Pack_GpsLoc` = 'CN001', `PACKHOUSE` = '1', `Exp_TinNumber` = 'Street1', `TIN` = 'test@mail.com', `REX_No` = '', `farm_ToPackhouse` = '', `Pack_ToExitPoint` = '1', `Reg_No` = NULL, `WAREHOUSE` = NULL, `OTHER_SCATTERED` = NULL, `IP_ADDR` = NULL, `LON` = '', `LAT` = '', `STATUS_MSG` = 'RECORD NOT FOUND' WHERE `ID` = 3;
+UPDATE `eses_nhts`.`exporter_registration` SET `BRANCH_ID` = 'nhts', `COMPANY_NAME` = 'Test', `REG_PROOF` = NULL, `VILLAGE` = 22, `ADDRESS` = NULL, `MOBILE_NO` = '961111118030', `EMAIL_ID` = '', `REASON` = NULL, `DOC` = NULL, `INSP_ID` = NULL, `EXPIRE_DATE` = '2023-06-30', `IS_ACTIVE` = 0, `CREATED_DATE` = '2022-09-08 10:26:22', `APPROVAL_DATE` = NULL, `CREATED_USER` = 'sts', `UPDATED_DATE` = '2022-11-16 12:56:43', `UPDATED_USER` = 'sts', `VERSION` = '50', `Status` = 1, `CMPY_ORIENTATION` = '1', `REG_NUMBER` = 'P051219453I', `UGANDA_EXPORT` = '2', `REF_LETTERNO` = 'LA11/1002133', `Farmer_HaveFarms` = '3', `SCATTERED` = '2', `Pack_GpsLoc` = 'CN002', `PACKHOUSE` = '1', `Exp_TinNumber` = 'Street1', `TIN` = 'testexp@mail.com', `REX_No` = '', `farm_ToPackhouse` = '', `Pack_ToExitPoint` = '1', `Reg_No` = NULL, `WAREHOUSE` = NULL, `OTHER_SCATTERED` = NULL, `IP_ADDR` = NULL, `LON` = ', , ', `LAT` = ', , ', `STATUS_MSG` = 'RECORD NOT FOUND' WHERE `ID` = 4;
+UPDATE `eses_nhts`.`exporter_registration` SET `BRANCH_ID` = 'nhts', `COMPANY_NAME` = 'Excel Ltd', `REG_PROOF` = NULL, `VILLAGE` = 56, `ADDRESS` = NULL, `MOBILE_NO` = '0720893421', `EMAIL_ID` = 'stvnganga@gmail.com', `REASON` = NULL, `DOC` = NULL, `INSP_ID` = NULL, `EXPIRE_DATE` = NULL, `IS_ACTIVE` = 0, `CREATED_DATE` = '2023-02-15 09:08:02', `APPROVAL_DATE` = NULL, `CREATED_USER` = 'sts', `UPDATED_DATE` = '2023-02-15 09:08:02', `UPDATED_USER` = 'sts', `VERSION` = '1', `Status` = 1, `CMPY_ORIENTATION` = '1', `REG_NUMBER` = 'P000000030N', `UGANDA_EXPORT` = '4', `REF_LETTERNO` = '2345657', `Farmer_HaveFarms` = '112, 113', `SCATTERED` = '135, 148', `Pack_GpsLoc` = '0808100000,0804400002', `PACKHOUSE` = '1', `Exp_TinNumber` = 'D8 Temple road', `TIN` = 'stvnganga@gmail.com', `REX_No` = '987654343', `farm_ToPackhouse` = 'Charles Njonjo', `Pack_ToExitPoint` = '1', `Reg_No` = NULL, `WAREHOUSE` = NULL, `OTHER_SCATTERED` = NULL, `IP_ADDR` = NULL, `LON` = ', ', `LAT` = ', ', `STATUS_MSG` = 'Something Went Wrong, Please Try Again' WHERE `ID` = 5;
+
+
+-------------------25-04-2023--------------------------
+ALTER TABLE `exporter_registration` 
+ADD COLUMN `EXPORTER_STATUS` int(2) NULL AFTER `STATUS_MSG`;
+ALTER TABLE `spray_field_management` 
+ADD COLUMN `PHI_AND_SPRAYING_DATE` date NULL AFTER `PLANTING_ID`;
+
+
+--------------------26-04-2023-------------------------
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 8, NULL, NULL, NULL, 'exporterStatus', 0, 1, NULL, 1, NULL, 'Exporter Status', '{\"0\":\"Applied\",\"1\":\"Verified\",\"2\":\"Approved\"}', 15, NULL, 1, 0, 100, 4, NULL);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1756', 'exporterStatus~1~5', NULL, 'Exporter Status', '{\"0\":\"Applied\",\"1\":\"Verified\",\"2\":\"Approved\"}', 9, 1, 8, 4);
+
+ALTER TABLE `spray_field_management` 
+ADD COLUMN `ACTIVE_INGREDIENT` varchar(255) NULL AFTER `PLANTING_ID`;
+
+INSERT INTO`farm_catalogue`(`ID`, `BRANCH_ID`, `NAME`, `REVIOSION_NO`, `STATUS`, `CATALOGUE_TYPEZ`) VALUES (88, 'nhts', 'Spraying Required?', 1, 1, 88);
+
+ALTER TABLE `scouting` 
+ADD COLUMN `SPRAYING_REQUIRED` varchar(255) NULL AFTER `PLANTING_ID`;
+------27-04-2023-----------
+INSERT INTO `locale_property` (`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'scouting.sprayingRequired', 'en', 'Spraying Required?');
+INSERT INTO `dynamic_report_config_detail` (`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (1757, 2, NULL, NULL, NULL, 'sprayingRequired', 0, 1, NULL, 1, NULL, 'Spraying Required?', 'getCatalgueNameByCode', 14, NULL, 1, 0, 100, 96, NULL);
+INSERT INTO `dynamic_report_config_filter` (`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1757', 'sprayingRequired', NULL, 'Spraying Required?', 'select code as b1,name  from catalogue_value cv where cv.TYPEZ=88', 10, 1, 5, 96);
+INSERT INTO `dynamic_report_config_detail` (`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (1758, 2, NULL, NULL, NULL, 'sprayingRequired', 0, 1, NULL, 1, NULL, 'Spraying Required?', 'getCatalgueNameByCode', 14, NULL, 1, 0, 100, 95, NULL);
+INSERT INTO `dynamic_report_config_filter` (`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (379, NULL, '1758', 'sprayingRequired', NULL, 'Spraying Required?', 'select code as b1,name  from catalogue_value cv where cv.TYPEZ=88', 10, 1, 5, 95);
+
+
+-------10-05-2023------
+
+ALTER TABLE `planting` 
+ADD COLUMN `FIELD_TYPE` varchar(255) NULL AFTER `PLANTING_MATERIALS`;
+
+INSERT INTO `farm_catalogue`(`ID`, `BRANCH_ID`, `NAME`, `REVIOSION_NO`, `STATUS`, `CATALOGUE_TYPEZ`) VALUES (89, 'nhts', 'Field Type', 1, 1, 89);
+
+ALTER TABLE `packing_detail` 
+ADD COLUMN `TOTAL_PRICE` varchar(255) NULL AFTER `QR_CODE_ID`;
+
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (1760, 1, NULL, NULL, NULL, 'shipmentDestination', 0, 1, NULL, 1, NULL, 'Shipment Destination', NULL, 7, NULL, 1, 0, 100, 116, NULL);
+
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (1761, 1, NULL, NULL, NULL, 'shipmentDestination', 0, 1, NULL, 1, NULL, 'Shipment Destination', NULL, 7, NULL, 1, 0, 100, 117, NULL);
+
+ALTER TABLE `eses_nhts`.`scouting` 
+ADD COLUMN `SCTRECOMMENDATION` varchar(255) NULL AFTER `SPRAYING_REQUIRED`;
+
+ALTER TABLE `shipment` 
+ADD COLUMN `SHIPMENT_DESTINATION` varchar(255) NULL AFTER `MSG_NO`;
+
+ALTER TABLE `recalling` 
+ADD COLUMN `SHIPMENT_DESTINATION` varchar(255) NULL AFTER `ATTACHMENT`;
+
+ALTER TABLE `spray_field_management` 
+ADD COLUMN `recommen` varchar(255) NULL AFTER `ACTIVE_INGREDIENT`;
+
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'planting.fieldType', 'en', 'Field Type');
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'packing.totalprice', 'en', 'Product Value');
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'shipment.shipmentDestination', 'en', 'Shipment Destination');
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'sprayAndFieldManagement.recommen', 'en', 'Recommendation');
+
+
+
+-----------for Packhouse Report menu---------
+
+SET FOREIGN_KEY_CHECKS = 1;
+set @parent_id = 4;
+set @menu_order = (SELECT max(ord) FROM ese_menu WHERE PARENT_ID = @parent_id);
+set @menu_order = @menu_order+1;
+
+INSERT INTO `ese_menu` (`ID`, `NAME`, `DES`, `URL`, `ORD`, `PARENT_ID`, `FILTER`, `EXPORT_AVILABILITY`, `PRIORITY`)
+        VALUES (NULL, 'report.packhouse','Packhouse Report', 'dynamicViewReportDT_list.action?id=140', @menu_order, @parent_id, '0', '0','0');
+ 
+SET @max_menu_id = (SELECT MAX(id) FROM ese_menu);
+
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 1);
+INSERT INTO `ese_role_menu`( `MENU_ID`, `ROLE_ID`) VALUES ( @max_menu_id, 2);
+INSERT INTO `ese_menu_action` (`MENU_ID`, `ACTION_ID`) VALUES (@max_menu_id, '1');
+INSERT INTO `ese_ent` (`ID`, `NAME`) VALUES (NULL, 'report.packhouse.list');
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('1', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='report.packhouse.list'));
+INSERT INTO `ese_role_ent` (`ROLE_ID`, `ENT_ID`) VALUES ('2', (SELECT id FROM ese_ent WHERE ese_ent.`NAME`='report.packhouse.list'));
+
+INSERT INTO `dynamic_report_config`(`ID`, `ALIAS`, `BRANCH_ID`, `DETAIL_METHOD`, `ENTITY_NAME`, `FETCH_TYPE`, `GRID_TYPE`, `GROUP_PROPERTY`, `PARENT_ID`, `REPORT`, `STATUS`, `XLS_FILE`, `subGrid`, `SORTBY`, `CSV_FILE`) VALUES (140, 'ex=exporter', NULL, NULL, 'com.sourcetrace.eses.entity.Packhouse', 2, '1', NULL, NULL, 'Packhouse Report', '1', 'Packhouse Report', NULL, NULL, NULL);
+
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'id', 0, 1, NULL, 0, NULL, 'Id', '', 1, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'branchId', 0, 1, NULL, 1, NULL, 'Branch Id', '', 2, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, '', NULL, 'code', 0, 1, NULL, 1, NULL, 'Code', NULL, 3, '', 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'name', 0, 1, NULL, 1, NULL, 'Name', NULL, 4, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'location', 0, 1, NULL, 1, NULL, 'Location', NULL, 5, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'phoneNo', 0, 1, NULL, 1, NULL, 'Phone Number', NULL, 6, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'latitude', 0, 1, NULL, 1, NULL, 'Latitude', NULL, 7, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'longitude', 0, 1, NULL, 1, NULL, 'Longitude', NULL, 8, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'address', 0, 1, NULL, 1, NULL, 'Address', NULL, 9, NULL, 1, 0, 100, 140, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 1, NULL, NULL, NULL, 'ex.name', 0, 1, NULL, 1, NULL, 'Exporter', NULL, 10, NULL, 1, 0, 100, 140, NULL);
+
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, '1', NULL, 'status~1~1', NULL, 'status', NULL, 1, 0, 1, 140);
+
+----------16-05-2023----------
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'mssg.delete.profile.agent.delete', 'en', 'Device Mapping Done. Cant Delete');
+UPDATE `dynamic_report_config_filter` SET `DEFAULT_FILTER` = '1', `CONFIG_DETAIL_ID` = '1037', `FIELD` = 'status~1~1', `IS_DATE_FILTER` = NULL, `LABEL` = 'status', `METHOD` = '{\"0\":\"In Active\",\"1\":\"Active\",\"4\":\"Locked\"}', `ORDERR` = 7, `STATUS` = 1, `TYPE` = 8, `REPORT_CONFIG` = 90 WHERE `ID` = 308;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 23, `ALIGNMENT` = 'center', `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'id', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 0, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Delete', `METHOD` = 'select distinct p.id,case when d.id is not null THEN	\'false\' ELSE 	\'true\' END from prof p left join  device d  on d.AGENT_ID=p.id and p.`STATUS`=1', `ORDERR` = 11, `PARAMTERS` = 'fieldStaff_delete?type=fieldStaff&id=##profile.agent.delete', `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 90, `SORT_FIELD` = NULL WHERE `ID` = 1039;
+
+
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 7, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'shipmentDestination', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Shipment Destination', `METHOD` = 'select distinct c.code,c.name from country c', `ORDERR` = 10, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 116, `SORT_FIELD` = NULL WHERE `ID` = 1760;
+
+------------18-05-2023------------------
+ALTER TABLE `shipment` 
+ADD COLUMN `SHIPMENT_SUPPORTING_FILES` varchar(255) NULL AFTER `SHIPMENT_DESTINATION`;
+
+------------19-05-2023------------------
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 76, NULL, NULL, NULL, 'shipmentSupportingFiles', 0, 1, NULL, 1, NULL, 'Upload', NULL, 11, NULL, 1, 0, 100, 116, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 76, NULL, NULL, NULL, 'shipmentSupportingFiles', 0, 1, NULL, 1, NULL, 'Upload', NULL, 13, NULL, 1, 0, 100, 117, NULL);
+
+-------------24-05-2023--------Failed Shipment report changes-----------------
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 7, NULL, NULL, NULL, 'shipmentDestination', 0, 1, NULL, 1, NULL, 'Shipment Destination', 'select distinct c.code,c.name from country c', 10, NULL, 1, 0, 100, 130, NULL);
+INSERT INTO `dynamic_report_config_detail`(`ID`, `ACESS_TYPE`, `ALIGNMENT`, `DATA_TYPE`, `EXPRESSION`, `FIELD`, `GROUP_PROP`, `IS_EXPORT_AVAILABILITY`, `IS_FOOTER_SUM`, `IS_GRID_AVAILABILITY`, `IS_GROUP_HEADER`, `LABEL_NAME`, `METHOD`, `ORDERR`, `PARAMTERS`, `STATUSS`, `SUM_PROP`, `WIDTH`, `REPORT_CONFIG_ID`, `SORT_FIELD`) VALUES (NULL, 76, NULL, NULL, NULL, 'shipmentSupportingFiles', 0, 1, NULL, 1, NULL, 'Upload', NULL, 11, NULL, 1, 0, 100, 130, NULL);
+INSERT INTO `dynamic_report_config_filter`(`ID`, `DEFAULT_FILTER`, `CONFIG_DETAIL_ID`, `FIELD`, `IS_DATE_FILTER`, `LABEL`, `METHOD`, `ORDERR`, `STATUS`, `TYPE`, `REPORT_CONFIG`) VALUES (NULL, NULL, '1760', 'shipmentDestination', NULL, 'shipmentDestination', 'select distinct c.code,c.name from country c', 3, 1, 5, 130);
+
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 76, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'id', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Upload', `METHOD` = NULL, `ORDERR` = 11, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 116, `SORT_FIELD` = NULL WHERE `ID` = 1778;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 76, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'id', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Upload', `METHOD` = NULL, `ORDERR` = 13, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 117, `SORT_FIELD` = NULL WHERE `ID` = 1779;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 76, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'id', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Upload', `METHOD` = NULL, `ORDERR` = 11, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 130, `SORT_FIELD` = NULL WHERE `ID` = 1781;
+
+ALTER TABLE `shipment_aud` 
+ADD COLUMN `SHIPMENT_SUPPORTING_FILES` varchar(255) NULL AFTER `PACKHOUSE_ID`;
+
+-----------------------------26-05-2023----------------------------------------
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'YesAndNo1', 'en', 'Yes');
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'YesAndNo0', 'en', 'No');
+
+--------backUP------------
+'VA Exporters','Excel Ltd'
+UPDATE `exporter_registration` SET `BRANCH_ID` = 'nhts', `COMPANY_NAME` = 'VA Exporters', `REG_PROOF` = NULL, `VILLAGE` = 22, `ADDRESS` = NULL, `MOBILE_NO` = '0724893298', `EMAIL_ID` = '', `REASON` = NULL, `DOC` = NULL, `INSP_ID` = NULL, `EXPIRE_DATE` = '2023-06-30', `IS_ACTIVE` = 1, `CREATED_DATE` = '2022-09-01 09:06:52', `APPROVAL_DATE` = NULL, `CREATED_USER` = NULL, `UPDATED_DATE` = '2023-05-25 04:30:55', `UPDATED_USER` = 'vahcd', `VERSION` = '45', `Status` = 1, `CMPY_ORIENTATION` = '1', `REG_NUMBER` = 'P051353949H', `UGANDA_EXPORT` = '4, 2, 3', `REF_LETTERNO` = 'LA11/1002133', `Farmer_HaveFarms` = '124, 135, 165', `SCATTERED` = '180, 205, 245', `Pack_GpsLoc` = '0807110000,0810100000,0709300000', `PACKHOUSE` = '1', `Exp_TinNumber` = 'Street1', `TIN` = 'vanitha@sourcetrace.com', `REX_No` = '', `farm_ToPackhouse` = '', `Pack_ToExitPoint` = '0', `Reg_No` = NULL, `WAREHOUSE` = NULL, `OTHER_SCATTERED` = NULL, `IP_ADDR` = NULL, `LON` = ', , , , , ', `LAT` = ', , , , , ', `STATUS_MSG` = 'Something Went Wrong, Please Try Again', `EXPORTER_STATUS` = 2 WHERE `ID` = 2;
+UPDATE `exporter_registration` SET `BRANCH_ID` = 'nhts', `COMPANY_NAME` = 'Excel Ltd', `REG_PROOF` = NULL, `VILLAGE` = 56, `ADDRESS` = NULL, `MOBILE_NO` = '0720893421', `EMAIL_ID` = 'stvnganga@gmail.com', `REASON` = NULL, `DOC` = NULL, `INSP_ID` = NULL, `EXPIRE_DATE` = NULL, `IS_ACTIVE` = 1, `CREATED_DATE` = '2023-02-15 09:08:02', `APPROVAL_DATE` = NULL, `CREATED_USER` = 'sts', `UPDATED_DATE` = '2023-05-25 04:31:25', `UPDATED_USER` = 'vahcd', `VERSION` = '11', `Status` = 1, `CMPY_ORIENTATION` = '1', `REG_NUMBER` = 'P000000030N', `UGANDA_EXPORT` = '4, 3', `REF_LETTERNO` = '2345657', `Farmer_HaveFarms` = '165', `SCATTERED` = '245', `Pack_GpsLoc` = '0709300000', `PACKHOUSE` = '1', `Exp_TinNumber` = 'D8 Temple road', `TIN` = 'stvnganga@gmail.com', `REX_No` = '987654343', `farm_ToPackhouse` = 'Charles Njonjo', `Pack_ToExitPoint` = '1', `Reg_No` = NULL, `WAREHOUSE` = NULL, `OTHER_SCATTERED` = NULL, `IP_ADDR` = NULL, `LON` = ', ', `LAT` = ', ', `STATUS_MSG` = 'Something Went Wrong, Please Try Again', `EXPORTER_STATUS` = 2 WHERE `ID` = 5;
+--------------------------
+------------05-06-2023------------
+UPDATE `locale_property` SET `code` = 'empty.packing.price', `lang_code` = 'en', `lang_value` = 'Please Enter Price Per Kg' WHERE `id` = 977;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'areaIrrrigated', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Area Irrigated (acres)', `METHOD` = NULL, `ORDERR` = 22, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 96, `SORT_FIELD` = NULL WHERE `ID` = 1149;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'areaIrrrigated', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Area Irrigated (acres)', `METHOD` = NULL, `ORDERR` = 21, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 95, `SORT_FIELD` = NULL WHERE `ID` = 1130;
+INSERT INTO `farm_catalogue`(`ID`, `BRANCH_ID`, `NAME`, `REVIOSION_NO`, `STATUS`, `CATALOGUE_TYPEZ`) VALUES (NULL, 'nhts', 'Truck Type', 1, 1, 91);
+INSERT INTO `locale_property`(`id`, `code`, `lang_code`, `lang_value`) VALUES (NULL, 'truckType', 'en', '91');
+
+ALTER TABLE `customer` 
+ADD COLUMN `WARD` varchar(255) NULL AFTER `EXPORTER_ID`,
+ADD COLUMN `SUB_COUNTY` varchar(255) NULL AFTER `WARD`,
+ADD COLUMN `COUNTY` varchar(255) NULL AFTER `SUB_COUNTY`,
+ADD COLUMN `COUNTRY` varchar(255) NULL AFTER `COUNTY`;
+ALTER TABLE `customer_aud` 
+ADD COLUMN `WARD` varchar(255) NULL AFTER `EXPORTER_ID`,
+ADD COLUMN `SUB_COUNTY` varchar(255) NULL AFTER `WARD`,
+ADD COLUMN `COUNTY` varchar(255) NULL AFTER `SUB_COUNTY`,
+ADD COLUMN `COUNTRY` varchar(255) NULL AFTER `COUNTY`;
+
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'shipmentDestination', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Shipment Destination', `METHOD` = NULL, `ORDERR` = 10, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 116, `SORT_FIELD` = NULL WHERE `ID` = 1760;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'shipmentDestination', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Shipment Destination', `METHOD` = NULL, `ORDERR` = 10, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 130, `SORT_FIELD` = NULL WHERE `ID` = 1786;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'shipmentDestination', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Shipment Destination', `METHOD` = NULL, `ORDERR` = 10, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 117, `SORT_FIELD` = NULL WHERE `ID` = 1761;
+---Filter not needed for scouting(Shipment Destination) 
+-------06-06-2023------
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'truckNo', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Number Plate', `METHOD` = NULL, `ORDERR` = 8, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 134, `SORT_FIELD` = NULL WHERE `ID` = 1715;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'truckNo', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Number Plate', `METHOD` = NULL, `ORDERR` = 9, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 135, `SORT_FIELD` = NULL WHERE `ID` = 1727;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'truckNo', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Number Plate', `METHOD` = NULL, `ORDERR` = 8, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 136, `SORT_FIELD` = NULL WHERE `ID` = 1739;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'truckNo', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Number Plate', `METHOD` = NULL, `ORDERR` = 9, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 137, `SORT_FIELD` = NULL WHERE `ID` = 1749;
+
+
+----------07-06-2023-----
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'truckNo', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Number Plate', `METHOD` = NULL, `ORDERR` = 7, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 111, `SORT_FIELD` = NULL WHERE `ID` = 1307;
+UPDATE `dynamic_report_config_detail` SET `ACESS_TYPE` = 1, `ALIGNMENT` = NULL, `DATA_TYPE` = NULL, `EXPRESSION` = NULL, `FIELD` = 'truckNo', `GROUP_PROP` = 0, `IS_EXPORT_AVAILABILITY` = 1, `IS_FOOTER_SUM` = NULL, `IS_GRID_AVAILABILITY` = 1, `IS_GROUP_HEADER` = NULL, `LABEL_NAME` = 'Number Plate', `METHOD` = NULL, `ORDERR` = 6, `PARAMTERS` = NULL, `STATUSS` = 1, `SUM_PROP` = 0, `WIDTH` = 100, `REPORT_CONFIG_ID` = 112, `SORT_FIELD` = NULL WHERE `ID` = 1311;

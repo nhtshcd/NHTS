@@ -72,6 +72,9 @@ public class PcbpAction extends SwitchAction {
 	@Setter
 	private String selectedCropCat;
 
+	@Getter
+	@Setter
+	List<Object[]> pcdpaudit;
 	/**
 	 * Creates the.
 	 * 
@@ -203,7 +206,7 @@ public class PcbpAction extends SwitchAction {
 
 			pcbp.setUom(pcbp.getUom());
 			/*pcbp.setChemicalName(pcbp.getChemicalName());*/
-
+			pcdpaudit = utilService.getAuditRecords("com.sourcetrace.eses.entity.Pcbp", pcbp.getId());
 			setCurrentPage(getCurrentPage());
 			command = UPDATE;
 			view = DETAIL;

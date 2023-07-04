@@ -36,57 +36,90 @@ import com.sourcetrace.eses.util.StringUtil;
 
 public class BuyerDownload implements ITxnAdapter {
 
-    private static final Logger LOGGER = Logger.getLogger(BuyerDownload.class.getName());
+	private static final Logger LOGGER = Logger.getLogger(BuyerDownload.class.getName());
 
-    @Autowired
-    private IFarmerService farmerService;
-    @Autowired
-    private IUtilService utilService;
+	@Autowired
+	private IFarmerService farmerService;
+	@Autowired
+	private IUtilService utilService;
 
+	@Override
+	public Map<?, ?> processJson(Map<?, ?> reqData) {
 
-    @Override
-    public Map<?, ?> processJson(Map<?, ?> reqData) {
+		LOGGER.info("---------- BUYER Download Start ----------");
+		/** HEADER VALUES **/
+		Head head = (Head) reqData.get(TransactionProperties.HEAD);
 
-        LOGGER.info("---------- BUYER Download Start ----------");
-        /** HEADER VALUES **/
-        Head head = (Head) reqData.get(TransactionProperties.HEAD);
+		String revisionNo = (String) reqData.get(TransactionProperties.BUYER_REV_NO);
 
-        String revisionNo = (String) reqData
-                .get(TransactionProperties.BUYER_REV_NO);
+		if (StringUtil.isEmpty(revisionNo) || !StringUtil.isLong(revisionNo)) {
+			revisionNo = "0";
+		}
+		Agent ag = (Agent) reqData.get("agentObj");
+		if (ag == null) {
+			ag = utilService.findAgent(head.getAgentId());
+		}
+		/** REQUEST VALUES **/
+		Map resp = new HashMap();
+		List<Customer> customerList;
+		if (ag.getPackhouse()!=null&&ag.getPackhouse().getExporter() != null && !ObjectUtil.isEmpty(ag.getPackhouse().getExporter())) {
+			customerList = (List<Customer>) farmerService.listObjectById(
+					"from  Customer c where c.revisionNo > ? and c.exporter.id =?",
+					new Object[] { Long.valueOf(revisionNo),
+							(ag.getPackhouse().getExporter() != null ? ag.getPackhouse().getExporter().getId() : 0l) });// utilService.listcustomers();
+		} else
+			customerList = (List<Customer>) farmerService
+					.listObjectById("from  Customer c where c.revisionNo > ? and c.exporter.id =?", new Object[] {
+							Long.valueOf(revisionNo), (ag.getExporter() != null ? ag.getExporter().getId() : 0l) });// utilService.listcustomers();
 
-        if (StringUtil.isEmpty(revisionNo) || !StringUtil.isLong(revisionNo)) {
-            revisionNo = "0";
-        }
-        Agent ag = (Agent) reqData.get("agentObj");
-        if (ag == null) {
-            ag = utilService.findAgent(head.getAgentId());
-        }
-        /** REQUEST VALUES **/
-        Map resp = new HashMap();
-        List<Customer> customerList = (List<Customer>) farmerService.listObjectById("from  Customer c where c.revisionNo > ? and c.exporter.id =?", new Object[]{Long.valueOf(revisionNo), (ag.getExporter() != null ? ag.getExporter().getId() : 0l)});// utilService.listcustomers();
-        List collection = new ArrayList();
-        if (!ObjectUtil.isEmpty(customerList)) {
-            for (Customer customer : customerList) {
-                Map customerCode = new HashMap();
-                customerCode.put(TransactionProperties.BUYER_ID, customer.getCustomerId());
-                customerCode.put(TransactionProperties.CUSTOMER_NAME, customer.getCustomerName());
-              
-                collection.add(customerCode);
+		List collection = new ArrayList();
+		if (!ObjectUtil.isEmpty(customerList)) {
+			for (Customer customer : customerList) {
+				Map customerCode = new HashMap();
+				customerCode.put(TransactionProperties.BUYER_ID, customer.getCustomerId());
+				customerCode.put(TransactionProperties.CUSTOMER_NAME, customer.getCustomerName());
+				/*
+				 * customerCode.put(TransactionProperties.BUYER_COUNTRY,
+				 * customer.getCity()!=null ?
+				 * customer.getCity().getLocality()!=null ?
+				 * customer.getCity().getLocality().getState()!=null ?
+				 * customer.getCity().getLocality().getState().getCountry()!=
+				 * null ?
+				 * customer.getCity().getLocality().getState().getCountry().
+				 * getName() : "" : "" : "" : "");
+				 * customerCode.put(TransactionProperties.BUYER_COUNTRY_CODE,
+				 * customer.getCity()!=null ?
+				 * customer.getCity().getLocality()!=null ?
+				 * customer.getCity().getLocality().getState()!=null ?
+				 * customer.getCity().getLocality().getState().getCountry()!=
+				 * null ?
+				 * customer.getCity().getLocality().getState().getCountry().
+				 * getCode() : "" : "" : "" : "");
+				 */
+				customerCode.put(TransactionProperties.BUYER_COUNTRY_CODE, "");
+				customerCode.put(TransactionProperties.BUYER_COUNTRY,
+						customer.getCountry() != null ? customer.getCountry() : "");
+				customerCode.put(TransactionProperties.BUYER_COUNTY,
+						customer.getCounty() != null ? customer.getCounty() : "");
+				customerCode.put(TransactionProperties.BUYER_SUB_COUNTY,
+						customer.getSubCounty() != null ? customer.getSubCounty() : "");
+				customerCode.put(TransactionProperties.BUYER_WARD,
+						customer.getWard() != null ? customer.getWard() : "");
+				collection.add(customerCode);
 
-            }
+			}
 
-        }
+		}
 
-        if (!ObjectUtil.isListEmpty(customerList)) {
-            revisionNo = String.valueOf(customerList.get(0).getRevisionNo());
-        }
+		if (!ObjectUtil.isListEmpty(customerList)) {
+			revisionNo = String.valueOf(customerList.get(0).getRevisionNo());
+		}
 
-        /** RESPONSE DATA **/
-        resp.put(TransactionProperties.BUYER, collection);
-        resp.put(TransactionProperties.BUYER_DOWNLOAD_REVISION_NO, revisionNo);
-        LOGGER.info("---------- BUYER Download END ----------");
-        return resp;
-    }
-
+		/** RESPONSE DATA **/
+		resp.put(TransactionProperties.BUYER, collection);
+		resp.put(TransactionProperties.BUYER_DOWNLOAD_REVISION_NO, revisionNo);
+		LOGGER.info("---------- BUYER Download END ----------");
+		return resp;
+	}
 
 }

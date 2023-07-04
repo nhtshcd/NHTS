@@ -479,7 +479,7 @@ function loadPlating(val){
 			</div>
 			<div class="formContainerWrapper">
 				<h2>
-					<s:property value="%{getLocaleProperty('info.farmCrops')}" />
+					<s:property value="%{getLocaleProperty('info.planting')}" />
 				</h2>
 				<div class="flexform">
 
@@ -591,6 +591,19 @@ function loadPlating(val){
 								name="planting.seedSource" listKey="key" listValue="value"
 								list="getCatList(getLocaleProperty('seedSourceTypes'))"
 								headerKey="" headerValue="%{getText('txt.select')}" />
+						</div>
+					</div>
+					
+					<div class="flexform-item">
+					<label for="txt">
+						<s:property value="%{getLocaleProperty('planting.fieldType')}" />
+						 <sup style="color: red;">*</sup> 
+						</label>
+						<div class="form-element">
+							<s:select name="planting.fieldType" list="getCatList(getLocaleProperty('fieldType'))"
+								headerKey="" headerValue="%{getText('txt.select')}"
+								listKey="key" listValue="value" theme="simple"
+								id="sourceOfWater" cssClass="form-control select2" />
 						</div>
 					</div>
 

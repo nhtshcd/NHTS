@@ -44,7 +44,7 @@ var command = '<s:property value="command"/>';
 		});
 		if(command=='update'){
 			$('#country').change();
-			loadFarmer('<s:property value="scouting.farmCrops.farm.farmer.village.id"/>');
+			loadFarmer('<s:property value="scouting.planting.farmCrops.farm.farmer.village.id"/>');
 			var cropDet='<s:property value="selectedProduct" />';
 			$('#cropName').val(cropDet).trigger('change');
 			var varietyId='<s:property value="scouting.variety" />';
@@ -66,7 +66,7 @@ var command = '<s:property value="command"/>';
 			$('#nameOfDisease').val(JSON.parse(JSON.stringify(nameOfDiseases.replace(/\s/g,'').split(",")))).select2();
 			$('#nameOfDisease').change();
 			
-			var farmCropsIdForUpdate='<s:property value="scouting.farmCrops.id"/>';
+			var farmCropsIdForUpdate='<s:property value="scouting.planting.farmCrops.id"/>';
 			if(farmCropsIdForUpdate != null && farmCropsIdForUpdate != ''){
 			populatePlanting(farmCropsIdForUpdate);
 			}
@@ -158,8 +158,8 @@ var command = '<s:property value="command"/>';
 		        success: function(result) {
 		        	insertOptions("varietyName", $.parseJSON(result));
 		        	
-		        	var sllfar ='<s:property value="scouting.farmCrops.id"/>';
-		        	if(selectedFarm =='<s:property value="scouting.farmCrops.farm.id"/>' &&  sllfar!=null && sllfar!='' && sllfar!='null'){
+		        	var sllfar ='<s:property value="scouting.planting.farmCrops.id"/>';
+		        	if(selectedFarm =='<s:property value="scouting.planting.farmCrops.farm.id"/>' &&  sllfar!=null && sllfar!='' && sllfar!='null'){
 		        		$('#varietyName').val(sllfar).change();
 		        	}
 		        	
@@ -210,8 +210,8 @@ var command = '<s:property value="command"/>';
 		        data: {selectedFarm : selectedFarm,selectedProduct:selectedProduct},
 		        success: function(result) {
 		        	insertOptions("varietyName", $.parseJSON(result));
-		        	var sllfar ='<s:property value="scouting.farmCrops.id"/>';
-		        	if(selectedFarm === '<s:property value="scouting.farmCrops.farm.id"/>' && sllfar!=null && sllfar!='' && sllfar!='null'){
+		        	var sllfar ='<s:property value="scouting.planting.farmCrops.id"/>';
+		        	if(selectedFarm === '<s:property value="scouting.planting.farmCrops.farm.id"/>' && sllfar!=null && sllfar!='' && sllfar!='null'){
 		        		$('#varietyName').val(sllfar).change();
 		        	}
 		        }
@@ -238,9 +238,9 @@ var command = '<s:property value="command"/>';
 				   var ss= $("#varietyName").val();
 				   clearElement('varietyName',true);
 				    
-		        	var sllfar ='<s:property value="scouting.farmCrops.farm.id"/>';
+		        	var sllfar ='<s:property value="scouting.planting.farmCrops.farm.id"/>';
 		        	
-		        	if(selectedPro =='<s:property value="scouting.farmCrops.farm.farmer.id"/>'  && sllfar!=null && sllfar!='' && sllfar!='null'){
+		        	if(selectedPro =='<s:property value="scouting.planting.farmCrops.farm.farmer.id"/>'  && sllfar!=null && sllfar!='' && sllfar!='null'){
 		        	
 		        		$('#farm').val(sllfar).select2().change();
 		        	
@@ -573,7 +573,7 @@ function nameOfInsectsObservedSelectAll(fieldVal){
 						<label for="txt"><s:text name="scouting.farmer" /><sup
 							style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select name="scouting.farmCrops.farm.farmer.id" list="{}"
+							<s:select name="scouting.planting.farmCrops.farm.farmer.id" list="{}"
 								headerKey="" headerValue="%{getText('txt.select')}"
 								listKey="key" listValue="value" theme="simple" id="farmer"
 								onchange="listFarm(this.value);loadAjaxData(this.value)"
@@ -586,7 +586,7 @@ function nameOfInsectsObservedSelectAll(fieldVal){
 						<label for="txt"><s:text name="scouting.farm" /><sup
 							style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select name="scouting.farmCrops.farm.id" list="{}"
+							<s:select name="scouting.planting.farmCrops.farm.id" list="{}"
 								headerKey="" headerValue="%{getText('txt.select')}"
 								listKey="key" listValue="value" theme="simple" id="farm"
 								onchange="listFarmsCropProduct(this.value)"
@@ -598,7 +598,7 @@ function nameOfInsectsObservedSelectAll(fieldVal){
 						<label for="txt"><s:text name="block" /><sup
 							style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select id="varietyName" name="scouting.farmCrops.id"
+							<s:select id="varietyName" name="scouting.planting.farmCrops.id"
 								listKey="key" listValue="value" list="{}" headerKey=""
 								headerValue="%{getText('txt.select')}"
 								onchange="populatePlanting(this.value)"
@@ -659,6 +659,26 @@ function nameOfInsectsObservedSelectAll(fieldVal){
 							<s:textfield readonly="true" id="grade" theme="simple"
 								maxlength="10" size="20" cssClass="form-control input-sm" />
 
+						</div>
+					</div>
+					<div class="flexform-item">
+						<label for="txt"><%-- <s:text name="scouting.sprayingRequired" /> --%>
+						<s:property value="%{getLocaleProperty('scouting.sprayingRequired')}" />
+						 <sup style="color: red;">*</sup> 
+						</label>
+						<div class="form-element">
+							<s:select name="scouting.sprayingRequired" list="getCatList(getLocaleProperty('yesNo'))"
+								headerKey="" headerValue="%{getText('txt.select')}"
+								listKey="key" listValue="value" theme="simple"
+								id="sourceOfWater" cssClass="form-control select2" />
+						</div>
+					</div>
+					<div class="flexform-item">
+						<label for="txt"><s:text name="scouting.sctRecommendation" /> <sup style="color: red;">*</sup> </label>
+						<div class="form-element">
+							<s:textfield name="scouting.sctRecommendation" id="sctRecommendation"
+								theme="simple" size="20" cssClass="form-control input-sm"
+								maxlength="250" />
 						</div>
 					</div>
 				</div>
@@ -811,8 +831,10 @@ function nameOfInsectsObservedSelectAll(fieldVal){
 						</div>
 					</div> --%>
 					<div class="flexform-item">
-						<label for="txt"><s:text name="scouting.irrigationType" /><sup
-							style="color: red;">*</sup></label>
+						<label for="txt">
+						<%-- <s:text name="scouting.irrigationType" /> --%>
+						<s:property value="%{getLocaleProperty('scouting.irrigationType')}" />
+						<sup style="color: red;">*</sup></label>
 						<div class="form-element">
 							<s:textfield name="scouting.irrigationType" id="irrigationType"
 								theme="simple" size="20" cssClass="form-control input-sm"
@@ -834,8 +856,10 @@ function nameOfInsectsObservedSelectAll(fieldVal){
 
 
 					<div class="flexform-item">
-						<label for="txt"><s:text name="scouting.areaIrrrigated" /><sup
-							style="color: red;">*</sup></label>
+						<label for="txt">
+						<%-- <s:text name="scouting.areaIrrrigated" /> --%>
+						<s:property value="%{getLocaleProperty('scouting.areaIrrrigated')}" />
+						<sup style="color: red;">*</sup></label>
 						<div class="form-element">
 							<s:textfield name="scouting.areaIrrrigated" id="areaIrrrigated"
 								theme="simple" cssClass="form-control input-sm" maxlength="8" onkeypress="return isDecimal1(event,this)"/>

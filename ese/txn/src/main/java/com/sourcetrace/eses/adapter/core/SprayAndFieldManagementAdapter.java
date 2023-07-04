@@ -9,6 +9,7 @@
  */
 package com.sourcetrace.eses.adapter.core;
 
+import java.util.Calendar;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -61,6 +62,9 @@ public class SprayAndFieldManagementAdapter implements ITxnAdapter {
 		String dis = (String) reqData.get("dis");
 		String endSprayDate  = (String) reqData.get("endSprayDate");
 		String oprMedRpt  = (String) reqData.get("oprMedRpt");
+		String activeIngredient  = (String) reqData.get("activeIngredient");
+		String recommendation  = (String) reqData.get("recommendation");
+		
 		Long existId = (Long) farmerService.findObjectById(
 				" select id from SprayAndFieldManagement fc where fc.msgNo=?", new Object[] { head.getMsgNo() });
 		if (existId != null && existId > 0) {
@@ -109,10 +113,20 @@ public class SprayAndFieldManagementAdapter implements ITxnAdapter {
 		sp.setCreatedDate(DateUtil.convertStringToDate(head.getTxnTime(), DateUtil.TXN_DATE_TIME));
 		sp.setCreatedUser(head.getAgentId());
 		sp.setMsgNo(head.getMsgNo());
-		sp.setFarmCrops(fc);
+		/*sp.setFarmCrops(fc);*/
 		sp.setDeleteStatus(0);
+		sp.setActiveIngredient(activeIngredient);
+		sp.setRecommen(recommendation);
 		sp.setDateOfSpraying(DateUtil.convertStringToDate(date, DateUtil.DATABASE_DATE_FORMAT));
 		sp.setEndDateSpray(endSprayDate!=null && !StringUtil.isEmpty(endSprayDate) ? DateUtil.convertStringToDate(endSprayDate, DateUtil.DATABASE_DATE_FORMAT) :null);
+		
+		if (!StringUtil.isEmpty(sp.getDateOfSpraying()) && !StringUtil.isEmpty(sp.getPhi()) && sp.getPhi()!=null && sp.getDateOfSpraying()!=null) {
+			Calendar cal = Calendar.getInstance();
+			cal.setTime(sp.getDateOfSpraying());
+			cal.add(Calendar.DATE, Integer.valueOf(sp.getPhi())); 
+			sp.setDayOfPHIandSprayingDate(cal.getTime());
+			}
+		
 		farmerService.save(sp);
 		return insResponse;
 	}

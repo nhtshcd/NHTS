@@ -156,41 +156,49 @@
 						<div class="flexi flexi10">
 						<label for="txt"><s:text name="country.name" /><sup style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select class="form-control  select2" list="countries" headerKey=""
+							<%-- <s:select class="form-control  select2" list="countries" headerKey=""
 								  theme="simple" name="selectedCountry" maxlength="20"	headerValue="%{getText('txt.select')}" Key="id" Value="name"	 						 
 								onchange="listState(this,'country','state','localities','city','panchayath','village');"
-								id="country" />
+								id="country" /> --%>
+							<s:textfield cssClass="form-control input-sm"
+								name="customer.country" theme="simple" />
 						</div>
 					</div>
 					<div class="flexi flexi10">
 						<label for="txt"><s:text name="county.name" /><sup style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select class="form-control  select2" list="states"
+							<%-- <s:select class="form-control  select2" list="states"
 								headerKey="" theme="simple" name="selectedState"
 								headerValue="%{getText('txt.select')}" Key="id" Value="name"
 								id="state" maxlength="20"
-								onchange="listLocality(this,'state','localities','city','panchayath','village');" />
+								onchange="listLocality(this,'state','localities','city','panchayath','village');" /> --%>
+							<s:textfield cssClass="form-control input-sm"
+								name="customer.county" theme="simple" />
 						</div>
 					</div>
 
 					<div class="flexi flexi10">
 						<label for="txt"><s:text name="subcountry.name" /><sup style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select class="form-control  select2" list="localities"
+							<%-- <s:select class="form-control  select2" list="localities"
 								headerKey="" theme="simple" name="selectedLocality"
 								headerValue="%{getText('txt.select')}" Key="id" Value="name"
 								id="localities" maxlength="20"
-								onchange="listMunicipalities(this,'localities','city','panchayath','village');" />
+								onchange="listMunicipalities(this,'localities','city','panchayath','village');" /> --%>
+						  <s:textfield cssClass="form-control input-sm"
+								name="customer.subCounty" theme="simple" />
 						</div>
 					</div>
 
 					<div class="flexi flexi10">
 						<label for="txt"><s:text name="ward.name" /><sup style="color: red;">*</sup></label>
 						<div class="form-element">
-							<s:select class="form-control  select2" list="city" headerKey=""
+							<%-- <s:select class="form-control  select2" list="city" headerKey=""
 								theme="simple" name="selectedCity" maxlength="20"
 								headerValue="%{getText('txt.select')}" Key="id" Value="name"
-								id="city"  />
+								id="city"  /> --%>
+						<s:textfield cssClass="form-control input-sm"
+								name="customer.ward" theme="simple" />
 						</div>
 					</div>
 					

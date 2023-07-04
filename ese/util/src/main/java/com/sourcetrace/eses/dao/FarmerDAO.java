@@ -1152,7 +1152,7 @@ public class FarmerDAO extends ESEDAO implements IFarmerDAO {
 		Session session = getSessionFactory().openSession();
 		String q = "select count(*) from Farmer where status in (1) and status_code=:statusCode and createdDate BETWEEN :startDate AND :endDate";
 		if (id > 0) {
-			/*q += " and exporters in (" + id +")";*/
+			/* q += " and exporters in (" + id +")"; */
 		}
 		Query query = session.createQuery(q);
 		query.setParameter("startDate", sDate).setParameter("endDate", eDate);
@@ -1229,7 +1229,7 @@ public class FarmerDAO extends ESEDAO implements IFarmerDAO {
 		Session session = getSessionFactory().getCurrentSession();
 		String q = "select COALESCE(sum(fm.totalLandHolding),'0') from Farmer f join f.farms fm where fm.status=1 and f.statusCode = 0 and f.status=1 and f.createdDate BETWEEN :startDate AND :endDate  ";
 		if (id > 0) {
-			/*q += " and f.farmer.exporters in (" + id +")";*/
+			/* q += " and f.farmer.exporters in (" + id +")"; */
 		}
 		return ((String) session.createQuery(q).setParameter("startDate", sDate).setParameter("endDate", eDate)
 				.uniqueResult());
@@ -1255,7 +1255,7 @@ public class FarmerDAO extends ESEDAO implements IFarmerDAO {
 		Session session = getSessionFactory().getCurrentSession();
 		String q = "select count(*) from Farm f WHERE f.status=1 and f.farmer.status=1 and f.createdDate BETWEEN :startDate AND :endDate";
 		if (id > 0) {
-			/*q += " and f.farmer.exporters in (" + id +")";*/
+			/* q += " and f.farmer.exporters in (" + id +")"; */
 		}
 		Long count = ((Long) session.createQuery(q).setParameter("startDate", sDate).setParameter("endDate", eDate)
 				.uniqueResult());
@@ -2098,7 +2098,8 @@ public class FarmerDAO extends ESEDAO implements IFarmerDAO {
 	public List<Object[]> listFarmFieldsByFarmerId(long id) {
 
 		return (List<Object[]>) list(
-				"select DISTINCT fm.id,fm.farmCode,fm.farmName FROM FarmCrops fc join fc.farm fm Where fm.farmer.id = ? and fm.status=1", id);
+				"select DISTINCT fm.id,fm.farmCode,fm.farmName FROM FarmCrops fc join fc.farm fm Where fm.farmer.id = ? and fm.status=1",
+				id);
 	}
 
 	@Override
@@ -2214,11 +2215,14 @@ public class FarmerDAO extends ESEDAO implements IFarmerDAO {
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
 	public List<Object[]> executeChartQuery(String chartQuery, int dateFilter, String dateField, String sDate,
-			String eDate, Long id, String exporterField, String groupField, String orderField) {
+			String eDate, Long id, String exporterField, String groupField, String orderField, int i) {
 		Session session = getSessionFactory().openSession();
 		String QueryString = chartQuery;
+
+		QueryString += " where p.`STATUS` = 1 ";
+
 		if (id > 0) {
-			QueryString += " where " + exporterField + "=" + id;
+			QueryString += " and " + exporterField + "=" + id;
 
 		}
 
@@ -2233,6 +2237,11 @@ public class FarmerDAO extends ESEDAO implements IFarmerDAO {
 
 		if (!StringUtil.isEmpty(orderField)) {
 			QueryString += " order by " + orderField;
+		}
+
+		if (i == 1) {
+			String datestr = " AND ha.DATE_HARVESTED BETWEEN cast(:startDate as Date) AND cast(:endDate  as Date) ";
+			QueryString = QueryString.replace("##dateHaFilter##", datestr);
 		}
 
 		SQLQuery query = session.createSQLQuery(QueryString);
@@ -2259,6 +2268,106 @@ public class FarmerDAO extends ESEDAO implements IFarmerDAO {
 		List list = query.list();
 
 		return list;
+	}
+
+	@Override
+	public Date findMaximunDateFromSprayingByFarmCropsId(Long farmCropsId) {
+
+		String queryString = "select max(sfm.PHI_AND_SPRAYING_DATE) from spray_field_management sfm WHERE sfm.PLANTING_ID ='"
+				+ farmCropsId + "'  and sfm.DELETE_STATUS!=1";
+
+		Session sessions = getSessionFactory().openSession();
+		Query query = sessions.createSQLQuery(queryString);
+		List<Object> list = query.list();
+		sessions.flush();
+		sessions.close();
+		if (!ObjectUtil.isListEmpty(list))
+			return (Date) list.get(0);
+		return null;
+	}
+
+	public List<Object[]> findListOfScoutingByplantingIds(List<Long> fcids) {
+		Session session = getSessionFactory().openSession();
+		String queryString = "SELECT t.PLANTING_ID,t.SCTRECOMMENDATION,t.DATE FROM ( SELECT id, MAX(CREATED_DATE) as MaxTime FROM scouting GROUP BY PLANTING_ID) r INNER JOIN scouting t ON t.CREATED_DATE = r.MaxTime AND t.CREATED_DATE = r.MaxTime where t.PLANTING_ID in(:ids) and t.DELETE_STATUS!=1";
+		SQLQuery query = session.createSQLQuery(queryString);
+		query.setParameterList("ids", fcids);
+		List<Object[]> result = query.list();
+		session.flush();
+		session.close();
+		return result;
+	}
+
+	@Override
+	public List<Object[]> getValueListByQuery(String methodName, Object[] parameter, String branchId) {
+		methodNameQ = methodName;
+		Session session = getSessionFactory().openSession();
+		if (branchId == null) {
+			methodNameQ = methodName.replaceAll("<.*?>", "");
+
+		} else {
+			methodNameQ = methodNameQ.replaceAll("<", "").replaceAll(">", "").replaceAll("branchId",
+					"'" + branchId + "'");
+		}
+		Query query = session.createSQLQuery(methodNameQ);
+		if (parameter != null && parameter.length > 0) {
+			i = 1;
+			Arrays.asList(parameter).stream().forEach(u -> {
+				if (methodNameQ.contains("param" + i)) {
+					if (u != null && u.toString().contains(",")) {
+						query.setParameterList("param" + i, Arrays.asList(u.toString().split(",")));
+					} else {
+						query.setParameter("param" + i, u);
+					}
+					i++;
+				}
+			});
+		}
+		List ls = query.list();
+		session.flush();
+		session.close();
+		return ls;
+
+	}
+
+	@Override
+	public List<Object[]> getCatalogueAuditValueByQuery(Long parameter) {
+
+		Session session = getSessionFactory().openSession();
+		// String queryString = "SELECT ( CASE WHEN cv.revType = 0 THEN
+		// cv.created_user ELSE cv.updated_user END ) AS mo,(SELECT
+		// FROM_UNIXTIME( r.revtstmp / 1000 )),(CASE WHEN cv.revtype=0 then
+		// \"Created\" else \"Updated\" END) as type,cv.CODE,cv.NAME,(CASE WHEN
+		// cv.STATUS=1 then \"Active\" else \"Inactive\" END) as
+		// status,cv.UPDATED_USER,cv.CREATED_DATE from catalogue_value_aud cv
+		// LEFT JOIN revinfo r ON r.rev = cv.rev WHERE cv.id =:ids";
+		String queryString = "SELECT cv.created_user as mo,DATE_FORMAT(cv.CREATED_DATE,\"%X-%m-%d %H:%i:%s\"),(CASE WHEN cv.revtype=0 then \"Created\" else \"Updated\" END) as type,cv.UPDATED_USER,(CASE WHEN cv.revType = 1 THEN DATE_FORMAT(cv.UPDATED_DATE,\"%X-%m-%d %H:%i:%s\") ELSE '' END ),cv.CODE,cv.NAME,(CASE WHEN cv.STATUS=1 then \"Active\" else \"Inactive\" END) as status   from catalogue_value_aud cv LEFT JOIN revinfo r ON r.rev = cv.rev  WHERE cv.id =:ids";
+		SQLQuery query = session.createSQLQuery(queryString);
+		query.setParameter("ids", parameter);
+		List<Object[]> result = query.list();
+		session.flush();
+		session.close();
+		return result;
+
+	}
+
+	@Override
+	public List<Object[]> findProcurementProductDetailById(Long id, String crop) {
+		Session session = getSessionFactory().openSession();
+		String queryString = "";
+		if (crop.equalsIgnoreCase("variety")) {
+			queryString = "select pv.created_user AS mo,DATE_FORMAT(pv.CREATED_DATE,\"%X-%m-%d %H:%i:%s\"),(CASE WHEN pv.revtype=0 then \"Created\" else \"Updated\" END) as type,pv.UPDATED_USER,(CASE WHEN pv.revType = 1 THEN DATE_FORMAT(pv.UPDATED_DATE,\"%X-%m-%d %H:%i:%s\")ELSE '' END ),pv.code,pv.name,pp.name as crop from  procurement_variety_aud pv left join procurement_product_aud pp on pp.ID=pv.PROCUREMENT_PRODUCT_ID and pp.rev =(select max(rev) from procurement_product_aud p where p.id  = pv.PROCUREMENT_PRODUCT_ID and p.rev<=pv.rev )LEFT JOIN revinfo r ON r.rev = pv.rev  where pv.id=:id ";
+		} else if (crop.equalsIgnoreCase("cropcategory")) {
+			queryString = "SELECT pp.created_user AS mo,DATE_FORMAT(pp.CREATED_DATE,\"%X-%m-%d %H:%i:%s\"),(CASE	WHEN pp.revtype = 0 THEN \"Create\" ELSE \"Update\" END ) AS type,pp.UPDATED_USER,(CASE WHEN pp.revType = 1 THEN DATE_FORMAT(pp.UPDATED_DATE,\"%X-%m-%d %H:%i:%s\")ELSE '' END ),pp.CODE,pp.NAME,c.NAME AS sp FROM	procurement_product_aud pp LEFT JOIN catalogue_value_aud c ON c.CODE = pp.speciesName and c.rev =(select max(rev) from catalogue_value_aud p where p.CODE  = pp.speciesName and p.rev<=pp.rev ) LEFT JOIN revinfo r ON r.rev = pp.rev  WHERE	pp.id =:id";
+		} else {
+			queryString = "select pg.created_user AS mo,DATE_FORMAT(pg.CREATED_DATE,\"%X-%m-%d %H:%i:%s\"),(CASE WHEN pg.revtype=0 then \"Create\" else \"Update\" END) as type,pg.UPDATED_USER,(CASE WHEN pg.revType = 1 THEN DATE_FORMAT(pg.UPDATED_DATE,\"%X-%m-%d %H:%i:%s\")ELSE '' END ),pg.name,pg.Crop_HS_code,pv.name as v,pp.name as p,pg.NO_OF_DAYS_TO_GROW,pg.yield from procurement_grade_aud pg left join procurement_variety_aud pv on pv.ID=pg.PROCUREMENT_VARIETY_ID and pv.rev = (select max(rev) from procurement_variety_aud p where p.id  = pg.PROCUREMENT_VARIETY_ID and p.rev<=pg.rev ) left join procurement_product_aud pp on pp.id=pv.PROCUREMENT_PRODUCT_ID and pp.rev = (select max(rev) from procurement_product_aud p where p.id  = pv.PROCUREMENT_PRODUCT_ID and p.rev<=pg.rev ) LEFT JOIN revinfo r ON r.rev = pv.rev where pg.id=:id";
+		}
+		Query query = session.createSQLQuery(queryString);
+
+		query.setParameter("id", id);
+		List<Object[]> val = query.list();
+		session.flush();
+		session.close();
+		return val;
 	}
 
 }

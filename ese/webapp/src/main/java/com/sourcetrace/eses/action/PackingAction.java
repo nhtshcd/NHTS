@@ -153,8 +153,8 @@ public class PackingAction extends SwitchAction {
 			if (packing.getPackingDetails() != null) {
 				packing.getPackingDetails().stream().forEach(uu -> {
 					CityWarehouse ctt = (CityWarehouse) farmerService.findObjectById(
-							"FROM CityWarehouse where batchNo=? and planting.id=? and coOperative.id=? and isDelete=0",
-							new Object[] { uu.getBatchNo(), uu.getPlanting().getId(), packing.getPackHouse().getId() });
+							"FROM CityWarehouse where qrCodeId=? and planting.id=? and coOperative.id=? and isDelete=0",
+							new Object[] { uu.getQrUnique(), uu.getPlanting().getId(), packing.getPackHouse().getId() });
 					uu.setCtt(ctt);
 
 				});
@@ -228,11 +228,16 @@ public class PackingAction extends SwitchAction {
 
 				});
 				temp.getPackingDetails().clear();
-				temp.setTotWt(packingDetails.stream().mapToDouble(u -> u.getQuantity()).sum());
-				utilService.updatePacking(temp, existock, packingDetails);
-				packingDetails.stream().forEach(uu -> {
+				
+				//utilService.updatePacking(temp, existock, packingDetails);
+				/*packingDetails.stream().forEach(uu -> {
 					utilService.saveOrUpdate(uu);
-				});
+				});*/
+				//temp.getShipmentDetails().clear();
+				temp.getPackingDetails().addAll(packingDetails);
+				temp.setTotWt(packingDetails.stream().mapToDouble(u -> u.getQuantity()).sum());
+				
+				 utilService.updatePacking(temp, existock, packingDetails);
 
 			}
 			request.setAttribute(HEADING, getText("packinglist"));
@@ -242,6 +247,9 @@ public class PackingAction extends SwitchAction {
 
 	}
 
+	 @Getter
+		@Setter
+		List<Object[]> ex;
 	public String detail() throws Exception {
 		String view = null;
 		if (id != null && !id.equals("")) {
@@ -255,13 +263,15 @@ public class PackingAction extends SwitchAction {
 			if (packing.getPackingDetails() != null) {
 				packing.getPackingDetails().stream().forEach(uu -> {
 					CityWarehouse ctt = (CityWarehouse) farmerService.findObjectById(
-							"FROM CityWarehouse where batchNo=? and planting.id=? and coOperative.id=? AND isDelete=0",
-							new Object[] { uu.getBatchNo(), uu.getPlanting().getId(), packing.getPackHouse().getId() });
+							"FROM CityWarehouse where qrCodeId=? and planting.id=? and coOperative.id=? AND isDelete=0",
+							new Object[] { uu.getQrUnique(), uu.getPlanting().getId(), packing.getPackHouse().getId() });
 					uu.setCtt(ctt);
 
 				});
 			}
-
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Packing", packing.getId());
+			
+			// ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Packing", packing.getId());
 			DateFormat df = new SimpleDateFormat(getGeneralDateFormat());
 			setPackingDate(df.format(packing.getPackingDate()));
 			setSelectedPackHouse(packing.getPackHouse().getName());
@@ -290,8 +300,8 @@ public class PackingAction extends SwitchAction {
 				Map<CityWarehouse, Double> existock = new HashMap<CityWarehouse, Double>();
 				packing.getPackingDetails().stream().forEach(uu -> {
 					CityWarehouse ctt = (CityWarehouse) farmerService.findObjectById(
-							"FROM CityWarehouse where batchNo=? and planting.id=? and coOperative.id=? AND isDelete=0",
-							new Object[] { uu.getBatchNo(), uu.getPlanting().getId(), packing.getPackHouse().getId() });
+							"FROM CityWarehouse where qrCodeId=? and planting.id=? and coOperative.id=? AND isDelete=0",
+							new Object[] { uu.getQrUnique(), uu.getPlanting().getId(), packing.getPackHouse().getId() });
 					//ctt.setLossWeight(0d);
 					existock.put(ctt, (uu.getQuantity() + uu.getRejectWt()) * -1);
 				});
@@ -489,14 +499,16 @@ public class PackingAction extends SwitchAction {
 				pcDetail.setBlockId(farmCrop.getFarmCrops());
 				pcDetail.setPlanting(farmCrop);
 				pcDetail.setBatchNo(cw.getBatchNo());
+				pcDetail.setQrUnique(cw.getQrCodeId());
 				if(list.get(10).toString() != null && !StringUtil.isEmpty(list.get(10).toString())){
-					pcDetail.setQrCodeId(String.valueOf(DateUtil.getRevisionNumber()));
+					pcDetail.setQrCodeId(String.valueOf(DateUtil.getRevisionNoDateTimeMilliSec()));
 					//pcDetail.setQrCodeId(list.get(10).toString());
 				}else{
-					pcDetail.setQrCodeId(String.valueOf(DateUtil.getRevisionNumber()));
+					pcDetail.setQrCodeId(String.valueOf(DateUtil.getRevisionNoDateTimeMilliSec()));
 				}
 				pcDetail.setQuantity(Double.valueOf(list.get(5)));
 				pcDetail.setPrice(Double.valueOf(list.get(6)));
+				pcDetail.setTotalprice((list.get(11)));
 				pcDetail.setRejectWt(Double.valueOf(list.get(7)));
 				pcDetail.setBestBefore(DateUtil.convertStringToDate(list.get(8), getGeneralDateFormat()));
 

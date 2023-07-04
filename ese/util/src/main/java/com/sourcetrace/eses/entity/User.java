@@ -30,6 +30,7 @@ import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ParamDef;
 import org.hibernate.annotations.Type;
 import org.hibernate.annotations.Where;
+import org.hibernate.envers.*;
 import org.hibernate.validator.constraints.NotEmpty;
 
 import lombok.Getter;
@@ -41,7 +42,9 @@ import lombok.Setter;
 @Entity
  @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))@Filters(@org.hibernate.annotations.Filter(name="branchFilter", condition="branch_id in ( :branchIdParam )"))
 @Table(name = "ese_user")
-@Getter @Setter
+@Getter
+@Setter
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class User implements java.io.Serializable {
 
 	public static enum userType1 {
@@ -106,12 +109,13 @@ public class User implements java.io.Serializable {
 	
 	@Column(name = "UPDATED_USER", length = 50,columnDefinition = "VARCHAR(255)")
 	private String updatedUser;
-	
-	@ManyToMany(fetch = FetchType.LAZY)
-	@JoinTable(name = "ese_user_ent", joinColumns = {
-			@JoinColumn(name = "ESE_USER_ID",  updatable = false) }, inverseJoinColumns = {
-					@JoinColumn(name = "ESE_ENT_ID",  updatable = false) })
-	private Set<Entitlement> entitlements;
+
+    @ManyToMany(fetch = FetchType.LAZY)
+    @JoinTable(name = "ese_user_ent", joinColumns = {
+            @JoinColumn(name = "ESE_USER_ID", updatable = false)}, inverseJoinColumns = {
+            @JoinColumn(name = "ESE_ENT_ID", updatable = false)})
+    @AuditJoinTable
+    Set<Entitlement> entitlements;
 
 	@NotEmpty(message = "empty.language")
 	@Column(name = "LANG", length = 5,columnDefinition = "VARCHAR(255)")
@@ -173,8 +177,8 @@ public class User implements java.io.Serializable {
 	
    @Column(name="SIGNATURE", length = 50)
 	private Long signature;
-   
-   @OneToMany(mappedBy = "referenceId", orphanRemoval = true)
+    @NotAudited
+    @OneToMany(mappedBy = "referenceId", orphanRemoval = true)
 	@OrderBy(value = "createdDate desc")
 	@Where(clause = "type = 0")
 	private SortedSet<PasswordHistory> passwordHistory;

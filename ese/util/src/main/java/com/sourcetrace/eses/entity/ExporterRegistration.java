@@ -28,6 +28,7 @@ import org.hibernate.annotations.Where;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "exporter_registration")
@@ -35,6 +36,7 @@ import lombok.Setter;
 @Filters(@org.hibernate.annotations.Filter(name = "branchFilter", condition = "branch_id in ( :branchIdParam )"))
 @Getter
 @Setter
+@Audited
 public class ExporterRegistration extends ApprovalEntity {
 
 	/**
@@ -69,7 +71,7 @@ public class ExporterRegistration extends ApprovalEntity {
 	@Column(name = "Pack_GpsLoc", length = 50, columnDefinition = "VARCHAR(255)")
 	private String packGpsLoc;
 
-	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "VILLAGE", columnDefinition = "BIGINT(45)")
 	private Village village;
 
@@ -97,18 +99,24 @@ public class ExporterRegistration extends ApprovalEntity {
 	@Column(name = "EMAIL_ID", length = 50, columnDefinition = "VARCHAR(255)")
 	private String email;
 
-	@OneToMany(mappedBy = "referenceId", orphanRemoval = true, cascade = CascadeType.ALL)
+	/*@OneToMany(mappedBy = "referenceId", orphanRemoval = true, cascade = CascadeType.ALL)
 	@OrderBy(clause = "id desc")
-	@Where(clause = "type = 17")
-	private SortedSet<InspectionDetails> inspDetails;
+    @Where(clause = "type = 17")
+    @NotAudited
+	private SortedSet<InspectionDetails> inspDetails;*/
 
-	@OneToMany(mappedBy = "referenceId", orphanRemoval = true, cascade = CascadeType.ALL)
+	/*@OneToMany(mappedBy = "referenceId", orphanRemoval = true, cascade = CascadeType.ALL)
 	@OrderBy(clause = "id desc")
-	@Where(clause = "type = 17")
-	private SortedSet<StatusDetails> statusDetails;
+    @Where(clause = "type = 17")
+    @NotAudited
+	private SortedSet<StatusDetails> statusDetails;*/
 	
 	@Column(name = "OTHER_SCATTERED", length = 50, columnDefinition = "VARCHAR(255)")
 	private String otherScattered;
+	
+	@Column(name = "EXPORTER_STATUS")
+	private Integer exporterStatus;
+	
 	@Transient
 	private String addr;
 	 

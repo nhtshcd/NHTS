@@ -200,7 +200,7 @@ var layOut='<%=request.getParameter("layoutType")%>	';
 
 </script>
 <body>
-	<s:form id="fileDownload" action="user_populateDownload">
+	<s:form id="fileDownload" action="sitePrepration_populateDownload">
 		<s:hidden id="loadId" name="idd" />
 	</s:form>
 	<s:form name="form" cssClass="fillform" id="target1" method="post"

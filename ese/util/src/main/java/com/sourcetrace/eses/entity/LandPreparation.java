@@ -24,11 +24,14 @@ import org.hibernate.annotations.ParamDef;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "land_preparation")
 @Getter
 @Setter
+//@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
+@Audited
 public class LandPreparation extends ParentEntity {
 
 	private static final long serialVersionUID = 1L;
@@ -37,7 +40,7 @@ public class LandPreparation extends ParentEntity {
 	@Column(name = "EVENT_DATE", length = 19)
 	private Date date;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "FARM_CROPS_ID")
 	private Farm farm;
 
@@ -50,7 +53,7 @@ public class LandPreparation extends ParentEntity {
 	@Column(name = "MSG_NO")
 	private String msgNo;
 	
-	@ManyToOne
+	@ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
 	@JoinColumn(name = "FARM_CROPS_BLOCKID")
 	private FarmCrops farmCrops;
 

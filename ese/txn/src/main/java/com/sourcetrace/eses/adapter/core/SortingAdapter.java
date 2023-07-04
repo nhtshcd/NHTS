@@ -69,7 +69,7 @@ public class SortingAdapter  implements ITxnAdapter {
 			}
 			if (farmCrops != null) {
 				sorting.setPlanting(farmCrops);
-				sorting.setFarmCrops(farmCrops.getFarmCrops());
+				//sorting.setFarmCrops(farmCrops.getFarmCrops());
 				sorting.setQtyHarvested(Double.valueOf(qtyHarvested));
 				sorting.setQtyRejected(Double.valueOf(qtyRejected));
 				sorting.setQtyNet(Double.valueOf(qtyNet));

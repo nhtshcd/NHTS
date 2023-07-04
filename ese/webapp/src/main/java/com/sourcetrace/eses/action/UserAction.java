@@ -376,13 +376,18 @@ public class UserAction extends SwitchValidatorAction {
 				Role r = utilService.findRole(Long.valueOf(rileid));
 				user.setRole(r);
 				user.setUserType(r.getType());
+				if (r.getType().equals(1) || r.getType().equals(2))
+					user.setAgroChDealer(user.getAgroChDealer());
+				else
+					user.setAgroChDealer(null);
 			}
 
 			user.setEnabled(user.isEnabled());
 
 			if (getUserImage() != null) {
-
-				user.getPersInfo().setImage(FileUtil.getBinaryFileContent(getUserImage()));
+				byte[] content = FileUtil.getBinaryFileContent(getUserImage());
+				System.out.println(content.length);
+				user.getPersInfo().setImage(content);
 
 			}
 
@@ -394,6 +399,7 @@ public class UserAction extends SwitchValidatorAction {
 			user.setCreatedDate(new Date());
 			user.setCreatedUser(getUsername());
 			user.setDataId(0l);
+
 			if (getIsMultiBranch().equals("1") && !StringUtil.isEmpty(getSubBranchId_F())) {
 				user.setBranchId(subBranchId_F);
 			}
@@ -435,18 +441,18 @@ public class UserAction extends SwitchValidatorAction {
 				ph.setReferenceId(aUser.getId());
 				utilService.save(ph);
 			}
-			
+
 			if (userEditHistory == null) {
 				userEditHistory = new UserActiveAndInActiveHostory();
 				userEditHistory.setBranchId(getBranchId());
 				userEditHistory.setCreatedDate(new Date());
 				userEditHistory.setCreatedUser(getUsername());
-				if(user.getAgroChDealer()!=null && !StringUtil.isEmpty(user.getAgroChDealer())){
-				userEditHistory.setAgroChDealer(user.getAgroChDealer());
+				if (user.getAgroChDealer() != null && !StringUtil.isEmpty(user.getAgroChDealer())) {
+					userEditHistory.setAgroChDealer(user.getAgroChDealer());
 				}
 				userEditHistory.setDate(new Date());
 				DateFormat dateFormat = new SimpleDateFormat("hh.mm aa");
-		    	String dateString = dateFormat.format(new Date()).toString();
+				String dateString = dateFormat.format(new Date()).toString();
 				userEditHistory.setTime(dateString);
 				userEditHistory.setUserName(user.getUsername());
 				userEditHistory.setLoggedUser(getUsername());
@@ -466,6 +472,16 @@ public class UserAction extends SwitchValidatorAction {
 	 * @throws Exception
 	 *             the exception
 	 */
+	@Getter
+	@Setter
+	private String roleID;
+	@Getter
+	@Setter
+	String exporter;
+	@Getter
+	@Setter
+	List<Object[]> ex;
+
 	public String detail() throws Exception {
 
 		if (id != null && !id.equals(EMPTY)) {
@@ -485,7 +501,10 @@ public class UserAction extends SwitchValidatorAction {
 						user.setParentBranchId(branchId_F);
 					}
 				}
-
+				if (user.getAgroChDealer() != null) {
+					ExporterRegistration regById = utilService.findExportRegById(user.getAgroChDealer());
+					exporter = regById.getName();
+				}
 				setCurrentPage(getCurrentPage());
 
 				setStatus(getLocaleProperty("status" + user.isEnabled()));
@@ -504,6 +523,9 @@ public class UserAction extends SwitchValidatorAction {
 					addActionError(NO_RECORD);
 					return REDIRECT;
 				}
+				roleID = getLoggedInRoleID();
+				ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.User", user.getId());
+
 				id = null;
 				command = DETAIL;
 				request.setAttribute(HEADING, getText(command));
@@ -604,8 +626,13 @@ public class UserAction extends SwitchValidatorAction {
 						Role r = utilService.findRole(user.getRole().getId());
 						temp.setUserType(r.getType());
 						temp.setRole(r);
+						if (r.getType().equals(1) || r.getType().equals(2))
+							temp.setAgroChDealer(user.getAgroChDealer());
+						else
+							temp.setAgroChDealer(null);
 					}
 					temp.setLanguage(user.getLanguage());
+					temp.setAgroChDealer(temp.getAgroChDealer());
 					if (getUserImage() != null) {
 						temp.getPersInfo().setImage(FileUtil.getBinaryFileContent(getUserImage()));
 
@@ -655,12 +682,12 @@ public class UserAction extends SwitchValidatorAction {
 						userEditHistory.setBranchId(getBranchId());
 						userEditHistory.setCreatedDate(new Date());
 						userEditHistory.setCreatedUser(getUsername());
-						if(temp.getAgroChDealer()!=null && !StringUtil.isEmpty(user.getAgroChDealer())){
-						userEditHistory.setAgroChDealer(temp.getAgroChDealer());
+						if (temp.getAgroChDealer() != null && !StringUtil.isEmpty(user.getAgroChDealer())) {
+							userEditHistory.setAgroChDealer(temp.getAgroChDealer());
 						}
 						userEditHistory.setDate(new Date());
 						DateFormat dateFormat = new SimpleDateFormat("hh.mm aa");
-				    	String dateString = dateFormat.format(new Date()).toString();
+						String dateString = dateFormat.format(new Date()).toString();
 						userEditHistory.setTime(dateString);
 						userEditHistory.setUserName(temp.getUsername());
 						userEditHistory.setLoggedUser(getUsername());
@@ -1137,4 +1164,43 @@ public class UserAction extends SwitchValidatorAction {
 		return DealerStatus;
 	}
 
+	public String getObjectIdFromTableByFieldIdAndRevIdForUser(String table, String fieldValue, String audId) {
+		if (fieldValue != null && !StringUtil.isEmpty(fieldValue) && audId != null && !StringUtil.isEmpty(audId)
+				&& table != null && !StringUtil.isEmpty(table)) {
+			String value = utilService.findObjectIdFromTableByFieldIdAndRevId(table, fieldValue, audId);
+			if (value != null && value != "" && !StringUtil.isEmpty(value) && value.equalsIgnoreCase("1")) {
+				return "Active";
+			} else if (value != null && value != "" && !StringUtil.isEmpty(value) && value.equalsIgnoreCase("0")) {
+				return "InActive";
+			}
+		}
+		return "";
+	}
+
+	@Getter
+	@Setter
+	private String idd;
+
+	public String populateDownload() {
+
+		try {
+			DocumentUpload dc = utilService.findDocumentUploadById(Long.valueOf(idd));
+			String documentName;
+
+			documentName = dc.getName() != null ? dc.getName() : "";
+
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-Disposition",
+					"attachment;filename=" + documentName + "." + dc.getDocFileContentType());
+			response.getOutputStream().write(dc.getContent());
+		} catch (Exception e) {
+			e.printStackTrace();
+
+		}
+		return null;
+	}
+
+	public String populateDetailImage(byte[] id) {
+		return "data:image/png;base64,"+Base64Util.encoder(id);
+	}
 }

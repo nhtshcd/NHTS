@@ -87,7 +87,7 @@ public class LandPreparationAdapter implements ITxnAdapter {
 					String mode = (String) jsonObj.get("mode");
 					String noOfLab = (String) jsonObj.get("noOfLab");
 					landPreparationDetails.setActivity(activity);
-					landPreparationDetails.setActivityMode(mode);
+					landPreparationDetails.setActivityMode("");
 					landPreparationDetails.setNoOfLabourers(noOfLab);
 					landPreparationDetails.setLandPreparation(landPreparation);
 					landPreparation.getLandPreparationDetails().add(landPreparationDetails);

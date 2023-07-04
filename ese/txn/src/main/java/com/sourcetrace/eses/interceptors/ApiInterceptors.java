@@ -16,6 +16,7 @@ import com.sourcetrace.eses.entity.AgentAccessLog;
 import com.sourcetrace.eses.entity.AgentAccessLogDetail;
 import com.sourcetrace.eses.entity.Device;
 import com.sourcetrace.eses.entity.ESESystem;
+import com.sourcetrace.eses.entity.ExporterRegistration;
 import com.sourcetrace.eses.entity.PreferenceType;
 import com.sourcetrace.eses.entity.Profile;
 import com.sourcetrace.eses.entity.Transaction;
@@ -54,16 +55,25 @@ public class ApiInterceptors extends HandlerInterceptorAdapter {
 		if (!js.getHead().getAgentId().equals("nhtstest123")) {
 			device = validateDevice(js.getHead(), js.getTxnLogId());
 
-			
-
 			Agent agent = validateAgent(js, js.getTxnLogId(), device);
 
 			Device dc = (Device) farmerDAO.findObjectById("from Device dc where dc.agent.profileId=?",
 					new Object[] { js.getHead().getAgentId() });
-			if ((device.getIsRegistered() == Device.DEVICE_NOT_REGISTERED || device.getAgent() == null) && dc == null && agent!=null) {
-				if (device.getExporter()!=null && agent.getExporter()!=null && device.getExporter().getId()!=agent.getExporter().getId()) {
+			if ((device.getIsRegistered() == Device.DEVICE_NOT_REGISTERED || device.getAgent() == null) && dc == null
+					&& agent != null) {
+				// if (device.getExporter()!=null && agent.getExporter()!=null
+				// && device.getExporter().getId()!=agent.getExporter().getId())
+				// {
+				ExporterRegistration ex;
+				if (agent.getPackhouse() != null && agent.getPackhouse().getExporter() != null
+						&& !ObjectUtil.isEmpty(agent.getPackhouse().getExporter()))
+					ex = utilDAO.findExportRegById(agent.getPackhouse().getExporter().getId());
+				else
+					ex = utilDAO.findExportRegById(agent.getExporter().getId());
+				if (device.getExporter() != null && ex != null
+						&& !device.getExporter().getId().toString().equalsIgnoreCase(ex.getId().toString())) {
 					logError(new TxnFault(ITxnErrorCodes.UNAUTHORISED_DEVICE, js.getTxnLogId()));
-				}else{
+				} else {
 					device.setAgent(agent);
 					device.setIsRegistered(Device.DEVICE_REGISTERED);
 					device.setBranchId(agent.getBranchId());
@@ -71,28 +81,32 @@ public class ApiInterceptors extends HandlerInterceptorAdapter {
 					utilDAO.update(device);
 				}
 			}
-			
+
 			if (!device.getEnabled()) {
 				logError(new TxnFault(ITxnErrorCodes.DEVICE_DISABLED, js.getTxnLogId()));
 			}
 			if (device.getIsRegistered() == Device.DEVICE_NOT_REGISTERED) {
 				logError(new TxnFault(ITxnErrorCodes.INVALID_DEVICE, js.getTxnLogId()));
 			}
-			
-			
-			if (device.getExporter()!=null && agent.getExporter()!=null && device.getExporter().getId()!=agent.getExporter().getId()) {
-				logError(new TxnFault(ITxnErrorCodes.UNAUTHORISED_DEVICE, js.getTxnLogId()));
-			}
-			
+
+			// if (device.getExporter()!=null && agent.getExporter()!=null &&
+			// device.getExporter().getId()!=agent.getExporter().getId()) {
+			/*
+			 * if (device.getExporter()!=null && agent.getExporter()!=null &&
+			 * !device.getExporter().getId().toString().equalsIgnoreCase(agent.
+			 * getExporter().getId().toString())) { logError(new
+			 * TxnFault(ITxnErrorCodes.UNAUTHORISED_DEVICE, js.getTxnLogId()));
+			 * }
+			 */
 
 			if (ObjectUtil.isEmpty(device.getAgent())) {
 				logError(new TxnFault(ITxnErrorCodes.AGENT_DEVICE_MAPPING_UNAVAILABLE, js.getTxnLogId()));
 			} else if (!js.getHead().getAgentId().equalsIgnoreCase(device.getAgent().getProfileId())) {
 				logError(new TxnFault(ITxnErrorCodes.AGENT_DEVICE_MAPPING_UNAUTHORIZED, js.getTxnLogId()));
 			}
-			js.getHead().setBranchId(device.getBranchId()==null ? agent.getBranchId() :  device.getBranchId());
+			js.getHead().setBranchId(device.getBranchId() == null ? agent.getBranchId() : device.getBranchId());
 		}
-		
+
 		request.setAttribute("reqObj", js);
 
 		return true;
@@ -301,16 +315,16 @@ public class ApiInterceptors extends HandlerInterceptorAdapter {
 
 		if (ObjectUtil.isEmpty(device) || device.getIsRegistered() == Device.DEVICE_NOT_REGISTERED) {
 			if (ObjectUtil.isEmpty(device)) {
-				 device = new Device();
-				 device.setSerialNumber(serialNo);
-				 device.setDeviceType(Device.MOBILE_DEVICE);
-				 device.setEnabled(false);
-				 device.setDeleted(false);
-				 device.setCode(idGenerator.getDeviceIdSeq());
-				 device.setCreatedDate(new Date());
-				 device.setModifiedTime(new Date());
-				 device.setIsRegistered(Device.DEVICE_NOT_REGISTERED);
-				 device.setName(agentId);
+				device = new Device();
+				device.setSerialNumber(serialNo);
+				device.setDeviceType(Device.MOBILE_DEVICE);
+				device.setEnabled(false);
+				device.setDeleted(false);
+				device.setCode(idGenerator.getDeviceIdSeq());
+				device.setCreatedDate(new Date());
+				device.setModifiedTime(new Date());
+				device.setIsRegistered(Device.DEVICE_NOT_REGISTERED);
+				device.setName(agentId);
 				utilDAO.save(device);
 			} else {
 				device.setDeviceType(Device.MOBILE_DEVICE);

@@ -61,7 +61,8 @@ public class HomeController {
 			dc.setRefCode(reference);
 			dc.setDocFileFileName(file.getOriginalFilename());
 			dc.setDocFileContentType(FilenameUtils.getExtension(file.getOriginalFilename()));
-			dc.setName(file.getOriginalFilename());
+			//dc.setName(file.getOriginalFilename());
+			dc.setName(FilenameUtils.getBaseName(file.getOriginalFilename()));
 			if(Arrays.asList("png","PNG","JPG","jpg","JPEG","jpeg").contains(dc.getDocFileContentType())){
 				dc.setFileType(DocumentUpload.fileType.IMAGE.ordinal());
 			}else if(Arrays.asList("pdf","PDF").contains(dc.getDocFileContentType())){

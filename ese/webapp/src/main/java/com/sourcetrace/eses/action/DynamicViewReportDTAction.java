@@ -25,6 +25,7 @@ import org.apache.poi.hssf.usermodel.*;
 import org.apache.poi.hssf.util.*;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.*;
+import org.hibernate.Session;
 import org.json.simple.*;
 import org.springframework.beans.factory.annotation.*;
 import org.springframework.context.annotation.*;
@@ -101,8 +102,9 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 	private String localitycode;
 	private String statecode;
 	private String batchid;
-	private String SORTING_QUERY = "FROM Sorting w WHERE w.farmCrops.id=? Order By createdDate Desc";
+	private String SORTING_QUERY = "FROM Sorting w WHERE w.planting.id=? Order By createdDate Desc";
 	private String txnId;
+
 	public DynamicViewReportDTAction() {
 		System.out.println("*************** Session Bean Created " + (++created) + " Times ***************");
 	}
@@ -200,10 +202,10 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 				}
 
 			}
-			
+
 			if (getLoggedInDealer() > 0) {
 				dynamicReportConfig.setCsvFile(dynamicReportConfig.getCsvFile());
-			}else{
+			} else {
 				dynamicReportConfig.setCsvFile(null);
 			}
 
@@ -237,9 +239,11 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 					.forEach(dynamicReportConfigDetail -> {
 						dynamicReportConfigDetail.setDataType(dynamicReportConfigDetail.getDataType() != null
 								? dynamicReportConfigDetail.getDataType() : "");
-						if((getDealerId()==null || StringUtil.isEmpty(getDealerId())) &&  dynamicReportConfigDetail.getAlignment()!=null && dynamicReportConfigDetail.getAlignment().equalsIgnoreCase("dealer")  ){
+						if ((getDealerId() == null || StringUtil.isEmpty(getDealerId()))
+								&& dynamicReportConfigDetail.getAlignment() != null
+								&& dynamicReportConfigDetail.getAlignment().equalsIgnoreCase("dealer")) {
 							dynamicReportConfigDetail.setAlignment(null);
-							
+
 						}
 						if (dynamicReportConfigDetail.getLabelName().contains("@")) {
 							String label = dynamicReportConfigDetail.getLabelName();
@@ -447,11 +451,10 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 	}
 
 	public String detail() throws Exception {
-		
 
 		Map data = null;
 		if (!ObjectUtil.isEmpty(dynamicReportConfig) && dynamicReportConfig.getFetchType() == 2L) {
-			
+
 			data = getExportData(false);
 		} else if (!ObjectUtil.isEmpty(dynamicReportConfig) && dynamicReportConfig.getFetchType() == 3L) {
 
@@ -1096,14 +1099,15 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 				ansVal = ("");
 				runCount.getAndIncrement();
 			}
-		}else if (dynamicReportConfigDetail.getAcessType() == 39L) {
+		} else if (dynamicReportConfigDetail.getAcessType() == 39L) {
 			fValue = ReflectUtil.getObjectFieldValue(arr, String.valueOf(at.get()));
 
 			if (!ObjectUtil.isEmpty(fValue) && !StringUtil.isEmpty(fValue)) {
 				// System.out.println("fValue: " + fValue);
-				ansVal = ("<a href=\"javascript:printReceipt(\\'" + fValue + "\\')\" class ='btn btn-default btnBorderRadius' "
-						+ "onclick='printReceipt(\"" + fValue + "\",\""+dynamicReportConfigDetail.getMethod()+"\")'>"
-						+ getText("printReceipt") + "</button>");
+				ansVal = ("<a href=\"javascript:printReceipt(\\'" + fValue
+						+ "\\')\" class ='btn btn-default btnBorderRadius' " + "onclick='printReceipt(\"" + fValue
+						+ "\",\"" + dynamicReportConfigDetail.getMethod() + "\")'>" + getText("printReceipt")
+						+ "</button>");
 
 			} else {
 				// No Latlon
@@ -1141,38 +1145,145 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 			}
 			if (expression_result.equalsIgnoreCase("1")) {
 				ansVal = "<button class=\"fa fa-print\"\"aria-hidden=\"true\"\" onclick='event.preventDefault();printContract(\""
-						+ StringEscapeUtils.escapeEcmaScript(dynamicReportConfigDetail.getMethod()) + ",#"+ dynamicReportConfigDetail.getParamters() + ",#" + arr[0].toString() + "\")'></button>";
+						+ StringEscapeUtils.escapeEcmaScript(dynamicReportConfigDetail.getMethod()) + ",#"
+						+ dynamicReportConfigDetail.getParamters() + ",#" + arr[0].toString() + "\")'></button>";
+			} else {
+				ansVal = "No Access";
+			}
+		} else if (dynamicReportConfigDetail.getAcessType() == 76L) {// Only for
+																		// Shipment
+			ansVal = (String) ReflectUtil.getObjectFieldValue(arr, String.valueOf(at.get()));
+
+			if (dynamicReportConfigDetail.getMethod() != null) {
+				if (valMap.containsKey(dynamicReportConfigDetail.getId())) {
+					Map<String, String> valuess = (Map<String, String>) valMap.get(dynamicReportConfigDetail.getId());
+					String ke = String.valueOf(arr[at.get()]);
+					if (valuess.containsKey(ke)) {
+						ansVal = valuess.get(ke);
+					} else {
+						ansVal = "";
+					}
+				}
+
+			}
+
+			if (!ObjectUtil.isEmpty(ansVal) && !StringUtil.isEmpty(ansVal)) {
+				Shipment shh = (Shipment) farmerService.findObjectById(
+						"FROM Shipment s WHERE s.id=? AND (s.status=? OR s.status=? OR s.status=?)",
+						new Object[] { Long.valueOf(arr[0].toString()), 1, 3, 4 });
+				if (shh != null && shh.getShipmentSupportingFiles() != null) {
+					ansVal = "<a class='fa fa-download' href='shipment_downloadMultipleImagesBasedOnDocumentId?idd="
+							+ ansVal + "&ids=" + arr[0] + "' title='" + dynamicReportConfigDetail.getLabelName()
+							+ "'></a>";
+				} else {
+					ansVal = "<button class='fa fa-ban'></button>";
+				}
+			} else {
+
+				// No Latlon
+				ansVal = "<button class='fa fa-ban'></button>";
+			}
+		} else if (dynamicReportConfigDetail.getAcessType() == 77L) {
+			ansVal = (String) ReflectUtil.getObjectFieldValue(arr, String.valueOf(at.get()));
+
+			if (dynamicReportConfigDetail.getMethod() != null) {
+				if (valMap.containsKey(dynamicReportConfigDetail.getId())) {
+					Map<String, String> valuess = (Map<String, String>) valMap.get(dynamicReportConfigDetail.getId());
+					String ke = String.valueOf(arr[at.get()]);
+					if (valuess.containsKey(ke)) {
+						ansVal = valuess.get(ke);
+					} else {
+						ansVal = "";
+					}
+				}
+
+			}
+
+			if (!ObjectUtil.isEmpty(ansVal) && !StringUtil.isEmpty(ansVal)) {
+
+				ansVal = "<a class='fa fa-download' href='generalPop_downloadMultipleImagesBasedOnDocumentId?idd="
+						+ ansVal + "' title='" + dynamicReportConfigDetail.getLabelName() + "'></a>";
+
+			} else {
+
+				// No Latlon
+				ansVal = "<button class='fa fa-ban'></button>";
+			}
+		} else if (dynamicReportConfigDetail.getAcessType() == 32L) {
+			if (request.getSession().getAttribute("roleId") != null
+					&& request.getSession().getAttribute("roleId").equals(2L)) {
+				if (arr[at.get()] != null) {
+					String par = (getLocaleProperty(dynamicReportConfigDetail.getParamters().split("~")[0].trim()));
+
+					String title = par.split("#")[1].trim();
+					String param = par.split("#")[0].trim();
+					mValue = ReflectUtil.getObjectFieldValue(arr, String.valueOf(at.get()));
+					String par1 = getLocaleProperty(dynamicReportConfigDetail.getParamters().split("~")[1]);
+					ScriptEngineManager mgr = new ScriptEngineManager();
+					ScriptEngine engine = mgr.getEngineByName("JavaScript");
+
+					List<String> fieldLiust = new ArrayList<>();
+					Matcher p = Pattern.compile("\\{(.*?)\\}").matcher(par1);
+
+					while (p.find())
+						fieldLiust.add(p.group(1));
+
+					if (!fieldLiust.isEmpty()) {
+						par1 = par1.replaceAll("branchId", branchId);
+						par1 = par1.replaceAll("\\{", "");
+						par1 = par1.replaceAll("\\}", "");
+						String parry = par1;
+						try {
+							par1 = (String) engine.eval(par1);
+						} catch (Exception e) {
+							par1 = parry;
+							// TODO: handle exception
+						}
+					}
+
+					fValue = ReflectUtil.getObjectFieldValue(arr, String.valueOf(param)) + "~" + par1 + "~"
+							+ dynamicReportConfigDetail.getMethod() + "~" + title;
+
+					if (fValue != null && !StringUtil.isEmpty(fValue)) {
+
+						ansVal = "<button class='fa fa-info' aria-hidden='true' onclick='event.preventDefault();detailPopup1(\""
+								+ fValue + "\")'></button>";
+
+					} else {
+						ansVal = "<button class='fa fa-ban'></button>";
+
+					}
+				}
 			} else {
 				ansVal = "No Access";
 			}
 		}
-		
-			if (dynamicReportConfigDetail.getDataType() != null
-					&& dynamicReportConfigDetail.getDataType().equals("5")) {
 
-				try {
-					ansVal = "<a href=" + dynamicReportConfigDetail.getParamters() + arr[0].toString() + "&breadcrumb="
-							+ URLEncoder.encode(dynamicReportConfigDetail.getDynamicReportConfig().getReport(),
-									StandardCharsets.UTF_8.toString())
-							+ "&redirectContent=" + getRedirectContent() + "&layoutType="
-							+ request.getParameter("layoutType") + "&url=" + request.getParameter("url")
-							+ " title='Go To Detail' target=_blank>" + ansVal + "</a>";
-				} catch (UnsupportedEncodingException e) {
-					// TODO Auto-generated catch block
-					e.printStackTrace();
-				}
+		if (dynamicReportConfigDetail.getDataType() != null && dynamicReportConfigDetail.getDataType().equals("5")) {
 
-			} else if (dynamicReportConfigDetail.getDataType() != null
-					&& dynamicReportConfigDetail.getDataType().equals("6")) {
-
-				ansVal = "<a class='fa fa-download' href=" + dynamicReportConfigDetail.getParamters()
-						+ arr[0].toString() + " title='" + dynamicReportConfigDetail.getLabelName() + "'></a>";
-
-			} else if (dynamicReportConfigDetail.getDataType() != null
-					&& dynamicReportConfigDetail.getDataType().equals("2")) {
-				ansVal = !StringUtil.isEmpty(ansVal.toString()) ? ansVal.toString() : "";
+			try {
+				ansVal = "<a href=" + dynamicReportConfigDetail.getParamters() + arr[0].toString() + "&breadcrumb="
+						+ URLEncoder.encode(dynamicReportConfigDetail.getDynamicReportConfig().getReport(),
+								StandardCharsets.UTF_8.toString())
+						+ "&redirectContent=" + getRedirectContent() + "&layoutType="
+						+ request.getParameter("layoutType") + "&url=" + request.getParameter("url")
+						+ " title='Go To Detail' target=_blank>" + ansVal + "</a>";
+			} catch (UnsupportedEncodingException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
 			}
-		
+
+		} else if (dynamicReportConfigDetail.getDataType() != null
+				&& dynamicReportConfigDetail.getDataType().equals("6")) {
+
+			ansVal = "<a class='fa fa-download' href=" + dynamicReportConfigDetail.getParamters() + arr[0].toString()
+					+ " title='" + dynamicReportConfigDetail.getLabelName() + "'></a>";
+
+		} else if (dynamicReportConfigDetail.getDataType() != null
+				&& dynamicReportConfigDetail.getDataType().equals("2")) {
+			ansVal = !StringUtil.isEmpty(ansVal.toString()) ? ansVal.toString() : "";
+		}
+
 		return ansVal;
 
 	}
@@ -1353,8 +1464,7 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 						|| dynamicReportConfig.getEntityName().trim().endsWith("Packhouse")) {
 					url = getLocaleProperty("profile") + "~#," + dynamicReportConfig.getReport()
 							+ "~dynamicViewReportDT_list.action?id=" + dynamicReportConfig.getId();
-				} else if (dynamicReportConfig.getEntityName().trim().endsWith(".Agent")
-						) {
+				} else if (dynamicReportConfig.getEntityName().trim().endsWith(".Agent")) {
 					url = getLocaleProperty("admin") + "~#," + dynamicReportConfig.getReport()
 							+ "~dynamicViewReportDT_list.action?id=" + dynamicReportConfig.getId();
 				} else {
@@ -1678,35 +1788,46 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 		}
 		return null;
 	}
-	
-	public String processSortPackQRBatchData(){
-		try {
-		String documentName = null;
-		documentName = getText("qrCode") + txnId;
-		String message =null;
-		Sorting sorting = (Sorting) farmerService.findObjectById(
-				"FROM Sorting so WHERE so.id=? AND so.status=?", new Object[] { Long.valueOf(txnId), 1 });
-		if(sorting!=null){
-			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and cw.qrCodeId=? and cw.coOperative.id is null",
-					new Object[] {sorting.getFarmCrops().getId(),sorting.getQrCodeId()});
-			
-	     message =sorting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()+"~"
-		+sorting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()+"~"+sorting.getFarmCrops().getBlockId()+"~"
-		+sorting.getFarmCrops().getBlockName()+"~"+sorting.getPlanting().getVariety().getCode()+"~"+sorting.getPlanting().getVariety().getName()+"~"
-		+sorting.getPlanting().getGrade().getCode()+"~"+sorting.getPlanting().getGrade().getName()+"~"+sorting.getQtyNet()+"~"
-		+sorting.getFarmCrops().getFarm().getFarmer().getFarmerId()+"~"+sorting.getFarmCrops().getFarm().getFarmer().getFirstName()+"~"
-		+sorting.getFarmCrops().getFarm().getFarmCode()+"~"+sorting.getFarmCrops().getFarm().getFarmName()+"~"
-		+cw.getStockType() +"~"+sorting.getFarmCrops().getExporter().getId()+"~"
-		+DateUtil.convertDateToString(cw.getCreatedDate(), "yyyy-MM-dd")+"~"+sorting.getPlanting().getPlantingId()+"~"+sorting.getQrCodeId();
-		}
-		ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
-				.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
-		setFileInputStream(new ByteArrayInputStream(stream.toByteArray()));
-		response.setContentType("application/octet-stream");
-		response.setHeader("Content-Disposition", "attachment;filename=" + documentName + "." + "png");
 
-		response.getOutputStream().write(stream.toByteArray());
-		
+	public String processSortPackQRBatchData() {
+		try {
+			String documentName = null;
+			documentName = getText("qrCode") + txnId;
+			String message = null;
+			Sorting sorting = (Sorting) farmerService.findObjectById("FROM Sorting so WHERE so.id=? AND so.status=?",
+					new Object[] { Long.valueOf(txnId), 1 });
+			if (sorting != null) {
+				CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
+						"FROM CityWarehouse cw WHERE cw.planting.id=? and cw.qrCodeId=? and cw.coOperative.id is null",
+						new Object[] { sorting.getPlanting().getId(), sorting.getQrCodeId() });
+
+				message = sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity()
+						.getLocality().getState().getCode()
+						+ "~"
+						+ sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity()
+								.getLocality().getState().getName()
+						+ "~" + sorting.getPlanting().getFarmCrops().getBlockId() + "~"
+						+ sorting.getPlanting().getFarmCrops().getBlockName() + "~"
+						+ sorting.getPlanting().getVariety().getCode() + "~"
+						+ sorting.getPlanting().getVariety().getName() + "~"
+						+ sorting.getPlanting().getGrade().getCode() + "~" + sorting.getPlanting().getGrade().getName()
+						+ "~" + sorting.getQtyNet() + "~"
+						+ sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getFarmerId() + "~"
+						+ sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getFirstName() + "~"
+						+ sorting.getPlanting().getFarmCrops().getFarm().getFarmCode() + "~"
+						+ sorting.getPlanting().getFarmCrops().getFarm().getFarmName() + "~" + cw.getStockType() + "~"
+						+ sorting.getPlanting().getFarmCrops().getExporter().getId() + "~"
+						+ DateUtil.convertDateToString(cw.getCreatedDate(), "yyyy-MM-dd") + "~"
+						+ sorting.getPlanting().getPlantingId() + "~" + sorting.getQrCodeId();
+			}
+			ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
+					.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
+			setFileInputStream(new ByteArrayInputStream(stream.toByteArray()));
+			response.setContentType("application/octet-stream");
+			response.setHeader("Content-Disposition", "attachment;filename=" + documentName + "." + "png");
+
+			response.getOutputStream().write(stream.toByteArray());
+
 		} catch (Exception e) {
 			e.printStackTrace();
 
@@ -1721,279 +1842,431 @@ public class DynamicViewReportDTAction extends BaseReportAction {
 
 	public String processPrintHTML() throws IOException, ParserConfigurationException, DocumentException {
 		if (!StringUtil.isEmpty(receiptNumber)) {
-			if(methodValuerp.equalsIgnoreCase("IncomingShipment")){
+			if (methodValuerp.equalsIgnoreCase("IncomingShipment")) {
 				initializePrintMap();
 				PackhouseIncoming procurementMTNR = (PackhouseIncoming) farmerService.findObjectById(
-						"FROM PackhouseIncoming pi WHERE pi.batchNo=? AND pi.status=?", new Object[] { receiptNumber, 1 });
+						"FROM PackhouseIncoming pi WHERE pi.batchNo=? AND pi.status=?",
+						new Object[] { receiptNumber, 1 });
 				buildTransactionPrintMap(procurementMTNR);
-			}
-			else if(methodValuerp.equalsIgnoreCase("packingOperations")){
+			} else if (methodValuerp.equalsIgnoreCase("packingOperations")) {
 				initializePrintMapForPacking();
-				Packing packing = (Packing) farmerService.findObjectById( "FROM Packing so WHERE so.batchNo=? AND so.status=?", new Object[] { String.valueOf(receiptNumber), 1 });
+				Packing packing = (Packing) farmerService.findObjectById(
+						"FROM Packing so WHERE so.batchNo=? AND so.status=?",
+						new Object[] { String.valueOf(receiptNumber), 1 });
 				buildTransactionPrintMapForPacking(packing);
-			}
-			else{
+			} else {
 				initializePrintMapForSorting();
 				Sorting sorting = (Sorting) farmerService.findObjectById(
-						"FROM Sorting so WHERE so.id=? AND so.status=?", new Object[] { Long.valueOf(receiptNumber), 1 });
+						"FROM Sorting so WHERE so.id=? AND so.status=?",
+						new Object[] { Long.valueOf(receiptNumber), 1 });
 				buildTransactionPrintMapForSorting(sorting);
 			}
-		
+
 		}
 		return "html";
 	}
 
-
-private void initializePrintMapForPacking() {
-	this.shipmentPrintMap = new HashMap<String, Object>();
-	List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
-	Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
-	this.shipmentPrintMap.put("checkIncomingOrSorting", "pack2");
-	this.shipmentPrintMap.put("recNo", "");
-	this.shipmentPrintMap.put("date", "");
-	this.shipmentPrintMap.put("agentName", "");
-	this.shipmentPrintMap.put("packerName", "");
-	this.shipmentPrintMap.put("product", "");
-	this.shipmentPrintMap.put("productMapList", productMapList);
-	this.shipmentPrintMap.put("totalInfo", totalMap);
-	this.shipmentPrintMap.put("packingFarmer", "");
-	this.shipmentPrintMap.put("packingFarm", "");
-	this.shipmentPrintMap.put("packingBlockidandName", "");
-	this.shipmentPrintMap.put("packingplanting", "");
-	this.shipmentPrintMap.put("packingReceptbatchNo", "");
-	this.shipmentPrintMap.put("packingCrop", "");
-	this.shipmentPrintMap.put("packingVariety", "");
-	this.shipmentPrintMap.put("packingincomingshipmentdate", "");
-	this.shipmentPrintMap.put("packingPackedquantity", "");
-	this.shipmentPrintMap.put("packingPrice", "");
-	this.shipmentPrintMap.put("rejectWt", "");
-	this.shipmentPrintMap.put("packingbestBeforeDate", "");
-	this.shipmentPrintMap.put("packingCountryOfOrigin", "");
-	}
-	
-private void buildTransactionPrintMapForPacking(Packing packing) throws MalformedURLException {
-		
-	List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
-	List<Map<String, Object>> qrMapList = new ArrayList<Map<String, Object>>();
-	if (!ObjectUtil.isEmpty(packing)) {
-		long noOfBagsSum = 0l;
-		double netWeightSum = 0d;
-		double rejectedWTSum = 0d;
-		DateFormat df = new SimpleDateFormat(getGeneralDateFormat());
-		if (!ObjectUtil.isEmpty(packing.getPackHouse().getName())) {
-			if (!StringUtil.isEmpty(packing.getPackHouse().getName())) {
-				this.shipmentPrintMap.put("recNo", packing.getPackHouse().getName());
-			}
-			if (!ObjectUtil.isEmpty(packing.getPackingDate())) {
-				this.shipmentPrintMap.put("date", df.format(packing.getPackingDate()));
-			}
-			if (!ObjectUtil.isEmpty(packing.getPackerName()) && !StringUtil.isEmpty(packing.getPackerName())) {
-				this.shipmentPrintMap.put("packerName", packing.getPackerName());
-			}
-			if (!ObjectUtil.isEmpty(packing.getBatchNo()) && !StringUtil.isEmpty(packing.getBatchNo())) {
-				this.shipmentPrintMap.put("agentName", packing.getBatchNo());
-			}
-
-		}
+	private void initializePrintMapForPacking() {
+		this.shipmentPrintMap = new HashMap<String, Object>();
+		List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
+		Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
 		this.shipmentPrintMap.put("checkIncomingOrSorting", "pack2");
+		this.shipmentPrintMap.put("recNo", "");
+		this.shipmentPrintMap.put("date", "");
+		this.shipmentPrintMap.put("agentName", "");
+		this.shipmentPrintMap.put("packerName", "");
+		this.shipmentPrintMap.put("product", "");
 		this.shipmentPrintMap.put("productMapList", productMapList);
-		this.shipmentPrintMap.put("qrMapList", qrMapList);
-		if (!ObjectUtil.isListEmpty(packing.getPackingDetails())) {
-			for (PackingDetail packingDetail : packing.getPackingDetails()) {
-				Map<String, Object> productMap = new LinkedHashMap<String, Object>();
+		this.shipmentPrintMap.put("totalInfo", totalMap);
+		this.shipmentPrintMap.put("packingFarmer", "");
+		this.shipmentPrintMap.put("packingFarm", "");
+		this.shipmentPrintMap.put("packingBlockidandName", "");
+		this.shipmentPrintMap.put("packingplanting", "");
+		this.shipmentPrintMap.put("packingReceptbatchNo", "");
+		this.shipmentPrintMap.put("packingCrop", "");
+		this.shipmentPrintMap.put("packingVariety", "");
+		this.shipmentPrintMap.put("packingincomingshipmentdate", "");
+		this.shipmentPrintMap.put("packingPackedquantity", "");
+		this.shipmentPrintMap.put("packingPrice", "");
+		this.shipmentPrintMap.put("rejectWt", "");
+		this.shipmentPrintMap.put("packingbestBeforeDate", "");
+		this.shipmentPrintMap.put("packingCountryOfOrigin", "");
+	}
+
+	private void buildTransactionPrintMapForPacking(Packing packing) throws MalformedURLException {
+
+		List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
+		List<Map<String, Object>> qrMapList = new ArrayList<Map<String, Object>>();
+		if (!ObjectUtil.isEmpty(packing)) {
+			long noOfBagsSum = 0l;
+			double netWeightSum = 0d;
+			double rejectedWTSum = 0d;
+			double totalSum = 0d;
+			DateFormat df = new SimpleDateFormat(getGeneralDateFormat());
+			if (!ObjectUtil.isEmpty(packing.getPackHouse().getName())) {
+				if (!StringUtil.isEmpty(packing.getPackHouse().getName())) {
+					this.shipmentPrintMap.put("recNo", packing.getPackHouse().getName());
+				}
+				if (!ObjectUtil.isEmpty(packing.getPackingDate())) {
+					this.shipmentPrintMap.put("date", df.format(packing.getPackingDate()));
+				}
+				if (!ObjectUtil.isEmpty(packing.getPackerName()) && !StringUtil.isEmpty(packing.getPackerName())) {
+					this.shipmentPrintMap.put("packerName", packing.getPackerName());
+				}
+				if (!ObjectUtil.isEmpty(packing.getBatchNo()) && !StringUtil.isEmpty(packing.getBatchNo())) {
+					this.shipmentPrintMap.put("agentName", packing.getBatchNo());
+				}
+
+			}
+			this.shipmentPrintMap.put("checkIncomingOrSorting", "pack2");
+			this.shipmentPrintMap.put("productMapList", productMapList);
+
+			Map<Long, PackingDetail> ctmap = new HashMap<Long, PackingDetail>();
+			if (!ObjectUtil.isListEmpty(packing.getPackingDetails())) {
+				for (PackingDetail packingDetail : packing.getPackingDetails()) {
+					Map<String, Object> productMap = new LinkedHashMap<String, Object>();
+					Map<String, Object> qrMap = new LinkedHashMap<String, Object>();
+					String pacQr = null;
+					productMap.put("packingFarmer", packingDetail.getBlockId().getFarm().getFarmer().getFarmerId()
+							+ " - " + packingDetail.getBlockId().getFarm().getFarmer().getFirstName());
+					productMap.put("packingFarm", packingDetail.getBlockId().getFarm().getFarmCode() + " - "
+							+ packingDetail.getBlockId().getFarm().getFarmName());
+					productMap.put("packingBlockidandName", packingDetail.getBlockId().getBlockId() + " - "
+							+ packingDetail.getBlockId().getBlockName());
+					productMap.put("packingplanting", packingDetail.getPlanting().getPlantingId());
+					/*
+					 * productMap.put("packingFarmer",
+					 * packingDetail.getBlockId().getFarm().getFarmer().
+					 * getFirstName()
+					 * +" - "+packingDetail.getBlockId().getFarm().getFarmer().
+					 * getFarmerId()); productMap.put("packingFarm",
+					 * packingDetail.getBlockId().getFarm().getFarmName()+" - "
+					 * +packingDetail.getBlockId().getFarm().getFarmCode());
+					 * productMap.put("packingBlockidandName",
+					 * packingDetail.getBlockId().getBlockId()
+					 * +" - "+packingDetail.getBlockId().getBlockName());
+					 */
+					productMap.put("packingReceptbatchNo", packingDetail.getBatchNo());
+					productMap.put("packingCrop", packingDetail.getPlanting().getVariety().getName());
+					productMap.put("packingVariety", packingDetail.getPlanting().getGrade().getName());
+					CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
+							"FROM CityWarehouse  where batchNo=?",
+							new Object[] { String.valueOf(packingDetail.getBatchNo()) });
+					if (cw != null) {
+						productMap.put("packingincomingshipmentdate",
+								getGeneralDateFormat(String.valueOf(cw.getCreatedDate())));
+					}
+					productMap.put("packingPackedquantity",
+							CurrencyUtil.getDecimalFormat(packingDetail.getQuantity(), "##.00"));
+					productMap.put("packingPrice", CurrencyUtil.getDecimalFormat(packingDetail.getPrice(), "##.00"));
+					productMap.put("productValue", packingDetail.getTotalprice());
+					productMap.put("rejectWt", CurrencyUtil.getDecimalFormat(packingDetail.getRejectWt(), "##.00"));
+					productMap.put("packingbestBeforeDate", df.format(packingDetail.getBestBefore()));
+					productMap.put("packingCountryOfOrigin",
+							packingDetail.getBlockId().getFarm().getVillage() != null ? packingDetail.getBlockId()
+									.getFarm().getVillage().getCity().getLocality().getState().getName() : "");
+
+					netWeightSum += packingDetail.getQuantity();
+					rejectedWTSum += packingDetail.getRejectWt();
+					totalSum += Double.valueOf(packingDetail.getTotalprice());
+
+					ctmap.put(packingDetail.getPlanting().getId(), packingDetail);
+
+					/*
+					 * pacQr = gendrateQRcodeForPacking(packingDetail);
+					 * qrMap.put("QrCode",pacQr); qrMapList.add(qrMap);
+					 */
+					productMapList.add(productMap);
+				}
+			}
+
+			ctmap.entrySet().forEach(uu -> {
 				Map<String, Object> qrMap = new LinkedHashMap<String, Object>();
 				String pacQr = null;
-				productMap.put("packingFarmer", packingDetail.getBlockId().getFarm().getFarmer().getFarmerId() +" - "+packingDetail.getBlockId().getFarm().getFarmer().getFirstName());
-				productMap.put("packingFarm", packingDetail.getBlockId().getFarm().getFarmCode()+" - "+packingDetail.getBlockId().getFarm().getFarmName());
-				productMap.put("packingBlockidandName", packingDetail.getBlockId().getBlockId() +" - "+packingDetail.getBlockId().getBlockName());
-				productMap.put("packingplanting", packingDetail.getPlanting().getPlantingId());
-/*				productMap.put("packingFarmer", packingDetail.getBlockId().getFarm().getFarmer().getFirstName() +" - "+packingDetail.getBlockId().getFarm().getFarmer().getFarmerId());
-				productMap.put("packingFarm", packingDetail.getBlockId().getFarm().getFarmName()+" - "+packingDetail.getBlockId().getFarm().getFarmCode());
-				productMap.put("packingBlockidandName", packingDetail.getBlockId().getBlockId() +" - "+packingDetail.getBlockId().getBlockName());*/	
-		    	productMap.put("packingReceptbatchNo", packingDetail.getBatchNo());
-				productMap.put("packingCrop", packingDetail.getPlanting().getVariety().getName());
-				productMap.put("packingVariety", packingDetail.getPlanting().getGrade().getName());
-				CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse  where batchNo=?", new Object[] { String.valueOf(packingDetail.getBatchNo()) });
-				if (cw != null) {
-					productMap.put("packingincomingshipmentdate", getGeneralDateFormat(String.valueOf(cw.getCreatedDate())));
+				try {
+					Double cw = (Double) farmerService.findObjectById(
+							"select sum(quantity) from PackingDetail where planting.id = ? and packing.id=? and packing.status = 1",
+							new Object[] { uu.getValue().getPlanting().getId(), uu.getValue().getPacking().getId() });
+
+					pacQr = gendrateQRcodeForPacking(uu.getValue(), cw);
+					qrMap.put("QrCode", pacQr);
+					qrMapList.add(qrMap);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
 				}
-				productMap.put("packingPackedquantity", CurrencyUtil.getDecimalFormat(packingDetail.getQuantity(), "##.00"));
-				productMap.put("packingPrice", CurrencyUtil.getDecimalFormat(packingDetail.getPrice(), "##.00"));
-				productMap.put("rejectWt", CurrencyUtil.getDecimalFormat(packingDetail.getRejectWt(), "##.00"));
-				productMap.put("packingbestBeforeDate", df.format(packingDetail.getBestBefore()));
-				productMap.put("packingCountryOfOrigin", packingDetail.getBlockId().getFarm().getVillage()!=null ? packingDetail.getBlockId().getFarm().getVillage().getCity().getLocality().getState().getName() :"");
-				
-				netWeightSum += packingDetail.getQuantity();
-				rejectedWTSum += packingDetail.getRejectWt();
-				pacQr = gendrateQRcodeForPacking(packingDetail);
-				qrMap.put("QrCode",pacQr);
-				qrMapList.add(qrMap);
+
+			});
+			this.shipmentPrintMap.put("qrMapList", qrMapList);
+			Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
+			totalMap.put("netWeight", CurrencyUtil.getDecimalFormat(netWeightSum, "##.00"));
+			totalMap.put("rejectedWTSum", CurrencyUtil.getDecimalFormat(rejectedWTSum, "##.00"));
+			totalMap.put("totalSum", CurrencyUtil.getDecimalFormat(totalSum, "##.00"));
+			this.shipmentPrintMap.put("qr", gendrateQRcode(packing.getBatchNo()));
+			this.shipmentPrintMap.put("batchNo", packing.getBatchNo());
+			this.shipmentPrintMap.put("totalInfo", totalMap);
+		}
+	}
+
+	private void initializePrintMapForSorting() {
+
+		this.shipmentPrintMap = new HashMap<String, Object>();
+		List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
+		Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
+		this.shipmentPrintMap.put("checkIncomingOrSorting", "sort0");
+		this.shipmentPrintMap.put("product", "");
+		this.shipmentPrintMap.put("productMapList", productMapList);
+		this.shipmentPrintMap.put("totalInfo", totalMap);
+		this.shipmentPrintMap.put("truckId", "");
+		this.shipmentPrintMap.put("driverName", "");
+		this.shipmentPrintMap.put("vehicleno", "");
+		this.shipmentPrintMap.put("driverNo", "");
+	}
+
+	private void buildTransactionPrintMapForSorting(Sorting sorting) throws MalformedURLException {
+
+		List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
+		if (!ObjectUtil.isEmpty(sorting)) {
+			long noOfBagsSum = 0l;
+			double netWeightSum = 0d;
+
+			this.shipmentPrintMap.put("checkIncomingOrSorting", "sort0");
+			this.shipmentPrintMap.put("tructId", getCatalgueNameByCode(sorting.getTruckType()));
+			this.shipmentPrintMap.put("driverName", sorting.getDriverName());
+			this.shipmentPrintMap.put("vehicleno", sorting.getTruckNo());
+			this.shipmentPrintMap.put("driverNo", sorting.getDriverCont());
+			this.shipmentPrintMap.put("productMapList", productMapList);
+			if (!ObjectUtil.isEmpty(sorting.getPlanting())) {
+				Map<String, Object> productMap = new LinkedHashMap<String, Object>();
+				productMap.put("blockname", sorting.getPlanting().getFarmCrops().getBlockName());
+				productMap.put("blockid", sorting.getPlanting().getFarmCrops().getBlockId());
+				productMap.put("plantingid", sorting.getPlanting().getPlantingId());
+				productMap.put("product", sorting.getPlanting().getVariety().getName());
+				productMap.put("variety", sorting.getPlanting().getGrade().getName());
+				productMap.put("qty", CurrencyUtil.getDecimalFormat(sorting.getQtyNet(), "##.00"));
+				productMap.put("transferredweight", "50");
+				netWeightSum += sorting.getQtyNet();
 				productMapList.add(productMap);
 			}
+			Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
+			totalMap.put("netWeight", CurrencyUtil.getDecimalFormat(netWeightSum, "##.00"));
+			// this.shipmentPrintMap.put("qr",
+			// gendrateQRcode(String.valueOf(sorting.getId())));
+			this.shipmentPrintMap.put("qr", gendrateQRcodeForShorting(sorting));
+
+			this.shipmentPrintMap.put("batchNo", sorting.getId());
+			this.shipmentPrintMap.put("totalInfo", totalMap);
 		}
+	}
+
+	public String gendrateQRcodeForShorting(Sorting sorting) throws MalformedURLException {
+		String url = request.getRequestURL().toString();
+		URL aURL;
+		aURL = new URL(url);
+		String path = aURL.getPath();
+		String fullPath[] = path.split("/", 0);
+		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
+		String tenant = getCurrentTenantId();
+		String timestamp = DateUtil.getRevisionNoWithMillSec();
+		String message = null;
+		if (sorting != null) {
+			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
+					"FROM CityWarehouse cw WHERE cw.planting.id=? and cw.qrCodeId=? and cw.coOperative.id is null",
+					new Object[] { sorting.getPlanting().getId(), sorting.getQrCodeId() });
+
+			message = sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality()
+					.getState().getCode()
+					+ "~"
+					+ sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality()
+							.getState().getName()
+					+ "~" + sorting.getPlanting().getFarmCrops().getBlockId() + "~"
+					+ sorting.getPlanting().getFarmCrops().getBlockName() + "~"
+					+ sorting.getPlanting().getVariety().getCode() + "~" + sorting.getPlanting().getVariety().getName()
+					+ "~" + sorting.getPlanting().getGrade().getCode() + "~"
+					+ sorting.getPlanting().getGrade().getName() + "~" + sorting.getQtyNet() + "~"
+					+ sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getFarmerId() + "~"
+					+ sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getFirstName() + "~"
+					+ sorting.getPlanting().getFarmCrops().getFarm().getFarmCode() + "~"
+					+ sorting.getPlanting().getFarmCrops().getFarm().getFarmName() + "~" + cw.getStockType() + "~"
+					+ sorting.getPlanting().getFarmCrops().getExporter().getId() + "~"
+					+ DateUtil.convertDateToString(cw.getCreatedDate(), "yyyy-MM-dd") + "~"
+					+ sorting.getPlanting().getPlantingId() + "~" + sorting.getQrCodeId();
+		}
+		ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
+				.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
+		return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
+	}
+	/*
+	 * stateCode +"~" +stateName +"~" +block Id +"~" +block Name +"~"
+	 * +productCode +"~" +productName +"~" +varietyCode +"~" +varietyName +"~"
+	 * +sorted Qty + "~" +farmerId+"~" +farmerName +"~" +farmID+"~" +farm
+	 * Name+"~" +Stock Type +"~" +exporterId+"~" +harvestDate;
+	 */
+
+	public String gendrateQRcodeForPacking(PackingDetail pk) throws MalformedURLException {
+		String url = request.getRequestURL().toString();
+		URL aURL;
+		aURL = new URL(url);
+		String path = aURL.getPath();
+		String fullPath[] = path.split("/", 0);
+		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
+		String tenant = getCurrentTenantId();
+		String timestamp = DateUtil.getRevisionNoWithMillSec();
+		String message = null;
+		if (pk != null) {
+			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
+					"FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null",
+					new Object[] { pk.getBlockId().getId() });
+
+			message = pk.getPacking().getBatchNo() + "~"
+					+ pk.getBlockId().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()
+					+ "~"
+					+ pk.getBlockId().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()
+					+ "~" + pk.getBlockId().getBlockId() + "~" + pk.getBlockId().getBlockName() + "~"
+					+ pk.getPlanting().getVariety().getCode() + "~" + pk.getPlanting().getVariety().getName() + "~"
+					+ pk.getPlanting().getGrade().getCode() + "~" + pk.getPlanting().getGrade().getName() + "~"
+					+ pk.getQuantity() + "~" + pk.getBlockId().getFarm().getFarmer().getFarmerId() + "~"
+					+ pk.getBlockId().getFarm().getFarmer().getFirstName() + "~"
+					+ pk.getBlockId().getFarm().getFarmCode() + "~" + pk.getBlockId().getFarm().getFarmName() + "~3~"
+					+ pk.getBlockId().getExporter().getId() + "~"
+					+ DateUtil.convertDateToString(pk.getPacking().getPackingDate(), "yyyy-MM-dd") + "~"
+					+ pk.getPacking().getPackHouse().getId() + "~" + pk.getPlanting().getPlantingId() + "~"
+					+ pk.getQrCodeId();
+		}
+		ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
+				.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
+		return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
+	}
+
+	public String gendrateQRcodeForIncomingShipment(PackhouseIncomingDetails pk) throws MalformedURLException {
+		String url = request.getRequestURL().toString();
+		URL aURL;
+		aURL = new URL(url);
+		String path = aURL.getPath();
+		String fullPath[] = path.split("/", 0);
+		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
+		String tenant = getCurrentTenantId();
+		String timestamp = DateUtil.getRevisionNoWithMillSec();
+		String message = null;
+		if (pk != null) {
+			/*
+			 * CityWarehouse cw = (CityWarehouse) farmerService.
+			 * findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null"
+			 * , new Object[] {pk.getFarmcrops().getId()});
+			 */
+
+			message = pk.getPackhouseIncoming().getBatchNo() + "~"
+					+ pk.getFarmcrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()
+					+ "~"
+					+ pk.getFarmcrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()
+					+ "~" + pk.getFarmcrops().getBlockId() + "~" + pk.getFarmcrops().getBlockName() + "~"
+					+ pk.getPlanting().getVariety().getCode() + "~" + pk.getPlanting().getVariety().getName() + "~"
+					+ pk.getPlanting().getGrade().getCode() + "~" + pk.getPlanting().getGrade().getName() + "~"
+					+ pk.getReceivedWeight() + "~" + pk.getFarmcrops().getFarm().getFarmer().getFarmerId() + "~"
+					+ pk.getFarmcrops().getFarm().getFarmer().getFirstName() + "~"
+					+ pk.getFarmcrops().getFarm().getFarmCode() + "~" + pk.getFarmcrops().getFarm().getFarmName()
+					+ "~2~" + pk.getFarmcrops().getExporter().getId() + "~"
+					+ DateUtil.convertDateToString(pk.getPackhouseIncoming().getOffLoadingDate(), "yyyy-MM-dd") + "~"
+					+ pk.getPackhouseIncoming().getPackhouse().getId() + "~" + pk.getPlanting().getPlantingId() + "~"
+					+ pk.getQrCodeId();
+		}
+		ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
+				.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
+		return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
+	}
+
+	public String gendrateQRcodeForIncomingShipment(PackhouseIncomingDetails pk, Double stk)
+			throws MalformedURLException {
+		String url = request.getRequestURL().toString();
+		URL aURL;
+		aURL = new URL(url);
+		String path = aURL.getPath();
+		String fullPath[] = path.split("/", 0);
+		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
+		String tenant = getCurrentTenantId();
+		String timestamp = DateUtil.getRevisionNoWithMillSec();
+		String message = null;
+		if (pk != null) {
+			/*
+			 * CityWarehouse cw = (CityWarehouse) farmerService.
+			 * findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null"
+			 * , new Object[] {pk.getFarmcrops().getId()});
+			 */
+
+			message = pk.getPackhouseIncoming().getBatchNo() + "~"
+					+ pk.getFarmcrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()
+					+ "~"
+					+ pk.getFarmcrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()
+					+ "~" + pk.getFarmcrops().getBlockId() + "~" + pk.getFarmcrops().getBlockName() + "~"
+					+ pk.getPlanting().getVariety().getCode() + "~" + pk.getPlanting().getVariety().getName() + "~"
+					+ pk.getPlanting().getGrade().getCode() + "~" + pk.getPlanting().getGrade().getName() + "~" + stk
+					+ "~" + pk.getFarmcrops().getFarm().getFarmer().getFarmerId() + "~"
+					+ pk.getFarmcrops().getFarm().getFarmer().getFirstName() + "~"
+					+ pk.getFarmcrops().getFarm().getFarmCode() + "~" + pk.getFarmcrops().getFarm().getFarmName()
+					+ "~2~" + pk.getFarmcrops().getExporter().getId() + "~"
+					+ DateUtil.convertDateToString(pk.getPackhouseIncoming().getOffLoadingDate(), "yyyy-MM-dd") + "~"
+					+ pk.getPackhouseIncoming().getPackhouse().getId() + "~" + pk.getPlanting().getPlantingId() + "~"
+					+ pk.getQrCodeId();
+		}
+		ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
+				.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
+		return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
+	}
+
+	public String gendrateQRcodeForPacking(PackingDetail pk, Double stk) throws MalformedURLException {
+		String url = request.getRequestURL().toString();
+		URL aURL;
+		aURL = new URL(url);
+		String path = aURL.getPath();
+		String fullPath[] = path.split("/", 0);
+		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
+		String tenant = getCurrentTenantId();
+		String timestamp = DateUtil.getRevisionNoWithMillSec();
+		String message = null;
+		if (pk != null) {
+			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById(
+					"FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null",
+					new Object[] { pk.getBlockId().getId() });
+
+			message = pk.getPacking().getBatchNo() + "~"
+					+ pk.getBlockId().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()
+					+ "~"
+					+ pk.getBlockId().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()
+					+ "~" + pk.getBlockId().getBlockId() + "~" + pk.getBlockId().getBlockName() + "~"
+					+ pk.getPlanting().getVariety().getCode() + "~" + pk.getPlanting().getVariety().getName() + "~"
+					+ pk.getPlanting().getGrade().getCode() + "~" + pk.getPlanting().getGrade().getName() + "~" + stk
+					+ "~" + pk.getBlockId().getFarm().getFarmer().getFarmerId() + "~"
+					+ pk.getBlockId().getFarm().getFarmer().getFirstName() + "~"
+					+ pk.getBlockId().getFarm().getFarmCode() + "~" + pk.getBlockId().getFarm().getFarmName() + "~3~"
+					+ pk.getBlockId().getExporter().getId() + "~"
+					+ DateUtil.convertDateToString(pk.getPacking().getPackingDate(), "yyyy-MM-dd") + "~"
+					+ pk.getPacking().getPackHouse().getId() + "~" + pk.getPlanting().getPlantingId() + "~"
+					+ pk.getQrCodeId();
+		}
+		ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
+				.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
+		return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
+	}
+
+	private void initializePrintMap() {
+
+		this.shipmentPrintMap = new HashMap<String, Object>();
+		List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
 		Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
-		totalMap.put("netWeight", CurrencyUtil.getDecimalFormat(netWeightSum, "##.00"));
-		totalMap.put("rejectedWTSum", CurrencyUtil.getDecimalFormat(rejectedWTSum, "##.00"));
-		this.shipmentPrintMap.put("qr", gendrateQRcode(packing.getBatchNo()));
-		this.shipmentPrintMap.put("batchNo", packing.getBatchNo());
-		this.shipmentPrintMap.put("totalInfo", totalMap);
-	}
-	}
-
-private void initializePrintMapForSorting() {
-	
-	this.shipmentPrintMap = new HashMap<String, Object>();
-	List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
-	Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
-	this.shipmentPrintMap.put("checkIncomingOrSorting", "sort0");
-	this.shipmentPrintMap.put("product", "");
-	this.shipmentPrintMap.put("productMapList", productMapList);
-	this.shipmentPrintMap.put("totalInfo", totalMap);
-	this.shipmentPrintMap.put("truckId", "");
-	this.shipmentPrintMap.put("driverName", "");
-	this.shipmentPrintMap.put("vehicleno", "");
-	this.shipmentPrintMap.put("driverNo", "");
-}
-
-
-private void buildTransactionPrintMapForSorting(Sorting sorting) throws MalformedURLException {
-	
-	List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
-	if (!ObjectUtil.isEmpty(sorting)) {
-		long noOfBagsSum = 0l;
-		double netWeightSum = 0d;
-		
-		this.shipmentPrintMap.put("checkIncomingOrSorting", "sort0");
-		this.shipmentPrintMap.put("tructId", sorting.getTruckType());
-		this.shipmentPrintMap.put("driverName", sorting.getDriverName());
-		this.shipmentPrintMap.put("vehicleno", sorting.getTruckNo());
-		this.shipmentPrintMap.put("driverNo", sorting.getDriverCont());
+		this.shipmentPrintMap.put("checkIncomingOrSorting", "ship1");
+		this.shipmentPrintMap.put("recNo", "");
+		this.shipmentPrintMap.put("date", "");
+		this.shipmentPrintMap.put("agentId", "");
+		this.shipmentPrintMap.put("agentName", "");
+		this.shipmentPrintMap.put("product", "");
 		this.shipmentPrintMap.put("productMapList", productMapList);
-		if (!ObjectUtil.isEmpty(sorting.getFarmCrops())) {
-			Map<String, Object> productMap = new LinkedHashMap<String, Object>();
-			productMap.put("blockname", sorting.getFarmCrops().getBlockName());
-			productMap.put("blockid", sorting.getFarmCrops().getBlockId());
-			productMap.put("plantingid", sorting.getPlanting().getPlantingId());
-			productMap.put("product", sorting.getPlanting().getVariety().getName());
-			productMap.put("variety", sorting.getPlanting().getGrade().getName());
-			productMap.put("qty", CurrencyUtil.getDecimalFormat(sorting.getQtyNet(), "##.00"));
-			productMap.put("transferredweight", "50");
-			netWeightSum += sorting.getQtyNet();
-			productMapList.add(productMap);
-		}
-		Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
-		totalMap.put("netWeight", CurrencyUtil.getDecimalFormat(netWeightSum, "##.00"));
-		//this.shipmentPrintMap.put("qr", gendrateQRcode(String.valueOf(sorting.getId())));
-		this.shipmentPrintMap.put("qr", gendrateQRcodeForShorting(sorting));
-		
-		this.shipmentPrintMap.put("batchNo", sorting.getId());
 		this.shipmentPrintMap.put("totalInfo", totalMap);
+
+		this.shipmentPrintMap.put("truckId", "");
+		this.shipmentPrintMap.put("driverName", "");
+		this.shipmentPrintMap.put("vehicleno", "");
+		this.shipmentPrintMap.put("driverNo", "");
 	}
-}
 
-public String gendrateQRcodeForShorting(Sorting sorting) throws MalformedURLException {
-	String url = request.getRequestURL().toString();
-	URL aURL;
-	aURL = new URL(url);
-	String path = aURL.getPath();
-	String fullPath[] = path.split("/", 0);
-	String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
-	String tenant = getCurrentTenantId();
-	String timestamp = DateUtil.getRevisionNoWithMillSec();
-	String message =null;
-	if(sorting!=null){
-		CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and cw.qrCodeId=? and cw.coOperative.id is null",
-				new Object[] {sorting.getFarmCrops().getId(),sorting.getQrCodeId()});
-		
-     message =sorting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()+"~"
-	+sorting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()+"~"+sorting.getFarmCrops().getBlockId()+"~"
-	+sorting.getFarmCrops().getBlockName()+"~"+sorting.getPlanting().getVariety().getCode()+"~"+sorting.getPlanting().getVariety().getName()+"~"
-	+sorting.getPlanting().getGrade().getCode()+"~"+sorting.getPlanting().getGrade().getName()+"~"+sorting.getQtyNet()+"~"
-	+sorting.getFarmCrops().getFarm().getFarmer().getFarmerId()+"~"+sorting.getFarmCrops().getFarm().getFarmer().getFirstName()+"~"
-	+sorting.getFarmCrops().getFarm().getFarmCode()+"~"+sorting.getFarmCrops().getFarm().getFarmName()+"~"
-	+cw.getStockType() +"~"+sorting.getFarmCrops().getExporter().getId()+"~"
-	+DateUtil.convertDateToString(cw.getCreatedDate(), "yyyy-MM-dd")+"~"+sorting.getPlanting().getPlantingId()+"~"+sorting.getQrCodeId();
-	}
-	ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
-			.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
-	return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
-}
-/*stateCode +"~" +stateName +"~" +block Id +"~" +block Name +"~" +productCode +"~" +productName +"~" +varietyCode +"~" +varietyName +"~" +sorted Qty +
-"~" +farmerId+"~" +farmerName +"~" +farmID+"~" +farm Name+"~" +Stock Type +"~" +exporterId+"~" +harvestDate;*/
-
-public String gendrateQRcodeForPacking(PackingDetail pk) throws MalformedURLException {
-	String url = request.getRequestURL().toString();
-	URL aURL;
-	aURL = new URL(url);
-	String path = aURL.getPath();
-	String fullPath[] = path.split("/", 0);
-	String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
-	String tenant = getCurrentTenantId();
-	String timestamp = DateUtil.getRevisionNoWithMillSec();
-	String message =null;
-	if(pk!=null){
-		CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null",
-				new Object[] {pk.getBlockId().getId()});
-		
-     message =pk.getPacking().getBatchNo()+"~"+pk.getBlockId().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()+"~"
-	+pk.getBlockId().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()+"~"+pk.getBlockId().getBlockId()+"~"
-	+pk.getBlockId().getBlockName()+"~"+pk.getPlanting().getVariety().getCode()+"~"+pk.getPlanting().getVariety().getName()+"~"
-	+pk.getPlanting().getGrade().getCode()+"~"+pk.getPlanting().getGrade().getName()+"~"+pk.getQuantity()+"~"
-	+pk.getBlockId().getFarm().getFarmer().getFarmerId()+"~"+pk.getBlockId().getFarm().getFarmer().getFirstName()+"~"
-	+pk.getBlockId().getFarm().getFarmCode()+"~"+pk.getBlockId().getFarm().getFarmName()+"~3~"+pk.getBlockId().getExporter().getId()+"~"
-	+DateUtil.convertDateToString(pk.getPacking().getPackingDate(), "yyyy-MM-dd")+"~"+pk.getPacking().getPackHouse().getId()+"~"+pk.getPlanting().getPlantingId()+"~"+pk.getQrCodeId();
-	}
-	ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
-			.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
-	return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
-}
-
-public String gendrateQRcodeForIncomingShipment(PackhouseIncomingDetails pk) throws MalformedURLException {
-	String url = request.getRequestURL().toString();
-	URL aURL;
-	aURL = new URL(url);
-	String path = aURL.getPath();
-	String fullPath[] = path.split("/", 0);
-	String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
-	String tenant = getCurrentTenantId();
-	String timestamp = DateUtil.getRevisionNoWithMillSec();
-	String message =null;
-	if(pk!=null){
-		/*CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null",
-				new Object[] {pk.getFarmcrops().getId()});*/
-		
-     message =pk.getPackhouseIncoming().getBatchNo()+"~"+pk.getFarmcrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getCode()+"~"
-	+pk.getFarmcrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getName()+"~"+pk.getFarmcrops().getBlockId()+"~"
-	+pk.getFarmcrops().getBlockName()+"~"+pk.getPlanting().getVariety().getCode()+"~"+pk.getPlanting().getVariety().getName()+"~"
-	+pk.getPlanting().getGrade().getCode()+"~"+pk.getPlanting().getGrade().getName()+"~"+pk.getReceivedWeight()+"~"
-	+pk.getFarmcrops().getFarm().getFarmer().getFarmerId()+"~"+pk.getFarmcrops().getFarm().getFarmer().getFirstName()+"~"
-	+pk.getFarmcrops().getFarm().getFarmCode()+"~"+pk.getFarmcrops().getFarm().getFarmName()+"~2~"+pk.getFarmcrops().getExporter().getId()+"~"
-	+DateUtil.convertDateToString(pk.getPackhouseIncoming().getOffLoadingDate(), "yyyy-MM-dd")+"~"+pk.getPackhouseIncoming().getPackhouse().getId()+"~"+pk.getPlanting().getPlantingId()+"~"+pk.getQrCodeId();
-	}
-	ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
-			.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
-	return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
-}
-
-private void initializePrintMap() {
-
-	this.shipmentPrintMap = new HashMap<String, Object>();
-	List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
-	Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
-	this.shipmentPrintMap.put("checkIncomingOrSorting", "ship1");
-	this.shipmentPrintMap.put("recNo", "");
-	this.shipmentPrintMap.put("date", "");
-	this.shipmentPrintMap.put("agentId", "");
-	this.shipmentPrintMap.put("agentName", "");
-	this.shipmentPrintMap.put("product", "");
-	this.shipmentPrintMap.put("productMapList", productMapList);
-	this.shipmentPrintMap.put("totalInfo", totalMap);
-
-	this.shipmentPrintMap.put("truckId", "");
-	this.shipmentPrintMap.put("driverName", "");
-	this.shipmentPrintMap.put("vehicleno", "");
-	this.shipmentPrintMap.put("driverNo", "");
-}
 	private void buildTransactionPrintMap(PackhouseIncoming procurementMTNR) throws MalformedURLException {
 
 		List<Map<String, Object>> productMapList = new ArrayList<Map<String, Object>>();
@@ -2016,14 +2289,15 @@ private void initializePrintMap() {
 
 			}
 			this.shipmentPrintMap.put("checkIncomingOrSorting", "ship1");
-			this.shipmentPrintMap.put("tructId", procurementMTNR.getTruckType());
+			this.shipmentPrintMap.put("tructId", getCatalgueNameByCode(procurementMTNR.getTruckType()));
 			this.shipmentPrintMap.put("driverName", procurementMTNR.getDriverName());
 			this.shipmentPrintMap.put("vehicleno", procurementMTNR.getTruckNo());
 			this.shipmentPrintMap.put("driverNo", procurementMTNR.getDriverCont());
 			// this.mtnrPrintMap.put("warehouseName",
 			// procurementMTNR.getCoOperative().getWarehouseName());
 			this.shipmentPrintMap.put("productMapList", productMapList);
-			this.shipmentPrintMap.put("qrMapList", qrMapList);
+			Map<Long, PackhouseIncomingDetails> ctmap = new HashMap<Long, PackhouseIncomingDetails>();
+
 			if (!ObjectUtil.isListEmpty(procurementMTNR.getPackhouseIncomingDetails())) {
 				for (PackhouseIncomingDetails pmtDetail : procurementMTNR.getPackhouseIncomingDetails()) {
 					/*
@@ -2043,79 +2317,110 @@ private void initializePrintMap() {
 					productMap.put("plantingid", pmtDetail.getPlanting().getPlantingId());
 					productMap.put("product", pmtDetail.getPlanting().getVariety().getName());
 					productMap.put("variety", pmtDetail.getPlanting().getGrade().getName());
-					Sorting sr = (Sorting) farmerService.findObjectById(SORTING_QUERY, new Object[] { Long.valueOf(pmtDetail.getFarmcrops().getId()) });
-					if(sr!=null){
+					Sorting sr = (Sorting) farmerService.findObjectById(SORTING_QUERY,
+							new Object[] { Long.valueOf(pmtDetail.getPlanting().getId()) });
+					if (sr != null) {
 						productMap.put("sortingDate", getGeneralDateFormat(String.valueOf(sr.getCreatedDate())));
 					}
 					productMap.put("transferredweight", "50");
-					productMap.put("receivedweight", CurrencyUtil.getDecimalFormat(pmtDetail.getReceivedWeight(), "##.00"));
+					productMap.put("receivedweight",
+							CurrencyUtil.getDecimalFormat(pmtDetail.getReceivedWeight(), "##.00"));
 					productMap.put("receivedunit", getCatalgueNameByCode(pmtDetail.getReceivedUnits()));
 					productMap.put("netWeight", pmtDetail.getNoUnits());
 					netWeightSum += pmtDetail.getReceivedWeight();
-					
-					pacQr = gendrateQRcodeForIncomingShipment(pmtDetail);
-					qrMap.put("QrCode",pacQr);
-					qrMapList.add(qrMap);
 
+					ctmap.put(pmtDetail.getPlanting().getId(), pmtDetail);
 					productMapList.add(productMap);
 				}
 			}
+			ctmap.entrySet().forEach(uu -> {
+				Map<String, Object> qrMap = new LinkedHashMap<String, Object>();
+				String pacQr = null;
+				try {
+					Double cw = (Double) farmerService.findObjectById(
+							"select sum(receivedWeight) from PackhouseIncomingDetails where planting.id = ? and packhouseIncoming.id=? and (packhouseIncoming.status = 1 or packhouseIncoming.status = 4)",
+							new Object[] { uu.getValue().getPlanting().getId(),
+									uu.getValue().getPackhouseIncoming().getId() });
+
+					pacQr = gendrateQRcodeForIncomingShipment(uu.getValue(), cw);
+					qrMap.put("QrCode", pacQr);
+					qrMapList.add(qrMap);
+				} catch (MalformedURLException e) {
+					e.printStackTrace();
+				}
+
+			});
+
+			this.shipmentPrintMap.put("qrMapList", qrMapList);
 			Map<String, Object> totalMap = new LinkedHashMap<String, Object>();
 			totalMap.put("netWeight", CurrencyUtil.getDecimalFormat(netWeightSum, "##.00"));
 			this.shipmentPrintMap.put("qr", gendrateQRcode(procurementMTNR.getBatchNo()));
-			//this.shipmentPrintMap.put("qr", gendrateQRcodeForIncomingShipment(procurementMTNR));
+			// this.shipmentPrintMap.put("qr",
+			// gendrateQRcodeForIncomingShipment(procurementMTNR));
 			this.shipmentPrintMap.put("batchNo", procurementMTNR.getBatchNo());
 			this.shipmentPrintMap.put("totalInfo", totalMap);
 		}
 	}
-	
-/*public String gendrateQRcodeForIncomingShipment(PackhouseIncoming procurementMTNR) throws MalformedURLException {
-		String url = request.getRequestURL().toString();
-		URL aURL;
-		aURL = new URL(url);
-		String path = aURL.getPath();
-		String fullPath[] = path.split("/", 0);
-		String urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" + fullPath[1];
-		String tenant = getCurrentTenantId();
-		String timestamp = DateUtil.getRevisionNoWithMillSec();
-		String blockId="",receivedWaigth="",crop="",variety="",blockName="",cropCode="",varietyCode="",farmerId="",farmerName="",farmId="",farmName="",harvestDate="",stockType="";
-		if(procurementMTNR!=null){
-		for(PackhouseIncomingDetails pd:procurementMTNR.getPackhouseIncomingDetails()){
-			blockId+=pd.getFarmcrops().getBlockId()+ ", ";
-			blockName+=pd.getFarmcrops().getBlockName()+ ", ";
-			receivedWaigth+=pd.getReceivedWeight()+ ", ";
-			crop+=pd.getFarmcrops().getVariety().getName()+ ", ";
-			cropCode+=pd.getFarmcrops().getVariety().getCode()+ ", ";
-			variety+=pd.getFarmcrops().getGrade().getName()+ ", ";
-			varietyCode+=pd.getFarmcrops().getGrade().getCode()+ ", ";
-			farmerId+=pd.getFarmcrops().getFarm().getFarmer().getFarmerId()+ ", ";
-			farmerName+=pd.getFarmcrops().getFarm().getFarmer().getFirstName()+ ", ";
-			farmId+=pd.getFarmcrops().getFarm().getFarmer().getFarmerId()+ ", ";
-			farmName+=pd.getFarmcrops().getFarm().getFarmer().getFirstName()+ ", ";
-			CityWarehouse cw = (CityWarehouse) farmerService.findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null",new Object[] {pd.getFarmcrops().getId()});
-			if(cw!=null){
-				harvestDate+=DateUtil.convertDateToString(cw.getLastHarvestDate(), getGeneralDateFormat())+", ";
-				stockType+=cw.getStockType()+", ";
-				
-			}
-		}
-		blockId=blockId.replaceAll(", $", "");receivedWaigth=receivedWaigth.replaceAll(", $", "");crop=crop.replaceAll(", $", "");variety=variety.replaceAll(", $", "");
-		blockName=blockName.replaceAll(", $", "");cropCode=cropCode.replaceAll(", $", "");varietyCode=varietyCode.replaceAll(", $", "");farmerId=farmerId.replaceAll(", $", "");
-		farmerName=farmerName.replaceAll(", $", "");farmId=farmId.replaceAll(", $", "");farmName=farmName.replaceAll(", $", "");
-		harvestDate=harvestDate.replaceAll(", $", "");stockType=stockType.replaceAll(", $", "");
-		}
-String message =procurementMTNR.getBatchNo()+"~" + "stateCode" + "~" + "stateName" +"~"+blockId+"~"+blockName+"~"+cropCode+"~"+crop+"~"+varietyCode+"~"+variety+"~"+receivedWaigth+"~"+farmerId+"~"
-		+farmerName+"~"+farmId+"~"+farmName+"~"+stockType+"~"+procurementMTNR.getPackhouse().getExporter().getId()+"~"+harvestDate;
 
-procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality().getState().getCode();
-procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality().getState().getName();
-
-		ByteArrayOutputStream stream = QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
-				.withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream();
-		return "data:image/png;base64," + DatatypeConverter.printBase64Binary(stream.toByteArray());
-	}*/
-
-	
+	/*
+	 * public String gendrateQRcodeForIncomingShipment(PackhouseIncoming
+	 * procurementMTNR) throws MalformedURLException { String url =
+	 * request.getRequestURL().toString(); URL aURL; aURL = new URL(url); String
+	 * path = aURL.getPath(); String fullPath[] = path.split("/", 0); String
+	 * urll = aURL.getProtocol() + "://" + aURL.getAuthority() + "/" +
+	 * fullPath[1]; String tenant = getCurrentTenantId(); String timestamp =
+	 * DateUtil.getRevisionNoWithMillSec(); String
+	 * blockId="",receivedWaigth="",crop="",variety="",blockName="",cropCode="",
+	 * varietyCode="",farmerId="",farmerName="",farmId="",farmName="",
+	 * harvestDate="",stockType=""; if(procurementMTNR!=null){
+	 * for(PackhouseIncomingDetails
+	 * pd:procurementMTNR.getPackhouseIncomingDetails()){
+	 * blockId+=pd.getFarmcrops().getBlockId()+ ", ";
+	 * blockName+=pd.getFarmcrops().getBlockName()+ ", ";
+	 * receivedWaigth+=pd.getReceivedWeight()+ ", ";
+	 * crop+=pd.getFarmcrops().getVariety().getName()+ ", ";
+	 * cropCode+=pd.getFarmcrops().getVariety().getCode()+ ", ";
+	 * variety+=pd.getFarmcrops().getGrade().getName()+ ", ";
+	 * varietyCode+=pd.getFarmcrops().getGrade().getCode()+ ", ";
+	 * farmerId+=pd.getFarmcrops().getFarm().getFarmer().getFarmerId()+ ", ";
+	 * farmerName+=pd.getFarmcrops().getFarm().getFarmer().getFirstName()+ ", ";
+	 * farmId+=pd.getFarmcrops().getFarm().getFarmer().getFarmerId()+ ", ";
+	 * farmName+=pd.getFarmcrops().getFarm().getFarmer().getFirstName()+ ", ";
+	 * CityWarehouse cw = (CityWarehouse) farmerService.
+	 * findObjectById("FROM CityWarehouse cw WHERE cw.farmcrops.id=? and  cw.coOperative.id is null"
+	 * ,new Object[] {pd.getFarmcrops().getId()}); if(cw!=null){
+	 * harvestDate+=DateUtil.convertDateToString(cw.getLastHarvestDate(),
+	 * getGeneralDateFormat())+", "; stockType+=cw.getStockType()+", ";
+	 * 
+	 * } } blockId=blockId.replaceAll(", $",
+	 * "");receivedWaigth=receivedWaigth.replaceAll(", $",
+	 * "");crop=crop.replaceAll(", $", "");variety=variety.replaceAll(", $",
+	 * ""); blockName=blockName.replaceAll(", $",
+	 * "");cropCode=cropCode.replaceAll(", $",
+	 * "");varietyCode=varietyCode.replaceAll(", $",
+	 * "");farmerId=farmerId.replaceAll(", $", "");
+	 * farmerName=farmerName.replaceAll(", $",
+	 * "");farmId=farmId.replaceAll(", $",
+	 * "");farmName=farmName.replaceAll(", $", "");
+	 * harvestDate=harvestDate.replaceAll(", $",
+	 * "");stockType=stockType.replaceAll(", $", ""); } String message
+	 * =procurementMTNR.getBatchNo()+"~" + "stateCode" + "~" + "stateName"
+	 * +"~"+blockId+"~"+blockName+"~"+cropCode+"~"+crop+"~"+varietyCode+"~"+
+	 * variety+"~"+receivedWaigth+"~"+farmerId+"~"
+	 * +farmerName+"~"+farmId+"~"+farmName+"~"+stockType+"~"+procurementMTNR.
+	 * getPackhouse().getExporter().getId()+"~"+harvestDate;
+	 * 
+	 * procurementMTNR.getPackhouse().getExporter().getVillage().getCity().
+	 * getLocality().getState().getCode();
+	 * procurementMTNR.getPackhouse().getExporter().getVillage().getCity().
+	 * getLocality().getState().getName();
+	 * 
+	 * ByteArrayOutputStream stream =
+	 * QRCode.from(message).withErrorCorrection(ErrorCorrectionLevel.L)
+	 * .withHint(EncodeHintType.MARGIN, 2).withSize(250, 250).stream(); return
+	 * "data:image/png;base64," +
+	 * DatatypeConverter.printBase64Binary(stream.toByteArray()); }
+	 */
 
 	public String getBatchid() {
 		return batchid;
@@ -2151,7 +2456,8 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 		initializeoutcomePrintMap();
 		if (!StringUtil.isEmpty(TraceNumber)) {
 			Shipment procurementOut = (Shipment) farmerService.findObjectById(
-					"FROM Shipment s WHERE s.pConsignmentNo=? AND (s.status=? OR s.status=?)", new Object[] { TraceNumber, 1, 3 });
+					"FROM Shipment s WHERE s.pConsignmentNo=? AND (s.status=? OR s.status=?)",
+					new Object[] { TraceNumber, 1, 3 });
 			buildoutcomeTransactionPrintMap(procurementOut);
 		}
 		return "htmlOutcome";
@@ -2203,6 +2509,18 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 					&& !StringUtil.isEmpty(procurementOut.getCustomer().getCustomerName())) {
 				this.outcomeShipmentPrintMap.put("agentName", procurementOut.getCustomer().getCustomerName());
 			}
+			if (!ObjectUtil.isEmpty(procurementOut.getShipmentDestination())
+					&& !StringUtil.isEmpty(procurementOut.getShipmentDestination())) {
+				/*
+				 * this.outcomeShipmentPrintMap.put("shipmentDestination",
+				 * utilService.findCountryByCode(procurementOut.
+				 * getShipmentDestination()) != null ?
+				 * utilService.findCountryByCode(procurementOut.
+				 * getShipmentDestination()).getName() : "");
+				 */
+				this.outcomeShipmentPrintMap.put("shipmentDestination",
+						procurementOut.getShipmentDestination() != null ? procurementOut.getShipmentDestination() : "");
+			}
 
 			if (!ObjectUtil.isEmpty(procurementOut.getPackhouse().getExporter().getExpTinNumber())
 					&& !StringUtil.isEmpty(procurementOut.getPackhouse().getExporter().getExpTinNumber())) {
@@ -2230,7 +2548,7 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 					&& !StringUtil.isEmpty(procurementOut.getPConsignmentNo())) {
 				this.outcomeShipmentPrintMap.put("consigno", procurementOut.getPConsignmentNo());
 			}
-			
+
 			if (!ObjectUtil.isEmpty(procurementOut.getKenyaTraceCode())
 					&& !StringUtil.isEmpty(procurementOut.getKenyaTraceCode())) {
 				this.outcomeShipmentPrintMap.put("traceCode", procurementOut.getKenyaTraceCode());
@@ -2303,11 +2621,11 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 
 	}
 
-    private static final SimpleDateFormat fileNameDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
-    private static final SimpleDateFormat csvfileNameDateFormat = new SimpleDateFormat("ddMMyyHHmm");
-    @Getter
-    @Setter
-    private String xlsFileName;
+	private static final SimpleDateFormat fileNameDateFormat = new SimpleDateFormat("yyyyMMddHHmmss");
+	private static final SimpleDateFormat csvfileNameDateFormat = new SimpleDateFormat("ddMMyyHHmm");
+	@Getter
+	@Setter
+	private String xlsFileName;
 	private int headerRow = 0;
 
 	public String populateXLS() throws Exception {
@@ -2339,7 +2657,7 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 		setFileInputStream(FileUtil.createFileInputStreamToZipFile((fileName), fileMap, ".pdf"));
 		return "pdf";
 	}
-	
+
 	PdfPCell pdfCell = null;
 	PdfPTable table = null;
 	Font cellFont = null; // font for cells.
@@ -2626,7 +2944,7 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 		fileOut.close();
 		return stream;
 	}
-	
+
 	XSSFRow row, filterRowTitle, filterRow1, filterRow2, filterRow3, filterRow4;
 	XSSFRow titleRow;
 	int colCount, rowCount, titleRow1 = 4, titleRow2 = 6;
@@ -3016,7 +3334,7 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 
 		return fileInputStream;
 	}
-	
+
 	public Map getExportData(boolean isExport) {
 		getDataTableJQGridRequestParam();
 		otherMap.put(DynamicReportConfig.DYNAMIC_CONFIG_DETAIL, dynamicReportConfig.getDynmaicReportConfigDetails());
@@ -3049,7 +3367,8 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 
 				dynamicReportConfig.getDynmaicReportConfigFilters().stream()
 						.filter(u -> u.getDefaultFilter() != null && !u.getDefaultFilter().equalsIgnoreCase("insp")
-								&& !u.getDefaultFilter().equalsIgnoreCase("inspwr") && !u.getDefaultFilter().equalsIgnoreCase("hcdFilter")
+								&& !u.getDefaultFilter().equalsIgnoreCase("inspwr")
+								&& !u.getDefaultFilter().equalsIgnoreCase("hcdFilter")
 								&& !u.getDefaultFilter().equalsIgnoreCase("dealer"))
 						.forEach(u -> {
 							filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] + "~"
@@ -3065,15 +3384,14 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 
 							});
 				}
-				
-			
-					dynamicReportConfig.getDynmaicReportConfigFilters().stream().filter(
-							u -> u.getDefaultFilter() != null && u.getDefaultFilter().equalsIgnoreCase("hcdFilter"))
-							.forEach(u -> {
-								filtersList.put(u.getDefaultFilter(), u.getField());
 
-							});
-			
+				dynamicReportConfig.getDynmaicReportConfigFilters().stream()
+						.filter(u -> u.getDefaultFilter() != null && u.getDefaultFilter().equalsIgnoreCase("hcdFilter"))
+						.forEach(u -> {
+							filtersList.put(u.getDefaultFilter(), u.getField());
+
+						});
+
 				if (request.getSession().getAttribute("inspId") != null
 						&& request.getSession().getAttribute("inspId") != "false") {
 					dynamicReportConfig.getDynmaicReportConfigFilters().stream()
@@ -3104,7 +3422,7 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 										.filter(u -> u.getId().equals(Long.valueOf(getSidx()))).findFirst().get()
 								: null;
 				setSidx(ds.getField());
-				if (ds.getSortField()!=null && !StringUtil.isEmpty(ds.getSortField())) {
+				if (ds.getSortField() != null && !StringUtil.isEmpty(ds.getSortField())) {
 					setSidx(ds.getField());
 					mainMap.get(DynamicReportConfig.OTHER_FIELD).put("sortQry", ds.getSortField());
 				}
@@ -3123,565 +3441,585 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 		return data;
 	}
 
-/*	XSSFRow row, filterRowTitle, filterRow1, filterRow2, filterRow3, filterRow4;
-	XSSFRow titleRow;
-	int colCount, rowCount, titleRow1 = 4, titleRow2 = 6;
-	Cell cell;
-	Integer cellIndex;
-	Integer heade = null;
-	JSONObject jss = new JSONObject();
-	int flagxls = 0;
-	int mainGridIterator = 0;
-	int serialNo = 1;
-	String heading = "";
-
-	public Object[] getExportDataStream(String exportType, String configId, String lang, String branchIdd,
-			String profId) throws IOException {
-		InputStream fileInputStream;
-		serialNo = 1;
-		Object[] recData = new Object[2];
-
-		String breanchidPa = "BRANCH_ID";
-		Map<String, String> defMapMailExport = new HashMap<String, String>();
-		if (!IExporter.EXPORT_MANUAL.equalsIgnoreCase(exportType)) {
-			setSord("desc");
-			setSidx("id");
-			dynamicReportConfig = utilService.findReportById(configId);
-
-			if (StringUtil.isEmpty(filterList) && dynamicReportConfig.getDynmaicReportConfigFilters().size() > 0) {
-				Map<String, String> filtersList = new HashMap<String, String>();
-				dynamicReportConfig.getDynmaicReportConfigFilters().stream()
-						.filter(u -> !u.getDefaultFilter().equalsIgnoreCase("insp")
-								&& !u.getDefaultFilter().equalsIgnoreCase("inspwr")
-								&& !u.getDefaultFilter().equalsIgnoreCase("dealer"))
-						.forEach(u -> {
-							filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] + "~"
-									+ u.getDefaultFilter() + "~" + u.getField().split("~")[2]);
-							mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList);
-						});
-				if (request != null && request.getSession() != null
-						&& request.getSession().getAttribute("dealerId") != null) {
-					dynamicReportConfig.getDynmaicReportConfigFilters().stream()
-							.filter(u -> u.getDefaultFilter().equalsIgnoreCase("dealer")).forEach(u -> {
-								filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] + "~"
-										+ request.getSession().getAttribute("dealerId") + "~3");
-								mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList);
-							});
-				}
-				if (request != null && request.getSession() != null
-						&& request.getSession().getAttribute("inspId") != null
-						&& request.getSession().getAttribute("inspId") != "false") {
-					dynamicReportConfig.getDynmaicReportConfigFilters().stream()
-							.filter(u -> u.getDefaultFilter().equalsIgnoreCase("insp")).forEach(u -> {
-								filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] + "~"
-										+ request.getSession().getAttribute("inspId") + "~3");
-								filtersList.put("status", "1~3~1");
-								mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList);
-							});
-
-					dynamicReportConfig.getDynmaicReportConfigFilters().stream()
-							.filter(u -> u.getDefaultFilter().equalsIgnoreCase("inspwr")).forEach(u -> {
-								filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] + "~"
-										+ request.getSession().getAttribute("inspId") + "~3");
-								// filtersList.put("status", "1~3~1");
-								mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList);
-							});
-				}
-			}
-
-		}
-
-		otherMap.put(DynamicReportConfig.DYNAMIC_CONFIG_DETAIL, dynamicReportConfig.getDynmaicReportConfigDetails());
-		otherMap.put(DynamicReportConfig.ENTITY, dynamicReportConfig.getEntityName());
-		otherMap.put(DynamicReportConfig.ALIAS, dynamicReportConfig.getAlias());
-		otherMap.put(DynamicReportConfig.GROUP_PROPERTY, dynamicReportConfig.getGroupProperty());
-		mainMap.put(DynamicReportConfig.OTHER_FIELD, otherMap);
-
-		Map data = null;
-		if (!ObjectUtil.isEmpty(dynamicReportConfig) && dynamicReportConfig.getFetchType() == 2L) {
-			data = readProjectionDataStatic(mainMap);
-		} else if (!ObjectUtil.isEmpty(dynamicReportConfig) && dynamicReportConfig.getFetchType() == 3L) {
-
-			data = readProjectionDataView(mainMap);
-		} else {
-			data = readData();
-		}
-
-		List<Object[]> mainGridRows = (List<Object[]>) data.get(ROWS);
-		Object objj = data.get(RECORDS);
-		jss = new JSONObject();
-		if (objj instanceof JSONObject) {
-			JSONObject countart = (JSONObject) objj;
-			totalRecords = (Integer) countart.get("count");
-			if (countart.containsKey("footers")) {
-				jss = (JSONObject) countart.get("footers");
-			}
-		}
-		recData[0] = mainGridRows.size();
-		String fName = dynamicReportConfig.getXlsFile() != null && !StringUtil.isEmpty(dynamicReportConfig.getXlsFile())
-				? getLocalePropertyForMailExport(dynamicReportConfig.getXlsFile(), lang).trim() : getText("xlsFile");
-		XSSFWorkbook workbook = new XSSFWorkbook();
-		XSSFSheet sheet = workbook.createSheet(fName);
-
-		*//** Defining Styles *//*
-		XSSFCellStyle headerStyle = workbook.createCellStyle();
-		
-		 * headerStyle.setBorderBottom(XSSFCellStyle.BORDER_MEDIUM);
-		 * headerStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		 * headerStyle.setBorderLeft(XSSFCellStyle.BORDER_MEDIUM);
-		 * headerStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		 * headerStyle.setBorderRight(XSSFCellStyle.BORDER_MEDIUM);
-		 * headerStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		 * headerStyle.setBorderTop(XSSFCellStyle.BORDER_MEDIUM);
-		 * headerStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-		 
-		headerStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-
-		XSSFCellStyle filterStyle = workbook.createCellStyle();
-		
-		 * filterStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-		 * filterStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		 * filterStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-		 * filterStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		 * filterStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
-		 * filterStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		 * filterStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
-		 * filterStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-		 
-		filterStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-		filterStyle.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
-
-		XSSFCellStyle headerLabelStyle = workbook.createCellStyle();
-		headerLabelStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-		headerLabelStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		headerLabelStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-		headerLabelStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		headerLabelStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
-		headerLabelStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		headerLabelStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
-		headerLabelStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
-		headerLabelStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-		headerLabelStyle.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
-
-		XSSFColor subGridColor = new XSSFColor(new Color(204, 255, 204));
-		filterStyle.setFillForegroundColor(subGridColor);
-		filterStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
-
-		XSSFCellStyle subGridHeader = workbook.createCellStyle();
-		subGridHeader.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-		subGridHeader.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		subGridHeader.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-		subGridHeader.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		subGridHeader.setBorderRight(XSSFCellStyle.BORDER_THIN);
-		subGridHeader.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		subGridHeader.setBorderTop(XSSFCellStyle.BORDER_THIN);
-		subGridHeader.setTopBorderColor(IndexedColors.BLACK.getIndex());
-		subGridHeader.setAlignment(HSSFCellStyle.ALIGN_CENTER);
-
-		XSSFColor myColor = new XSSFColor(new Color(237, 237, 237));
-		subGridHeader.setFillForegroundColor(myColor);
-
-		XSSFCellStyle rows = workbook.createCellStyle();
-		rows.setBorderBottom(XSSFCellStyle.BORDER_THIN);
-		rows.setBottomBorderColor(IndexedColors.BLACK.getIndex());
-		rows.setBorderLeft(XSSFCellStyle.BORDER_THIN);
-		rows.setLeftBorderColor(IndexedColors.BLACK.getIndex());
-		rows.setBorderRight(XSSFCellStyle.BORDER_THIN);
-		rows.setRightBorderColor(IndexedColors.BLACK.getIndex());
-		rows.setBorderTop(XSSFCellStyle.BORDER_THIN);
-		rows.setTopBorderColor(IndexedColors.BLACK.getIndex());
-
-		*//** Defining Fonts *//*
-		XSSFFont font1 = workbook.createFont();
-		font1.setFontHeightInPoints((short) 22);
-
-		XSSFFont font2 = workbook.createFont();
-		font2.setFontHeightInPoints((short) 16);
-
-		XSSFFont font3 = workbook.createFont();
-		font3.setFontHeightInPoints((short) 14);
-
-		XSSFFont font4 = workbook.createFont();
-		font3.setFontHeightInPoints((short) 10);
-
-		XSSFCellStyle style1 = (XSSFCellStyle) workbook.createCellStyle();
-
-		XSSFCellStyle style2 = (XSSFCellStyle) workbook.createCellStyle();
-
-		int imgRow1 = 0;
-		int imgRow2 = 4;
-		int imgCol1 = 0;
-		int imgCol2 = 0;
-
-		int titleRow1 = 2;
-		int titleRow2 = 5;
-		int count = 0;
-		rowCount = 2;
-		colCount = 0;
-
-		sheet.addMergedRegion(new CellRangeAddress(imgRow1, imgRow2, imgCol1, imgCol2));
-		sheet.addMergedRegion(new CellRangeAddress(rowCount, rowCount, titleRow1, titleRow2));
-
-		titleRow = sheet.createRow(rowCount++);
-		titleRow.setHeight((short) 500);
-
-		cell = titleRow.createCell(2);
-		// if(dynamicReportConfig.getId()==1){
-		
-		 * if (!StringUtil.isEmpty(dynamicReportConfig.getAreaWise()) &&
-		 * dynamicReportConfig.getAreaWise().equalsIgnoreCase("1") &&
-		 * !StringUtil.isEmpty(getBranchId()) &&
-		 * !StringUtil.isEmpty(getUserAreaCode()) &&
-		 * !getUserAreaCode().contains(",")) {
-		 * cell.setCellValue(getLocalePropertyForMailExport(getLocaleProperty(
-		 * dynamicReportConfig.getReport()+getUserAreaCode()), lang)); }else{
-		 
-		cell.setCellValue(getLocalePropertyForMailExport(dynamicReportConfig.getReport(), lang));
-		 } 
-		
-		 * }else if(dynamicReportConfig.getId()==11){
-		 * cell.setCellValue(dynamicReportConfig.getReport()); }else{
-		 * cell.setCellValue(dynamicReportConfig.getReport()); }
-		 
-		font1.setBoldweight((short) 22);
-		font1.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-		headerStyle.setFont(font1);
-		cell.setCellStyle(headerStyle);
-
-		rowCount = 8;
-		Map<String, DynamicReportConfigFilter> filterFieldMap = new LinkedHashMap<>();
-		dynamicReportConfig.getDynmaicReportConfigFilters().stream().filter(p -> p.getStatus() != 0).forEach(df -> {
-			if (df.getField().contains("~")) {
-				filterFieldMap.put(df.getField().split("~")[0], df);
-			} else {
-				filterFieldMap.put(df.getField(), df);
-			}
-		});
-
-		row = sheet.createRow(rowCount++);
-		cell = row.createCell(4);
-		cell.setCellValue(getLocalePropertyForMailExport("filter", lang));
-		cell.setCellStyle(filterStyle);
-
-		if (branchIdParma != null && !StringUtil.isEmpty(branchIdParma)) {
-			row = sheet.createRow(rowCount++);
-			cell = row.createCell(4);
-			cell.setCellValue(getLocalePropertyForMailExport("app.branch", lang));
-			cell.setCellStyle(rows);
-
-			cell = row.createCell(5);
-			cell.setCellValue(getBranchesMap().get(branchIdParma));
-			cell.setCellStyle(rows);
-		}
-
-		if (!StringUtil.isEmpty(filterList)) {
-			try {
-				Type listType1 = new TypeToken<Map<String, String>>() {
-				}.getType();
-				Map<String, String> filtersList = new Gson().fromJson(filterList, listType1);
-				if (filtersList.entrySet().stream()
-						.anyMatch(filterFieldData -> (filterFieldMap.containsKey(filterFieldData.getKey())))) {
-
-					filtersList.entrySet().stream()
-							.filter(filterFieldData -> (filterFieldMap.containsKey(filterFieldData.getKey())))
-							.forEach(filterFieldData -> {
-								row = sheet.createRow(rowCount++);
-
-								cell = row.createCell(4);
-								cell.setCellValue(getLocalePropertyForMailExport(
-										filterFieldMap.get(filterFieldData.getKey()).getLabel(), lang));
-								cell.setCellStyle(rows);
-
-								cell = row.createCell(5);
-								if (filterFieldMap.get(filterFieldData.getKey()).getType() == 3) {
-									Map<String, String> optMap = getOptions(
-											filterFieldMap.get(filterFieldData.getKey()).getMethod());
-									String optVal = filterFieldData.getValue();
-									optVal = optVal.replaceAll("=", "").replaceAll("'", "");
-									cell.setCellValue(optMap.get(Integer.valueOf(optVal.split("~")[1].trim())));
-									cell.setCellStyle(rows);
-								} else if (filterFieldMap.get(filterFieldData.getKey()).getType() == 4) {
-									String dateOrg = filterFieldData.getValue().split("~")[1];
-									dateOrg = dateOrg.replaceAll("between", "From");
-									dateOrg = dateOrg.replace("and", "To");
-									dateOrg.replaceAll("'", "");
-									String datStr = DateUtil.convertDateFormat(dateOrg.split("\\|")[0].split(" ")[0],
-											DateUtil.DATE, DateUtil.DATE_FORMAT_2) + "|"
-											+ DateUtil.convertDateFormat(dateOrg.split("\\|")[1].split(" ")[0],
-													DateUtil.DATE, DateUtil.DATE_FORMAT_2);
-									cell.setCellValue(datStr);
-									cell.setCellStyle(rows);
-
-								} else if (filterFieldMap.get(filterFieldData.getKey()).getType() == 5) {
-									Object[] parameter = null;
-									Map<String, String> optMap = getQueryForFilters(
-											filterFieldMap.get(filterFieldData.getKey()).getMethod(), parameter);
-									String optVal = filterFieldData.getValue();
-									if (optVal.contains("~")) {
-										cell.setCellValue(optMap.get(optVal.split("~")[1].trim()));
-									} else {
-										optVal = optVal.replaceAll("=", "").replaceAll("'", "");
-										cell.setCellValue(optMap.get(optVal.trim()));
-									}
-									cell.setCellStyle(rows);
-								} else if (filterFieldMap.get(filterFieldData.getKey()).getType() == 10) {
-									Object[] parameter = null;
-									Map<String, String> optMap = getQueryForMultiSelectFilters(
-											filterFieldMap.get(filterFieldData.getKey()).getMethod(), parameter);
-									String optVal = filterFieldData.getValue();
-									optVal = optVal.replaceAll("=", "").replaceAll("'", "");
-									String aOtpVal = optVal.split("~")[1].trim();
-									if (aOtpVal.contains(",")) {
-										StringBuilder fVal = new StringBuilder();
-										Arrays.asList(aOtpVal.split(",")).stream().forEach(x -> {
-											fVal.append(optMap.get(x) + ",");
-										});
-										cell.setCellValue(StringUtil.removeLastComma(String.valueOf(fVal)));
-
-									} else {
-										cell.setCellValue(optMap.get(aOtpVal));
-									}
-									cell.setCellStyle(rows);
-								}
-
-							});
-				}
-
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		row = sheet.createRow(rowCount++);
-		row.setHeight((short) 400);
-
-		colCount = 0;
-		Map<String, Double> totMap = new LinkedHashMap<>();
-
-		dynamicReportConfig.getDynmaicReportConfigDetails().stream()
-				.filter(f -> f.getIsGridAvailability() && f.getIsFooterSum() != null && f.getIsFooterSum().equals("1"))
-				.sorted((f1, f2) -> Long.compare(f1.getOrder(), f2.getOrder())).forEach(dy -> {
-					totMap.put(dy.getLabelName() + "_" + dy.getOrder(), 0.0);
-				});
-		dynamicReportConfig.getDynmaicReportConfigDetails().stream()
-				.filter(f -> f.getIsGridAvailability() && f.getIsFooterSum() != null && f.getIsFooterSum().equals("2"))
-				.forEach(dy -> {
-					tothead = String.valueOf(dy.getOrder());
-				});
-
-		 removing ID column config detail fro iterating 
-		dynamicReportConfig.getDynmaicReportConfigDetails()
-				.remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator().next());
-		
-		 * removing Branch Dynamic Report COnfig Detail From Iterating, s its
-		 * value already added to rows
-		 
-		
-		 * dynamicReportConfig.getDynmaicReportConfigDetails()
-		 * .remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator(
-		 * ).next());
-		 
-		cell = row.createCell(colCount++);
-		cell.setCellValue(getLocalePropertyForMailExport("SNO", lang));
-		font2.setBoldweight((short) 5);
-		font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-		filterStyle.setFont(font2);
-		 cell.setCellStyle(filterStyle); 
-		cell.setCellStyle(filterStyle);
-		
-		 * if (IExporter.EXPORT_MANUAL.equalsIgnoreCase(exportType)) { if
-		 * (StringUtil.isEmpty(getBranchId())) { cell =
-		 * row.createCell(colCount++);
-		 * cell.setCellValue(getLocalePropertyForMailExport("branchId", lang));
-		 * font2.setBoldweight((short) 5);
-		 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-		 * filterStyle.setFont(font2); // cell.setCellStyle(filterStyle);
-		 * cell.setCellStyle(filterStyle);
-		 * 
-		 * } } else { if (StringUtil.isEmpty(branchIdd)) { cell =
-		 * row.createCell(colCount++);
-		 * cell.setCellValue(getLocalePropertyForMailExport("branchId", lang));
-		 * font2.setBoldweight((short) 5);
-		 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-		 * filterStyle.setFont(font2); //cell.setCellStyle(filterStyle);
-		 * cell.setCellStyle(filterStyle); } }
-		 
-
-		if (StringUtil.isEmpty(getBranchId())) {
-			cell = row.createCell(colCount++);
-			cell.setCellValue(getLocalePropertyForMailExport("masterDT.Branch", lang));
-			font2.setBoldweight((short) 5);
-			font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-			filterStyle.setFont(font2);
-			cell.setCellStyle(filterStyle);
-			cell = row.createCell(colCount++);
-			cell.setCellValue(getLocalePropertyForMailExport("masterDT.area", lang));
-			font2.setBoldweight((short) 5);
-			font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-			filterStyle.setFont(font2);
-			cell.setCellStyle(filterStyle);
-		}
-		dynamicReportConfig.getDynmaicReportConfigDetails().stream().filter(config -> config.getIsExportAvailability())
-				.sorted((f1, f2) -> Long.compare(f1.getOrder(), f2.getOrder())).forEach(dynamicReportConfigDetail -> {
-					cell = row.createCell(colCount++);
-					String[] groupHeader;
-					heading = "";
-					if (!StringUtil.isEmpty(dynamicReportConfigDetail.getIsGroupHeader())) {
-						groupHeader = dynamicReportConfigDetail.getIsGroupHeader().split("~");
-						heading = groupHeader[2] + " "
-								+ getLocalePropertyForMailExport(dynamicReportConfigDetail.getLabelName(), lang);
-					} else {
-
-						heading = getLocalePropertyForMailExport(dynamicReportConfigDetail.getLabelName(), lang);
-					}
-					cell.setCellValue(heading);
-					font2.setBoldweight((short) 5);
-					font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-					filterStyle.setFont(font2);
-					sheet.setColumnWidth(mainGridIterator, (15 * 550));
-					mainGridIterator++;
-
-					if (!StringUtil.isEmpty(dynamicReportConfigDetail.getIsFooterSum())
-							&& dynamicReportConfigDetail.getIsFooterSum().equals("2")) {
-						heade = colCount;
-					}
-					 cell.setCellStyle(filterStyle); 
-					cell.setCellStyle(filterStyle);
-
-				});
-		sheet.setColumnWidth(mainGridIterator++, (15 * 550));
-		sheet.setColumnWidth(mainGridIterator, (15 * 550));
-		Map valMap = formValMap(dynamicReportConfig, branchIdd);
-		mainGridRows.stream().forEach(arr -> {
-			row = sheet.createRow(rowCount++);
-			AtomicInteger col = new AtomicInteger(0);
-			row.setHeight((short) 400);
-			AtomicInteger colCount = new AtomicInteger(1);
-
-			initializeMap(arr);
-			cell = row.createCell(col.getAndIncrement());
-			style1.setAlignment(CellStyle.ALIGN_CENTER);
-			cell.setCellStyle(style1);
-			cell.setCellValue(serialNo++);
-			branchId = getBranchId();
-			StringBuilder exportParams = new StringBuilder("");
-
-			dynamicReportConfig.getDynmaicReportConfigDetails().stream()
-					.filter(config -> config.getIsExportAvailability())
-					.sorted((f1, f2) -> Long.compare(f1.getOrder(), f2.getOrder()))
-					.forEach(dynamicReportConfigDetail -> {
-						cell = row.createCell(col.getAndIncrement());
-
-						String ansVal = getAnswer(dynamicReportConfigDetail, arr, colCount, valMap, lang, exportParams,
-								true);
-						colCount.incrementAndGet();
-						exportParams.append("~" + ansVal);
-						if (dynamicReportConfigDetail.getAlignment() != null
-								&& !StringUtil.isEmpty(dynamicReportConfigDetail.getAlignment())) {
-							if (dynamicReportConfigDetail.getAlignment().equalsIgnoreCase("center")) {
-								style2.setAlignment(CellStyle.ALIGN_CENTER);
-								cell.setCellStyle(style2);
-							} else if (dynamicReportConfigDetail.getAlignment().equalsIgnoreCase("left")) {
-								style2.setAlignment(CellStyle.ALIGN_LEFT);
-								cell.setCellStyle(style2);
-							} else if (dynamicReportConfigDetail.getAlignment().equalsIgnoreCase("right")) {
-								style2.setAlignment(CellStyle.ALIGN_RIGHT);
-								cell.setCellStyle(style2);
-							}
-						}
-
-						if (!ObjectUtil.isEmpty(ansVal) && !StringUtil.isEmpty(ansVal)) {
-
-							if (dynamicReportConfigDetail.getDataType() != null) {
-								if (dynamicReportConfigDetail.getDataType() != null
-										&& dynamicReportConfigDetail.getDataType().equalsIgnoreCase("2")) {
-									ansVal = !StringUtil.isEmpty(ansVal.toString())
-											? CurrencyUtil.getDecimalFormat(Double.valueOf(ansVal.toString()), "##.00")
-											: "0.00";
-									cell.setCellValue(ansVal);
-
-								} else if (dynamicReportConfigDetail.getDataType() != null
-										&& dynamicReportConfigDetail.getDataType().equalsIgnoreCase("3")) {
-									ansVal = !StringUtil.isEmpty(ansVal.toString())
-											? CurrencyUtil.getDecimalFormat(Double.valueOf(ansVal.toString()), "##.000")
-											: "0.000";
-									cell.setCellValue(ansVal);
-
-								}
-
-						else if (dynamicReportConfigDetail.getDataType() != null
-								&& dynamicReportConfigDetail.getDataType().equalsIgnoreCase("0")) {
-									ansVal = !StringUtil.isEmpty(ansVal.toString())
-											? CurrencyUtil.getDecimalFormat(Double.valueOf(ansVal.toString()), "##")
-											: "0";
-									cell.setCellValue(ansVal);
-
-								}
-
-						else {
-									cell.setCellValue(ansVal);
-								}
-							} else {
-								cell.setCellValue(ansVal);
-							}
-						} else {
-							cell.setCellValue("");
-						}
-
-					});
-
-		});
-		if (jss != null && !jss.isEmpty() && heade != null) {
-			row = sheet.createRow(rowCount++);
-			cell = row.createCell(heade - 1);
-			cell.setCellValue("Total");
-			font4.setBoldweight((short) 5);
-			font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-			filterStyle.setFont(font4);
-			cell.setCellStyle(filterStyle);
-			jss.keySet().stream().forEach(u -> {
-				cell = row.createCell(heade++);
-				cell.setCellType(Cell.CELL_TYPE_STRING);
-				// cell.setCellValue(u.getValue().toString());
-				cell.setCellValue(jss.get(u).toString());
-				font4.setBoldweight((short) 5);
-				font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
-				filterStyle.setFont(font4);
-				cell.setCellStyle(filterStyle);
-
-			});
-
-		}
-		
-		 * for (int i = 0; i <= colCount; i++) { sheet.autoSizeColumn(i); }
-		 
-
-		// alternateGreenAndWhiteRows(sheet);
-
-		Drawing drawing = sheet.createDrawingPatriarch();
-		int pictureIdx = getPicIndex(workbook);
-		XSSFClientAnchor anchor = new XSSFClientAnchor(100, 150, 900, 100, (short) 0, 0, (short) 0, 4);
-		anchor.setAnchorType(1);
-		Picture picture = drawing.createPicture(anchor, pictureIdx);
-		picture.resize();
-		String makeDir = FileUtil.storeXls(id);
-		if (IExporter.EXPORT_MANUAL.equalsIgnoreCase(exportType)) {
-			response.setContentType("application/vnd.ms-excel");
-			response.setHeader("Content-Disposition", "attachment; filename=" + fName);
-			ServletOutputStream outStream = response.getOutputStream();
-			workbook.write(outStream); // Write workbook to response.
-			outStream.close();
-		} else {
-
-			FileOutputStream fileOut = new FileOutputStream(makeDir + fName);
-			workbook.write(fileOut);
-			InputStream stream = new FileInputStream(new File(makeDir + fName));
-			fileOut.close();
-			recData[1] = stream;
-			// stream.close();
-		}
-		return recData;
-
-	}*/
+	/*
+	 * XSSFRow row, filterRowTitle, filterRow1, filterRow2, filterRow3,
+	 * filterRow4; XSSFRow titleRow; int colCount, rowCount, titleRow1 = 4,
+	 * titleRow2 = 6; Cell cell; Integer cellIndex; Integer heade = null;
+	 * JSONObject jss = new JSONObject(); int flagxls = 0; int mainGridIterator
+	 * = 0; int serialNo = 1; String heading = "";
+	 * 
+	 * public Object[] getExportDataStream(String exportType, String configId,
+	 * String lang, String branchIdd, String profId) throws IOException {
+	 * InputStream fileInputStream; serialNo = 1; Object[] recData = new
+	 * Object[2];
+	 * 
+	 * String breanchidPa = "BRANCH_ID"; Map<String, String> defMapMailExport =
+	 * new HashMap<String, String>(); if
+	 * (!IExporter.EXPORT_MANUAL.equalsIgnoreCase(exportType)) {
+	 * setSord("desc"); setSidx("id"); dynamicReportConfig =
+	 * utilService.findReportById(configId);
+	 * 
+	 * if (StringUtil.isEmpty(filterList) &&
+	 * dynamicReportConfig.getDynmaicReportConfigFilters().size() > 0) {
+	 * Map<String, String> filtersList = new HashMap<String, String>();
+	 * dynamicReportConfig.getDynmaicReportConfigFilters().stream() .filter(u ->
+	 * !u.getDefaultFilter().equalsIgnoreCase("insp") &&
+	 * !u.getDefaultFilter().equalsIgnoreCase("inspwr") &&
+	 * !u.getDefaultFilter().equalsIgnoreCase("dealer")) .forEach(u -> {
+	 * filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] +
+	 * "~" + u.getDefaultFilter() + "~" + u.getField().split("~")[2]);
+	 * mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList); }); if
+	 * (request != null && request.getSession() != null &&
+	 * request.getSession().getAttribute("dealerId") != null) {
+	 * dynamicReportConfig.getDynmaicReportConfigFilters().stream() .filter(u ->
+	 * u.getDefaultFilter().equalsIgnoreCase("dealer")).forEach(u -> {
+	 * filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] +
+	 * "~" + request.getSession().getAttribute("dealerId") + "~3");
+	 * mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList); }); } if
+	 * (request != null && request.getSession() != null &&
+	 * request.getSession().getAttribute("inspId") != null &&
+	 * request.getSession().getAttribute("inspId") != "false") {
+	 * dynamicReportConfig.getDynmaicReportConfigFilters().stream() .filter(u ->
+	 * u.getDefaultFilter().equalsIgnoreCase("insp")).forEach(u -> {
+	 * filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] +
+	 * "~" + request.getSession().getAttribute("inspId") + "~3");
+	 * filtersList.put("status", "1~3~1");
+	 * mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList); });
+	 * 
+	 * dynamicReportConfig.getDynmaicReportConfigFilters().stream() .filter(u ->
+	 * u.getDefaultFilter().equalsIgnoreCase("inspwr")).forEach(u -> {
+	 * filtersList.put(u.getField().split("~")[0], u.getField().split("~")[1] +
+	 * "~" + request.getSession().getAttribute("inspId") + "~3"); //
+	 * filtersList.put("status", "1~3~1");
+	 * mainMap.put(DynamicReportConfig.FILTER_FIELDS, filtersList); }); } }
+	 * 
+	 * }
+	 * 
+	 * otherMap.put(DynamicReportConfig.DYNAMIC_CONFIG_DETAIL,
+	 * dynamicReportConfig.getDynmaicReportConfigDetails());
+	 * otherMap.put(DynamicReportConfig.ENTITY,
+	 * dynamicReportConfig.getEntityName());
+	 * otherMap.put(DynamicReportConfig.ALIAS, dynamicReportConfig.getAlias());
+	 * otherMap.put(DynamicReportConfig.GROUP_PROPERTY,
+	 * dynamicReportConfig.getGroupProperty());
+	 * mainMap.put(DynamicReportConfig.OTHER_FIELD, otherMap);
+	 * 
+	 * Map data = null; if (!ObjectUtil.isEmpty(dynamicReportConfig) &&
+	 * dynamicReportConfig.getFetchType() == 2L) { data =
+	 * readProjectionDataStatic(mainMap); } else if
+	 * (!ObjectUtil.isEmpty(dynamicReportConfig) &&
+	 * dynamicReportConfig.getFetchType() == 3L) {
+	 * 
+	 * data = readProjectionDataView(mainMap); } else { data = readData(); }
+	 * 
+	 * List<Object[]> mainGridRows = (List<Object[]>) data.get(ROWS); Object
+	 * objj = data.get(RECORDS); jss = new JSONObject(); if (objj instanceof
+	 * JSONObject) { JSONObject countart = (JSONObject) objj; totalRecords =
+	 * (Integer) countart.get("count"); if (countart.containsKey("footers")) {
+	 * jss = (JSONObject) countart.get("footers"); } } recData[0] =
+	 * mainGridRows.size(); String fName = dynamicReportConfig.getXlsFile() !=
+	 * null && !StringUtil.isEmpty(dynamicReportConfig.getXlsFile()) ?
+	 * getLocalePropertyForMailExport(dynamicReportConfig.getXlsFile(),
+	 * lang).trim() : getText("xlsFile"); XSSFWorkbook workbook = new
+	 * XSSFWorkbook(); XSSFSheet sheet = workbook.createSheet(fName);
+	 * 
+	 *//** Defining Styles */
+
+	/*
+	 * XSSFCellStyle headerStyle = workbook.createCellStyle();
+	 * 
+	 * headerStyle.setBorderBottom(XSSFCellStyle.BORDER_MEDIUM);
+	 * headerStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+	 * headerStyle.setBorderLeft(XSSFCellStyle.BORDER_MEDIUM);
+	 * headerStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+	 * headerStyle.setBorderRight(XSSFCellStyle.BORDER_MEDIUM);
+	 * headerStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
+	 * headerStyle.setBorderTop(XSSFCellStyle.BORDER_MEDIUM);
+	 * headerStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
+	 * 
+	 * headerStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+	 * 
+	 * XSSFCellStyle filterStyle = workbook.createCellStyle();
+	 * 
+	 * filterStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+	 * filterStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+	 * filterStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+	 * filterStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+	 * filterStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+	 * filterStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
+	 * filterStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+	 * filterStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
+	 * 
+	 * filterStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+	 * filterStyle.setFillForegroundColor(HSSFColor.GREY_25_PERCENT.index);
+	 * 
+	 * XSSFCellStyle headerLabelStyle = workbook.createCellStyle();
+	 * headerLabelStyle.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+	 * headerLabelStyle.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+	 * headerLabelStyle.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+	 * headerLabelStyle.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+	 * headerLabelStyle.setBorderRight(XSSFCellStyle.BORDER_THIN);
+	 * headerLabelStyle.setRightBorderColor(IndexedColors.BLACK.getIndex());
+	 * headerLabelStyle.setBorderTop(XSSFCellStyle.BORDER_THIN);
+	 * headerLabelStyle.setTopBorderColor(IndexedColors.BLACK.getIndex());
+	 * headerLabelStyle.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+	 * headerLabelStyle.setFillForegroundColor(HSSFColor.LIGHT_YELLOW.index);
+	 * 
+	 * XSSFColor subGridColor = new XSSFColor(new Color(204, 255, 204));
+	 * filterStyle.setFillForegroundColor(subGridColor);
+	 * filterStyle.setFillPattern(HSSFCellStyle.SOLID_FOREGROUND);
+	 * 
+	 * XSSFCellStyle subGridHeader = workbook.createCellStyle();
+	 * subGridHeader.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+	 * subGridHeader.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+	 * subGridHeader.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+	 * subGridHeader.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+	 * subGridHeader.setBorderRight(XSSFCellStyle.BORDER_THIN);
+	 * subGridHeader.setRightBorderColor(IndexedColors.BLACK.getIndex());
+	 * subGridHeader.setBorderTop(XSSFCellStyle.BORDER_THIN);
+	 * subGridHeader.setTopBorderColor(IndexedColors.BLACK.getIndex());
+	 * subGridHeader.setAlignment(HSSFCellStyle.ALIGN_CENTER);
+	 * 
+	 * XSSFColor myColor = new XSSFColor(new Color(237, 237, 237));
+	 * subGridHeader.setFillForegroundColor(myColor);
+	 * 
+	 * XSSFCellStyle rows = workbook.createCellStyle();
+	 * rows.setBorderBottom(XSSFCellStyle.BORDER_THIN);
+	 * rows.setBottomBorderColor(IndexedColors.BLACK.getIndex());
+	 * rows.setBorderLeft(XSSFCellStyle.BORDER_THIN);
+	 * rows.setLeftBorderColor(IndexedColors.BLACK.getIndex());
+	 * rows.setBorderRight(XSSFCellStyle.BORDER_THIN);
+	 * rows.setRightBorderColor(IndexedColors.BLACK.getIndex());
+	 * rows.setBorderTop(XSSFCellStyle.BORDER_THIN);
+	 * rows.setTopBorderColor(IndexedColors.BLACK.getIndex());
+	 * 
+	 *//** Defining Fonts *//*
+							 * XSSFFont font1 = workbook.createFont();
+							 * font1.setFontHeightInPoints((short) 22);
+							 * 
+							 * XSSFFont font2 = workbook.createFont();
+							 * font2.setFontHeightInPoints((short) 16);
+							 * 
+							 * XSSFFont font3 = workbook.createFont();
+							 * font3.setFontHeightInPoints((short) 14);
+							 * 
+							 * XSSFFont font4 = workbook.createFont();
+							 * font3.setFontHeightInPoints((short) 10);
+							 * 
+							 * XSSFCellStyle style1 = (XSSFCellStyle)
+							 * workbook.createCellStyle();
+							 * 
+							 * XSSFCellStyle style2 = (XSSFCellStyle)
+							 * workbook.createCellStyle();
+							 * 
+							 * int imgRow1 = 0; int imgRow2 = 4; int imgCol1 =
+							 * 0; int imgCol2 = 0;
+							 * 
+							 * int titleRow1 = 2; int titleRow2 = 5; int count =
+							 * 0; rowCount = 2; colCount = 0;
+							 * 
+							 * sheet.addMergedRegion(new
+							 * CellRangeAddress(imgRow1, imgRow2, imgCol1,
+							 * imgCol2)); sheet.addMergedRegion(new
+							 * CellRangeAddress(rowCount, rowCount, titleRow1,
+							 * titleRow2));
+							 * 
+							 * titleRow = sheet.createRow(rowCount++);
+							 * titleRow.setHeight((short) 500);
+							 * 
+							 * cell = titleRow.createCell(2); //
+							 * if(dynamicReportConfig.getId()==1){
+							 * 
+							 * if (!StringUtil.isEmpty(dynamicReportConfig.
+							 * getAreaWise()) &&
+							 * dynamicReportConfig.getAreaWise().
+							 * equalsIgnoreCase("1") &&
+							 * !StringUtil.isEmpty(getBranchId()) &&
+							 * !StringUtil.isEmpty(getUserAreaCode()) &&
+							 * !getUserAreaCode().contains(",")) {
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * getLocaleProperty(
+							 * dynamicReportConfig.getReport()+getUserAreaCode()
+							 * ), lang)); }else{
+							 * 
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * dynamicReportConfig.getReport(), lang)); }
+							 * 
+							 * }else if(dynamicReportConfig.getId()==11){
+							 * cell.setCellValue(dynamicReportConfig.getReport()
+							 * ); }else{
+							 * cell.setCellValue(dynamicReportConfig.getReport()
+							 * ); }
+							 * 
+							 * font1.setBoldweight((short) 22);
+							 * font1.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * headerStyle.setFont(font1);
+							 * cell.setCellStyle(headerStyle);
+							 * 
+							 * rowCount = 8; Map<String,
+							 * DynamicReportConfigFilter> filterFieldMap = new
+							 * LinkedHashMap<>();
+							 * dynamicReportConfig.getDynmaicReportConfigFilters
+							 * ().stream().filter(p -> p.getStatus() !=
+							 * 0).forEach(df -> { if
+							 * (df.getField().contains("~")) {
+							 * filterFieldMap.put(df.getField().split("~")[0],
+							 * df); } else { filterFieldMap.put(df.getField(),
+							 * df); } });
+							 * 
+							 * row = sheet.createRow(rowCount++); cell =
+							 * row.createCell(4);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * "filter", lang)); cell.setCellStyle(filterStyle);
+							 * 
+							 * if (branchIdParma != null &&
+							 * !StringUtil.isEmpty(branchIdParma)) { row =
+							 * sheet.createRow(rowCount++); cell =
+							 * row.createCell(4);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * "app.branch", lang)); cell.setCellStyle(rows);
+							 * 
+							 * cell = row.createCell(5);
+							 * cell.setCellValue(getBranchesMap().get(
+							 * branchIdParma)); cell.setCellStyle(rows); }
+							 * 
+							 * if (!StringUtil.isEmpty(filterList)) { try { Type
+							 * listType1 = new TypeToken<Map<String, String>>()
+							 * { }.getType(); Map<String, String> filtersList =
+							 * new Gson().fromJson(filterList, listType1); if
+							 * (filtersList.entrySet().stream()
+							 * .anyMatch(filterFieldData ->
+							 * (filterFieldMap.containsKey(filterFieldData.
+							 * getKey())))) {
+							 * 
+							 * filtersList.entrySet().stream()
+							 * .filter(filterFieldData ->
+							 * (filterFieldMap.containsKey(filterFieldData.
+							 * getKey()))) .forEach(filterFieldData -> { row =
+							 * sheet.createRow(rowCount++);
+							 * 
+							 * cell = row.createCell(4);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * filterFieldMap.get(filterFieldData.getKey()).
+							 * getLabel(), lang)); cell.setCellStyle(rows);
+							 * 
+							 * cell = row.createCell(5); if
+							 * (filterFieldMap.get(filterFieldData.getKey()).
+							 * getType() == 3) { Map<String, String> optMap =
+							 * getOptions(
+							 * filterFieldMap.get(filterFieldData.getKey()).
+							 * getMethod()); String optVal =
+							 * filterFieldData.getValue(); optVal =
+							 * optVal.replaceAll("=", "").replaceAll("'", "");
+							 * cell.setCellValue(optMap.get(Integer.valueOf(
+							 * optVal.split("~")[1].trim())));
+							 * cell.setCellStyle(rows); } else if
+							 * (filterFieldMap.get(filterFieldData.getKey()).
+							 * getType() == 4) { String dateOrg =
+							 * filterFieldData.getValue().split("~")[1]; dateOrg
+							 * = dateOrg.replaceAll("between", "From"); dateOrg
+							 * = dateOrg.replace("and", "To");
+							 * dateOrg.replaceAll("'", ""); String datStr =
+							 * DateUtil.convertDateFormat(dateOrg.split("\\|")[0
+							 * ].split(" ")[0], DateUtil.DATE,
+							 * DateUtil.DATE_FORMAT_2) + "|" +
+							 * DateUtil.convertDateFormat(dateOrg.split("\\|")[1
+							 * ].split(" ")[0], DateUtil.DATE,
+							 * DateUtil.DATE_FORMAT_2);
+							 * cell.setCellValue(datStr);
+							 * cell.setCellStyle(rows);
+							 * 
+							 * } else if
+							 * (filterFieldMap.get(filterFieldData.getKey()).
+							 * getType() == 5) { Object[] parameter = null;
+							 * Map<String, String> optMap = getQueryForFilters(
+							 * filterFieldMap.get(filterFieldData.getKey()).
+							 * getMethod(), parameter); String optVal =
+							 * filterFieldData.getValue(); if
+							 * (optVal.contains("~")) {
+							 * cell.setCellValue(optMap.get(optVal.split("~")[1]
+							 * .trim())); } else { optVal =
+							 * optVal.replaceAll("=", "").replaceAll("'", "");
+							 * cell.setCellValue(optMap.get(optVal.trim())); }
+							 * cell.setCellStyle(rows); } else if
+							 * (filterFieldMap.get(filterFieldData.getKey()).
+							 * getType() == 10) { Object[] parameter = null;
+							 * Map<String, String> optMap =
+							 * getQueryForMultiSelectFilters(
+							 * filterFieldMap.get(filterFieldData.getKey()).
+							 * getMethod(), parameter); String optVal =
+							 * filterFieldData.getValue(); optVal =
+							 * optVal.replaceAll("=", "").replaceAll("'", "");
+							 * String aOtpVal = optVal.split("~")[1].trim(); if
+							 * (aOtpVal.contains(",")) { StringBuilder fVal =
+							 * new StringBuilder();
+							 * Arrays.asList(aOtpVal.split(",")).stream().
+							 * forEach(x -> { fVal.append(optMap.get(x) + ",");
+							 * }); cell.setCellValue(StringUtil.removeLastComma(
+							 * String.valueOf(fVal)));
+							 * 
+							 * } else { cell.setCellValue(optMap.get(aOtpVal));
+							 * } cell.setCellStyle(rows); }
+							 * 
+							 * }); }
+							 * 
+							 * } catch (Exception e) { e.printStackTrace(); } }
+							 * row = sheet.createRow(rowCount++);
+							 * row.setHeight((short) 400);
+							 * 
+							 * colCount = 0; Map<String, Double> totMap = new
+							 * LinkedHashMap<>();
+							 * 
+							 * dynamicReportConfig.getDynmaicReportConfigDetails
+							 * ().stream() .filter(f ->
+							 * f.getIsGridAvailability() && f.getIsFooterSum()
+							 * != null && f.getIsFooterSum().equals("1"))
+							 * .sorted((f1, f2) -> Long.compare(f1.getOrder(),
+							 * f2.getOrder())).forEach(dy -> {
+							 * totMap.put(dy.getLabelName() + "_" +
+							 * dy.getOrder(), 0.0); });
+							 * dynamicReportConfig.getDynmaicReportConfigDetails
+							 * ().stream() .filter(f ->
+							 * f.getIsGridAvailability() && f.getIsFooterSum()
+							 * != null && f.getIsFooterSum().equals("2"))
+							 * .forEach(dy -> { tothead =
+							 * String.valueOf(dy.getOrder()); });
+							 * 
+							 * removing ID column config detail fro iterating
+							 * dynamicReportConfig.getDynmaicReportConfigDetails
+							 * () .remove(dynamicReportConfig.
+							 * getDynmaicReportConfigDetails().iterator().next()
+							 * );
+							 * 
+							 * removing Branch Dynamic Report COnfig Detail From
+							 * Iterating, s its value already added to rows
+							 * 
+							 * 
+							 * dynamicReportConfig.getDynmaicReportConfigDetails
+							 * () .remove(dynamicReportConfig.
+							 * getDynmaicReportConfigDetails().iterator(
+							 * ).next());
+							 * 
+							 * cell = row.createCell(colCount++);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * "SNO", lang)); font2.setBoldweight((short) 5);
+							 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font2);
+							 * cell.setCellStyle(filterStyle);
+							 * cell.setCellStyle(filterStyle);
+							 * 
+							 * if (IExporter.EXPORT_MANUAL.equalsIgnoreCase(
+							 * exportType)) { if
+							 * (StringUtil.isEmpty(getBranchId())) { cell =
+							 * row.createCell(colCount++);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * "branchId", lang)); font2.setBoldweight((short)
+							 * 5);
+							 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font2); //
+							 * cell.setCellStyle(filterStyle);
+							 * cell.setCellStyle(filterStyle);
+							 * 
+							 * } } else { if (StringUtil.isEmpty(branchIdd)) {
+							 * cell = row.createCell(colCount++);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * "branchId", lang)); font2.setBoldweight((short)
+							 * 5);
+							 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font2);
+							 * //cell.setCellStyle(filterStyle);
+							 * cell.setCellStyle(filterStyle); } }
+							 * 
+							 * 
+							 * if (StringUtil.isEmpty(getBranchId())) { cell =
+							 * row.createCell(colCount++);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * "masterDT.Branch", lang));
+							 * font2.setBoldweight((short) 5);
+							 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font2);
+							 * cell.setCellStyle(filterStyle); cell =
+							 * row.createCell(colCount++);
+							 * cell.setCellValue(getLocalePropertyForMailExport(
+							 * "masterDT.area", lang));
+							 * font2.setBoldweight((short) 5);
+							 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font2);
+							 * cell.setCellStyle(filterStyle); }
+							 * dynamicReportConfig.getDynmaicReportConfigDetails
+							 * ().stream().filter(config ->
+							 * config.getIsExportAvailability()) .sorted((f1,
+							 * f2) -> Long.compare(f1.getOrder(),
+							 * f2.getOrder())).forEach(dynamicReportConfigDetail
+							 * -> { cell = row.createCell(colCount++); String[]
+							 * groupHeader; heading = ""; if
+							 * (!StringUtil.isEmpty(dynamicReportConfigDetail.
+							 * getIsGroupHeader())) { groupHeader =
+							 * dynamicReportConfigDetail.getIsGroupHeader().
+							 * split("~"); heading = groupHeader[2] + " " +
+							 * getLocalePropertyForMailExport(
+							 * dynamicReportConfigDetail.getLabelName(), lang);
+							 * } else {
+							 * 
+							 * heading = getLocalePropertyForMailExport(
+							 * dynamicReportConfigDetail.getLabelName(), lang);
+							 * } cell.setCellValue(heading);
+							 * font2.setBoldweight((short) 5);
+							 * font2.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font2);
+							 * sheet.setColumnWidth(mainGridIterator, (15 *
+							 * 550)); mainGridIterator++;
+							 * 
+							 * if
+							 * (!StringUtil.isEmpty(dynamicReportConfigDetail.
+							 * getIsFooterSum()) &&
+							 * dynamicReportConfigDetail.getIsFooterSum().equals
+							 * ("2")) { heade = colCount; }
+							 * cell.setCellStyle(filterStyle);
+							 * cell.setCellStyle(filterStyle);
+							 * 
+							 * }); sheet.setColumnWidth(mainGridIterator++, (15
+							 * * 550)); sheet.setColumnWidth(mainGridIterator,
+							 * (15 * 550)); Map valMap =
+							 * formValMap(dynamicReportConfig, branchIdd);
+							 * mainGridRows.stream().forEach(arr -> { row =
+							 * sheet.createRow(rowCount++); AtomicInteger col =
+							 * new AtomicInteger(0); row.setHeight((short) 400);
+							 * AtomicInteger colCount = new AtomicInteger(1);
+							 * 
+							 * initializeMap(arr); cell =
+							 * row.createCell(col.getAndIncrement());
+							 * style1.setAlignment(CellStyle.ALIGN_CENTER);
+							 * cell.setCellStyle(style1);
+							 * cell.setCellValue(serialNo++); branchId =
+							 * getBranchId(); StringBuilder exportParams = new
+							 * StringBuilder("");
+							 * 
+							 * dynamicReportConfig.getDynmaicReportConfigDetails
+							 * ().stream() .filter(config ->
+							 * config.getIsExportAvailability()) .sorted((f1,
+							 * f2) -> Long.compare(f1.getOrder(),
+							 * f2.getOrder()))
+							 * .forEach(dynamicReportConfigDetail -> { cell =
+							 * row.createCell(col.getAndIncrement());
+							 * 
+							 * String ansVal =
+							 * getAnswer(dynamicReportConfigDetail, arr,
+							 * colCount, valMap, lang, exportParams, true);
+							 * colCount.incrementAndGet();
+							 * exportParams.append("~" + ansVal); if
+							 * (dynamicReportConfigDetail.getAlignment() != null
+							 * && !StringUtil.isEmpty(dynamicReportConfigDetail.
+							 * getAlignment())) { if
+							 * (dynamicReportConfigDetail.getAlignment().
+							 * equalsIgnoreCase("center")) {
+							 * style2.setAlignment(CellStyle.ALIGN_CENTER);
+							 * cell.setCellStyle(style2); } else if
+							 * (dynamicReportConfigDetail.getAlignment().
+							 * equalsIgnoreCase("left")) {
+							 * style2.setAlignment(CellStyle.ALIGN_LEFT);
+							 * cell.setCellStyle(style2); } else if
+							 * (dynamicReportConfigDetail.getAlignment().
+							 * equalsIgnoreCase("right")) {
+							 * style2.setAlignment(CellStyle.ALIGN_RIGHT);
+							 * cell.setCellStyle(style2); } }
+							 * 
+							 * if (!ObjectUtil.isEmpty(ansVal) &&
+							 * !StringUtil.isEmpty(ansVal)) {
+							 * 
+							 * if (dynamicReportConfigDetail.getDataType() !=
+							 * null) { if
+							 * (dynamicReportConfigDetail.getDataType() != null
+							 * && dynamicReportConfigDetail.getDataType().
+							 * equalsIgnoreCase("2")) { ansVal =
+							 * !StringUtil.isEmpty(ansVal.toString()) ?
+							 * CurrencyUtil.getDecimalFormat(Double.valueOf(
+							 * ansVal.toString()), "##.00") : "0.00";
+							 * cell.setCellValue(ansVal);
+							 * 
+							 * } else if
+							 * (dynamicReportConfigDetail.getDataType() != null
+							 * && dynamicReportConfigDetail.getDataType().
+							 * equalsIgnoreCase("3")) { ansVal =
+							 * !StringUtil.isEmpty(ansVal.toString()) ?
+							 * CurrencyUtil.getDecimalFormat(Double.valueOf(
+							 * ansVal.toString()), "##.000") : "0.000";
+							 * cell.setCellValue(ansVal);
+							 * 
+							 * }
+							 * 
+							 * else if (dynamicReportConfigDetail.getDataType()
+							 * != null &&
+							 * dynamicReportConfigDetail.getDataType().
+							 * equalsIgnoreCase("0")) { ansVal =
+							 * !StringUtil.isEmpty(ansVal.toString()) ?
+							 * CurrencyUtil.getDecimalFormat(Double.valueOf(
+							 * ansVal.toString()), "##") : "0";
+							 * cell.setCellValue(ansVal);
+							 * 
+							 * }
+							 * 
+							 * else { cell.setCellValue(ansVal); } } else {
+							 * cell.setCellValue(ansVal); } } else {
+							 * cell.setCellValue(""); }
+							 * 
+							 * });
+							 * 
+							 * }); if (jss != null && !jss.isEmpty() && heade !=
+							 * null) { row = sheet.createRow(rowCount++); cell =
+							 * row.createCell(heade - 1);
+							 * cell.setCellValue("Total");
+							 * font4.setBoldweight((short) 5);
+							 * font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font4);
+							 * cell.setCellStyle(filterStyle);
+							 * jss.keySet().stream().forEach(u -> { cell =
+							 * row.createCell(heade++);
+							 * cell.setCellType(Cell.CELL_TYPE_STRING); //
+							 * cell.setCellValue(u.getValue().toString());
+							 * cell.setCellValue(jss.get(u).toString());
+							 * font4.setBoldweight((short) 5);
+							 * font4.setBoldweight(HSSFFont.BOLDWEIGHT_BOLD);
+							 * filterStyle.setFont(font4);
+							 * cell.setCellStyle(filterStyle);
+							 * 
+							 * });
+							 * 
+							 * }
+							 * 
+							 * for (int i = 0; i <= colCount; i++) {
+							 * sheet.autoSizeColumn(i); }
+							 * 
+							 * 
+							 * // alternateGreenAndWhiteRows(sheet);
+							 * 
+							 * Drawing drawing = sheet.createDrawingPatriarch();
+							 * int pictureIdx = getPicIndex(workbook);
+							 * XSSFClientAnchor anchor = new
+							 * XSSFClientAnchor(100, 150, 900, 100, (short) 0,
+							 * 0, (short) 0, 4); anchor.setAnchorType(1);
+							 * Picture picture = drawing.createPicture(anchor,
+							 * pictureIdx); picture.resize(); String makeDir =
+							 * FileUtil.storeXls(id); if
+							 * (IExporter.EXPORT_MANUAL.equalsIgnoreCase(
+							 * exportType)) { response.setContentType(
+							 * "application/vnd.ms-excel");
+							 * response.setHeader("Content-Disposition",
+							 * "attachment; filename=" + fName);
+							 * ServletOutputStream outStream =
+							 * response.getOutputStream();
+							 * workbook.write(outStream); // Write workbook to
+							 * response. outStream.close(); } else {
+							 * 
+							 * FileOutputStream fileOut = new
+							 * FileOutputStream(makeDir + fName);
+							 * workbook.write(fileOut); InputStream stream = new
+							 * FileInputStream(new File(makeDir + fName));
+							 * fileOut.close(); recData[1] = stream; //
+							 * stream.close(); } return recData;
+							 * 
+							 * }
+							 */
 
 	public int getPicIndex(XSSFWorkbook workbook) throws IOException {
 
@@ -3696,79 +4034,78 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 		return index;
 	}
 
-		public String getMethodValuerp() {
-			return methodValuerp;
+	public String getMethodValuerp() {
+		return methodValuerp;
+	}
+
+	public void setMethodValuerp(String methodValuerp) {
+		this.methodValuerp = methodValuerp;
+	}
+
+	public HashMap<String, Object> getSortingPrintMap() {
+		return sortingPrintMap;
+	}
+
+	public void setSortingPrintMap(HashMap<String, Object> sortingPrintMap) {
+		this.sortingPrintMap = sortingPrintMap;
+	}
+
+	public String getTxnId() {
+		return txnId;
+	}
+
+	public void setTxnId(String txnId) {
+		this.txnId = txnId;
+	}
+
+	public void populateCSV() throws Exception {
+
+		JSONObject jss = new JSONObject();
+		jss.put("status", "1");
+		if (getLoggedInDealer() > 0) {
+			ExporterRegistration ex = utilService.findExportRegById(Long.valueOf(getLoggedInDealer()));
+			setCsvFileName(ex.getRegNumber() + "_" + dynamicReportConfig.getCsvFile() + "_" + DateUtil.getCurrentYear()
+					+ "_" + csvfileNameDateFormat.format(new Date()) + ".csv");
+
 		}
-
-		public void setMethodValuerp(String methodValuerp) {
-			this.methodValuerp = methodValuerp;
+		String dirName = utilService.findPrefernceByName("FTP_DIRECTOTY");
+		File directory = new File(dirName);
+		if (!directory.exists()) {
+			directory.mkdir();
 		}
+		File file = new File(dirName + csvFileName);
+		try {
+			// create FileWriter object with file as parameter
+			FileWriter outputfile = new FileWriter(file);
 
-		public HashMap<String, Object> getSortingPrintMap() {
-			return sortingPrintMap;
-		}
-
-		public void setSortingPrintMap(HashMap<String, Object> sortingPrintMap) {
-            this.sortingPrintMap = sortingPrintMap;
-        }
-
-    public String getTxnId() {
-        return txnId;
-    }
-
-    public void setTxnId(String txnId) {
-        this.txnId = txnId;
-    }
-
-
-    public void populateCSV() throws Exception {
-
-        JSONObject jss = new JSONObject();
-        jss.put("status", "1");
-        if (getLoggedInDealer() > 0) {
-            ExporterRegistration ex = utilService.findExportRegById(Long.valueOf(getLoggedInDealer()));
-            setCsvFileName(ex.getRegNumber() + "_" + dynamicReportConfig.getCsvFile() + "_" + DateUtil.getCurrentYear() + "_" + csvfileNameDateFormat.format(new Date()) + ".csv");
-
-        }
-        String dirName = utilService.findPrefernceByName("FTP_DIRECTOTY");
-        File directory = new File(dirName);
-        if (!directory.exists()) {
-            directory.mkdir();
-        }
-        File file = new File(dirName + csvFileName);
-        try {
-            // create FileWriter object with file as parameter
-            FileWriter outputfile = new FileWriter(file);
-
-            // create CSVWriter object filewriter object as parameter
+			// create CSVWriter object filewriter object as parameter
 			CSVWriter writer = new CSVWriter(outputfile, CSVWriter.DEFAULT_SEPARATOR, CSVWriter.NO_QUOTE_CHARACTER);
 
-            Map data = getExportData(true);
-            dynamicReportConfig.getDynmaicReportConfigDetails()
-                    .remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator().next());
-            if (!StringUtil.isEmpty(getBranchId())) {
-                dynamicReportConfig.getDynmaicReportConfigDetails()
-                        .remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator().next());
+			Map data = getExportData(true);
+			dynamicReportConfig.getDynmaicReportConfigDetails()
+					.remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator().next());
+			if (!StringUtil.isEmpty(getBranchId())) {
+				dynamicReportConfig.getDynmaicReportConfigDetails()
+						.remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator().next());
 
-            } else if (request.getSession() != null) {
-                dynamicReportConfig.getDynmaicReportConfigDetails()
-                        .remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator().next());
-            }
-            List<Object[]> mainGridRows = (List<Object[]>) data.get(ROWS);
-            List<String> header = new ArrayList<>();
-            dynamicReportConfig.getDynmaicReportConfigDetails().stream()
-                    .filter(config -> config.getIsExportAvailability())
-                    .sorted((f1, f2) -> Long.compare(f1.getOrder(), f2.getOrder()))
-                    .forEach(dynamicReportConfigDetail -> {
-                        header.add(getLocaleProperty(dynamicReportConfigDetail.getLabelName()));
+			} else if (request.getSession() != null) {
+				dynamicReportConfig.getDynmaicReportConfigDetails()
+						.remove(dynamicReportConfig.getDynmaicReportConfigDetails().iterator().next());
+			}
+			List<Object[]> mainGridRows = (List<Object[]>) data.get(ROWS);
+			List<String> header = new ArrayList<>();
+			dynamicReportConfig.getDynmaicReportConfigDetails().stream()
+					.filter(config -> config.getIsExportAvailability())
+					.sorted((f1, f2) -> Long.compare(f1.getOrder(), f2.getOrder()))
+					.forEach(dynamicReportConfigDetail -> {
+						header.add(getLocaleProperty(dynamicReportConfigDetail.getLabelName()));
 
-                    });
-            writer.writeNext(header.stream().map(u -> String.valueOf(u)).toArray(String[]::new));
+					});
+			writer.writeNext(header.stream().map(u -> String.valueOf(u)).toArray(String[]::new));
 
-
-            Map<Long, Object> valMap = formValMap(dynamicReportConfig, getLoggedInUserLanguage());
-            mainGridRows.stream().forEach(arr -> {
-                List<String> valuue = new ArrayList<>();
+			Map<Long, Object> valMap = formValMap(dynamicReportConfig, getLoggedInUserLanguage());
+			mainGridRows.stream().forEach(arr -> {
+				List<String> valuue = new ArrayList<>();
 				runCount = new AtomicInteger(2);
 				dynamicReportConfig.getDynmaicReportConfigDetails().stream()
 						.sorted((f1, f2) -> Long.compare(f1.getOrder(), f2.getOrder()))
@@ -3776,11 +4113,10 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 							if (!dynamicReportConfigDetail.getIsExportAvailability()) {
 								runCount.incrementAndGet();
 							} else {
-								valuue.add(String.valueOf(parseHTMLContent(getAnswer(dynamicReportConfigDetail, arr, runCount,
-										valMap, getLoggedInUserLanguage(), new StringBuilder()))));
+								valuue.add(String.valueOf(parseHTMLContent(getAnswer(dynamicReportConfigDetail, arr,
+										runCount, valMap, getLoggedInUserLanguage(), new StringBuilder()))));
 								runCount.incrementAndGet();
 							}
-
 
 						});
 				writer.writeNext(valuue.stream().map(u -> String.valueOf(u)).toArray(String[]::new));
@@ -3794,21 +4130,21 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 			Files.setPosixFilePermissions(file.toPath(), perms);
 
 		} catch (IOException e) {
-            jss.put("status", "0");
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        sendAjaxResponse(jss);
-/*
+			jss.put("status", "0");
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		sendAjaxResponse(jss);
+		/*
+		 * 
+		 * setFileInputStream(new FileInputStream(file));
+		 * 
+		 * return "csv";
+		 */
 
-			setFileInputStream(new FileInputStream(file));
+	}
 
-		return "csv";
-*/
-
-    }
-    
-    public String getExporterNames(String grpCodes) {
+	public String getExporterNames(String grpCodes) {
 		String groupName = "";
 		if (grpCodes != null) {
 			String[] array = grpCodes.split(",");
@@ -3824,5 +4160,6 @@ procurementMTNR.getPackhouse().getExporter().getVillage().getCity().getLocality(
 		return groupName;
 	}
 
+	
 
 }

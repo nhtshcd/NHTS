@@ -1549,7 +1549,21 @@ public class UniqueIDGenerator implements IUniqueIDGenerator {
 		return GRADE_CHAR + remainingChar + sequence;
 	}
 	
+	@Override
+	public String getProductTransferIdSeq() {
+		// TODO Auto-generated method stub
+		String sequence =sequenceDAO.getProductTransferIdSeq();
+		//return PT_CHAR + sequence;
+		return sequence;
+	}
 	
+	@Override
+	public String getProductReceptionIdSeq() {
+		// TODO Auto-generated method stub
+		String sequence= sequenceDAO.getProductReceptionIdSeq();
+		//return PR_CHAR + sequence;
+		return sequence;
+	}
 
 	
 }

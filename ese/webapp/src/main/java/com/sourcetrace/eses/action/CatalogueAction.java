@@ -1,6 +1,5 @@
 package com.sourcetrace.eses.action;
 
-
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -29,6 +28,10 @@ import com.sourcetrace.eses.service.IUtilService;
 import com.sourcetrace.eses.util.DateUtil;
 import com.sourcetrace.eses.util.ObjectUtil;
 import com.sourcetrace.eses.util.StringUtil;
+
+import lombok.Getter;
+import lombok.Setter;
+
 import com.sourcetrace.eses.action.SwitchValidatorAction;
 
 @SuppressWarnings("serial")
@@ -54,6 +57,9 @@ public class CatalogueAction extends SwitchValidatorAction {
 	private String cataLogueMasterName;
 	private String statusDeafaultVal;
 
+	@Getter
+	@Setter
+	private Long param1;
 
 	public void setIdGenerator(IUniqueIDGenerator idGenerator) {
 
@@ -86,10 +92,11 @@ public class CatalogueAction extends SwitchValidatorAction {
 	 */
 	public String data() throws Exception {
 
-		Map<String, String> searchRecord = getDataTableJQGridRequestParam();// get the
-																	// search
-																	// parameter
-																	// with
+		Map<String, String> searchRecord = getDataTableJQGridRequestParam();// get
+																			// the
+		// search
+		// parameter
+		// with
 		// value
 
 		FarmCatalogue filter = new FarmCatalogue();
@@ -110,23 +117,23 @@ public class CatalogueAction extends SwitchValidatorAction {
 		if (!StringUtil.isEmpty(searchRecord.get("name"))) {
 			filter.setName(searchRecord.get("name").trim());
 		}
-		
+
 		if (!StringUtil.isEmpty(searchRecord.get("typez"))) {
 			filter.setTypez((Integer.valueOf(searchRecord.get("typez"))));
 		} else {
 			filter.setTypez(0);
 		}
-		
+
 		if (!StringUtil.isEmpty(searchRecord.get("status"))) {
 			filter.setStatus((searchRecord.get("status")));
 		}
-		
+
 		if (!StringUtil.isEmpty(searchRecord.get("dispName"))) {
 			filter.setDispName((searchRecord.get("dispName")));
 		}
-		
-				//filter.setMasterStatus(0);
-		
+
+		// filter.setMasterStatus(0);
+
 		filter.setIsReserved(0);
 
 		Map data = reportService.listWithEntityFiltering(getDir(), getSort(), getStartIndex(), getResults(), filter,
@@ -144,38 +151,46 @@ public class CatalogueAction extends SwitchValidatorAction {
 
 		FarmCatalogue catalogue = (FarmCatalogue) obj;
 		JSONObject jsonObject = new JSONObject();
-		//JSONArray rows = new JSONArray();
+		// JSONArray rows = new JSONArray();
 		JSONObject objDt = new JSONObject();
 		JSONObject actionOnj = new JSONObject();
-		objDt.put("code","<font color=\"#0000FF\" style=\"cursor:pointer;\">" + catalogue.getCode() + "</font>");
-		FarmCatalogueMaster catalogueMaster = utilService
-				.findFarmCatalogueMasterByCatalogueTypez(catalogue.getTypez());
+		objDt.put("code", "<font color=\"#0000FF\" style=\"cursor:pointer;\">" + catalogue.getCode() + "</font>");
+		FarmCatalogueMaster catalogueMaster = utilService.findFarmCatalogueMasterByCatalogueTypez(catalogue.getTypez());
 		if (!ObjectUtil.isEmpty(catalogueMaster)) {
-			objDt.put("typez",catalogueMaster.getName());
+			objDt.put("typez", catalogueMaster.getName());
 		} else {
-			objDt.put("typez","");
+			objDt.put("typez", "");
 		}
-		//rows.add(catalogue.getName());
-		
+		// rows.add(catalogue.getName());
+
 		String name = getLanguagePref(getLoggedInUserLanguage(), catalogue.getCode().trim().toString());
-		if(!StringUtil.isEmpty(name) && name != null){
-			objDt.put("name",name);
-		}else{
-			objDt.put("name",catalogue.getName());
+		if (!StringUtil.isEmpty(name) && name != null) {
+			objDt.put("name", name);
+		} else {
+			objDt.put("name", catalogue.getName());
 		}
-		
-		if(!StringUtil.isEmpty(catalogue.getStatus())){
-			objDt.put("status",catalogue.getStatus().equals("0")?getLocaleProperty("statuss0"):getLocaleProperty("statuss1"));
-		}else{
-			objDt.put("status",getLocaleProperty("statuss1"));
+
+		if (!StringUtil.isEmpty(catalogue.getStatus())) {
+			objDt.put("status",
+					catalogue.getStatus().equals("0") ? getLocaleProperty("statuss0") : getLocaleProperty("statuss1"));
+		} else {
+			objDt.put("status", getLocaleProperty("statuss1"));
 		}
 		actionOnj.put("code", catalogue.getCode());
 		actionOnj.put("name", catalogue.getName());
 		actionOnj.put("typez", catalogue.getTypez());
 		actionOnj.put("id", catalogue.getId());
 		actionOnj.put("status", catalogue.getStatus());
-		objDt.put("edit","<a href='#' onclick='ediFunction(\"" + StringEscapeUtils.escapeJavaScript(actionOnj.toString())
-		+ "\")' class='fa fa-edit' title='Edit' ></a>");
+		objDt.put("edit",
+				"<a href='#' onclick='ediFunction(\"" + StringEscapeUtils.escapeJavaScript(actionOnj.toString())
+						+ "\")' class='fa fa-edit' title='Edit' ></a>");
+		if (request.getSession().getAttribute("roleId") != null
+				&& request.getSession().getAttribute("roleId").equals(2L)) {
+			objDt.put("audit", "<button class='fa fa-info' aria-hidden='true' onclick='detailPopup(\""
+					+ catalogue.getId() + "\")'></button>");
+		} else {
+			objDt.put("audit", "No Access");
+		}
 		jsonObject.put("DT_RowId", catalogue.getId());
 		jsonObject.put("cell", objDt);
 		return jsonObject;
@@ -190,17 +205,16 @@ public class CatalogueAction extends SwitchValidatorAction {
 	 */
 
 	public void populateCreate() throws Exception {
-	
+
 		if ((Integer.valueOf(typez) > 0) && (!StringUtil.isEmpty(catalogueName))) {
 
-			FarmCatalogue eCatalogue = utilService.findCatalogueByNameAndType(catalogueName,
-					Integer.valueOf(typez));
+			FarmCatalogue eCatalogue = utilService.findCatalogueByNameAndType(catalogueName, Integer.valueOf(typez));
 			if (eCatalogue != null) {
 				getJsonObject().put("msg", getText("unique.CatalogueName"));
 				getJsonObject().put("title", getText("title.error"));
 				sendAjaxResponse(getJsonObject());
 			} else {
-				farmCatalogue=new FarmCatalogue();
+				farmCatalogue = new FarmCatalogue();
 				farmCatalogue.setCode(idGenerator.getCatalogueIdSeq());
 				farmCatalogue.setRevisionNo(DateUtil.getRevisionNumber());
 				farmCatalogue.setDispName(catalogueName);
@@ -215,8 +229,6 @@ public class CatalogueAction extends SwitchValidatorAction {
 					farmCatalogue.setDispName(farmCatalogue.getName());
 				}
 
-				
-
 				utilService.addCatalogue(farmCatalogue);
 
 				getJsonObject().put("msg", getText("msg.added"));
@@ -225,39 +237,37 @@ public class CatalogueAction extends SwitchValidatorAction {
 			}
 		}
 	}
-	
-	public void populateUpdate(){
+
+	public void populateUpdate() {
 		if (!StringUtil.isEmpty(getId())) {
 			FarmCatalogue catalogue = utilService.findCatalogueById(Long.valueOf(getId()));
-			if(!ObjectUtil.isEmpty(catalogue)){
+			if (!ObjectUtil.isEmpty(catalogue)) {
 				catalogue.setName(catalogueName);
 				catalogue.setRevisionNo(DateUtil.getRevisionNumber());
 				catalogue.setTypez(Integer.parseInt(typez));
-				if(StringUtil.isEmpty(getDispName()) || getDispName()==null){
+				if (StringUtil.isEmpty(getDispName()) || getDispName() == null) {
 					catalogue.setDispName(catalogueName);
-				}else{
+				} else {
 					catalogue.setDispName(getDispName());
 				}
-				
-					catalogue.setStatus(status);
-					
-					catalogue.setUpdatedUser(getUsername());
-					catalogue.setUpdatedDate(new Date());
-				
+
+				catalogue.setStatus(status);
+
+				catalogue.setUpdatedUser(getUsername());
+				catalogue.setUpdatedDate(new Date());
+
 				utilService.editCatalogue(catalogue);
-				
+
 				getJsonObject().put("msg", getText("msg.updated"));
 				getJsonObject().put("title", getText("title.success"));
 				sendAjaxResponse(getJsonObject());
 			}
 		}
 	}
-	
-	
-	public void populateDelete(){
-		
+
+	public void populateDelete() {
+
 	}
-	
 
 	/**
 	 * Update.
@@ -266,71 +276,54 @@ public class CatalogueAction extends SwitchValidatorAction {
 	 * @throws Exception
 	 *             the exception
 	 */
-	/*public String update() throws Exception {
-
-		if (id != null && !id.equals("")) {
-			farmCatalogue = utilService.findCatalogueById(Long.valueOf(id));
-			List<Language> languageMasters = utilService.findIsSurveyStatusLanguage();
-			List<LanguagePreferences> languagePreferences = utilService.listLangPrefByCode(farmCatalogue.getCode());
-			
-	        
-	        
-			for(Language l : languageMasters){
-			
-				List<LanguagePreferences> lpList = languagePreferences.stream().filter(obj -> l.getCode().equals(obj.getLang())).collect(Collectors.toList());
-				if(lpList==null || lpList.isEmpty()){
-					LanguagePreferences preferences = new LanguagePreferences();
-					preferences.setCode("");
-					preferences.setName("");
-					preferences.setLang(l.getCode());
-					preferences.setLtype(LanguagePreferences.Type.CATALOGUE.ordinal());
-					languagePreferences.add(preferences);
-					
-				}
-			}
-			Set<LanguagePreferences> languagePrefs = new HashSet<LanguagePreferences>();
-	        for (LanguagePreferences x : languagePreferences)
-	        	{
-	        	languagePrefs.add(x);
-	        	}
-			
-			farmCatalogue.setLanguagePref(languagePrefs);
-			if (farmCatalogue == null) {
-				addActionError(NO_RECORD);
-				return REDIRECT;
-			}
-			setCurrentPage(getCurrentPage());
-			id = null;
-			command = UPDATE;
-			request.setAttribute(HEADING, getText("catalogueupdate"));
-			setStatusDeafaultVal(farmCatalogue.getStatus());
-		} else {
-			if (farmCatalogue != null) {
-				FarmCatalogue temp = utilService.findCatalogueById(farmCatalogue.getId());
-				if (temp == null) {
-					addActionError(NO_RECORD);
-					return REDIRECT;
-				}
-
-				setCurrentPage(getCurrentPage());
-				temp.setName(farmCatalogue.getName());
-				temp.setTypez(farmCatalogue.getTypez());
-				temp.setRevisionNo(DateUtil.getRevisionNumber());
-				temp.setStatus(farmCatalogue.getStatus());
-				
-				if(farmCatalogue.getDispName()==null && StringUtil.isEmpty(farmCatalogue.getDispName())){
-					temp.setDispName(farmCatalogue.getName());
-				}else{
-					temp.setDispName(farmCatalogue.getDispName());
-				}
-				temp.setLanguagePref(farmCatalogue.getLanguagePref());
-				utilService.editCatalogue(temp);
-			}
-			request.setAttribute(HEADING, getText("cataloguelist"));
-			return REDIRECT;
-		}
-		return super.execute();
-	}*/
+	/*
+	 * public String update() throws Exception {
+	 * 
+	 * if (id != null && !id.equals("")) { farmCatalogue =
+	 * utilService.findCatalogueById(Long.valueOf(id)); List<Language>
+	 * languageMasters = utilService.findIsSurveyStatusLanguage();
+	 * List<LanguagePreferences> languagePreferences =
+	 * utilService.listLangPrefByCode(farmCatalogue.getCode());
+	 * 
+	 * 
+	 * 
+	 * for(Language l : languageMasters){
+	 * 
+	 * List<LanguagePreferences> lpList =
+	 * languagePreferences.stream().filter(obj ->
+	 * l.getCode().equals(obj.getLang())).collect(Collectors.toList());
+	 * if(lpList==null || lpList.isEmpty()){ LanguagePreferences preferences =
+	 * new LanguagePreferences(); preferences.setCode("");
+	 * preferences.setName(""); preferences.setLang(l.getCode());
+	 * preferences.setLtype(LanguagePreferences.Type.CATALOGUE.ordinal());
+	 * languagePreferences.add(preferences);
+	 * 
+	 * } } Set<LanguagePreferences> languagePrefs = new
+	 * HashSet<LanguagePreferences>(); for (LanguagePreferences x :
+	 * languagePreferences) { languagePrefs.add(x); }
+	 * 
+	 * farmCatalogue.setLanguagePref(languagePrefs); if (farmCatalogue == null)
+	 * { addActionError(NO_RECORD); return REDIRECT; }
+	 * setCurrentPage(getCurrentPage()); id = null; command = UPDATE;
+	 * request.setAttribute(HEADING, getText("catalogueupdate"));
+	 * setStatusDeafaultVal(farmCatalogue.getStatus()); } else { if
+	 * (farmCatalogue != null) { FarmCatalogue temp =
+	 * utilService.findCatalogueById(farmCatalogue.getId()); if (temp == null) {
+	 * addActionError(NO_RECORD); return REDIRECT; }
+	 * 
+	 * setCurrentPage(getCurrentPage()); temp.setName(farmCatalogue.getName());
+	 * temp.setTypez(farmCatalogue.getTypez());
+	 * temp.setRevisionNo(DateUtil.getRevisionNumber());
+	 * temp.setStatus(farmCatalogue.getStatus());
+	 * 
+	 * if(farmCatalogue.getDispName()==null &&
+	 * StringUtil.isEmpty(farmCatalogue.getDispName())){
+	 * temp.setDispName(farmCatalogue.getName()); }else{
+	 * temp.setDispName(farmCatalogue.getDispName()); }
+	 * temp.setLanguagePref(farmCatalogue.getLanguagePref());
+	 * utilService.editCatalogue(temp); } request.setAttribute(HEADING,
+	 * getText("cataloguelist")); return REDIRECT; } return super.execute(); }
+	 */
 
 	/**
 	 * Detail.
@@ -349,33 +342,34 @@ public class CatalogueAction extends SwitchValidatorAction {
 					.findFarmCatalogueMasterByCatalogueTypez(farmCatalogue.getTypez());
 			if (!ObjectUtil.isEmpty(catalogueMaster)) {
 				setCataLogueMasterName(catalogueMaster.getName());
-				setStatus(farmCatalogue.getStatus().equals("0")?getLocaleProperty("statuss0"):getLocaleProperty("statuss1"));
+				setStatus(farmCatalogue.getStatus().equals("0") ? getLocaleProperty("statuss0")
+						: getLocaleProperty("statuss1"));
 			}
-			
+
 			List<Language> languageMasters = utilService.findIsSurveyStatusLanguage();
 			List<LanguagePreferences> languagePreferences = utilService.listLangPrefByCode(farmCatalogue.getCode());
-			for(Language l : languageMasters){
-			
-				List<LanguagePreferences> lpList = languagePreferences.stream().filter(obj -> l.getCode().equals(obj.getLang())).collect(Collectors.toList());
-				if(lpList==null || lpList.isEmpty()){
+			for (Language l : languageMasters) {
+
+				List<LanguagePreferences> lpList = languagePreferences.stream()
+						.filter(obj -> l.getCode().equals(obj.getLang())).collect(Collectors.toList());
+				if (lpList == null || lpList.isEmpty()) {
 					LanguagePreferences preferences = new LanguagePreferences();
 					preferences.setCode("");
 					preferences.setName("");
 					preferences.setLang(l.getCode());
 					preferences.setLtype(LanguagePreferences.Type.CATALOGUE.ordinal());
 					languagePreferences.add(preferences);
-					
+
 				}
 			}
-			
+
 			Set<LanguagePreferences> languagePrefs = new HashSet<LanguagePreferences>();
-	        for (LanguagePreferences x : languagePreferences)
-	        	{
-	        	languagePrefs.add(x);
-	        	}
-	        
+			for (LanguagePreferences x : languagePreferences) {
+				languagePrefs.add(x);
+			}
+
 			farmCatalogue.setLanguagePref(languagePrefs);
-		
+
 			if (farmCatalogue == null) {
 				addActionError(NO_RECORD);
 				return REDIRECT;
@@ -451,10 +445,11 @@ public class CatalogueAction extends SwitchValidatorAction {
 	private Map<Integer, String> formCatalogueMap(String keyProperty, Map<Integer, String> typezList) {
 
 		typezList = new LinkedHashMap();
-		
-			List<FarmCatalogueMaster> farmCatalougeList = utilService.listFarmCatalogueMatsters();
-			for(FarmCatalogueMaster fc: farmCatalougeList){
-			typezList.put(fc.getTypez(), fc.getName());}
+
+		List<FarmCatalogueMaster> farmCatalougeList = utilService.listFarmCatalogueMatsters();
+		for (FarmCatalogueMaster fc : farmCatalougeList) {
+			typezList.put(fc.getTypez(), fc.getName());
+		}
 		return typezList;
 	}
 
@@ -518,10 +513,10 @@ public class CatalogueAction extends SwitchValidatorAction {
 		 * sb.append(count).append(":").append(valuesArray[count]).append(";");
 		 * }
 		 */
-		List<FarmCatalogueMaster> farmCatalougeList =  new ArrayList<>();
-	
-				 farmCatalougeList = utilService.listFarmCatalogueMatsters();
-		
+		List<FarmCatalogueMaster> farmCatalougeList = new ArrayList<>();
+
+		farmCatalougeList = utilService.listFarmCatalogueMatsters();
+
 		sb.append("-1:").append(FILTER_ALL).append(";");
 
 		for (FarmCatalogueMaster farmCatalougeMaster : farmCatalougeList) {
@@ -531,13 +526,13 @@ public class CatalogueAction extends SwitchValidatorAction {
 		String data = sb.toString();
 		return data.substring(0, data.length() - 1);
 	}
-	
-	public void populateCatalougeMaster(){
+
+	public void populateCatalougeMaster() {
 		JSONObject jsonObject = new JSONObject();
-		utilService.listFarmCatalogueMatsters().stream().forEach(catalogue->{
+		utilService.listFarmCatalogueMatsters().stream().forEach(catalogue -> {
 			jsonObject.put(catalogue.getId(), catalogue.getName());
 		});
-		
+
 		try {
 			PrintWriter out = response.getWriter();
 			response.setContentType("application/json");
@@ -546,15 +541,15 @@ public class CatalogueAction extends SwitchValidatorAction {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
-		
+
 	}
-	
+
 	@SuppressWarnings("unchecked")
-	public String getStatusFilter(){
-		String value = getLocaleProperty("statuss1")+":"+getLocaleProperty("statuss0");
+	public String getStatusFilter() {
+		String value = getLocaleProperty("statuss1") + ":" + getLocaleProperty("statuss0");
 		return value;
 	}
-	
+
 	public FarmCatalogue getFarmCatalogue() {
 		return farmCatalogue;
 	}
@@ -624,7 +619,7 @@ public class CatalogueAction extends SwitchValidatorAction {
 	public void setTypez(String typez) {
 		this.typez = typez;
 	}
-	
+
 	public String getDispName() {
 		return dispName;
 	}
@@ -640,6 +635,37 @@ public class CatalogueAction extends SwitchValidatorAction {
 	public void setUtilService(IUtilService utilService) {
 		this.utilService = utilService;
 	}
-	
-	
+
+	public String methodQuery() {
+		if (id != null) {
+			List<Object[]> Datas = farmerService.getCatalogueAuditValueByQuery(Long.valueOf(id));
+			List<JSONObject> jsonObjects = new ArrayList<JSONObject>();
+
+			JSONObject jsonObj = new JSONObject();
+
+			previousObje = null;
+			Datas.stream().forEach(da -> {
+				JSONArray jsonArr = new JSONArray();
+
+				if (previousObje == null || !ObjectUtil.isEquals(da, previousObje)) {
+
+					for (i = 0; i < da.length; i++) {
+						if (da[i] != null) {
+							jsonArr.add(i, da[i].toString());
+						} else {
+							jsonArr.add(i, "");
+						}
+					}
+					jsonObj.put(j, jsonArr);
+					j++;
+					previousObje = da;
+				}
+
+			});
+			printAjaxResponse(jsonObj, "text/html");
+
+		}
+		return null;
+	}
+
 }

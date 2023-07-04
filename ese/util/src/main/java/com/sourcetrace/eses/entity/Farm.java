@@ -22,13 +22,15 @@ import org.hibernate.annotations.ParamDef;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))
 @Filters(@org.hibernate.annotations.Filter(name = "branchFilter", condition = "branch_id in ( :branchIdParam )"))
 @Table(name = "farm")
-@Getter 
+@Getter
 @Setter
+@Audited
 public class Farm extends ParentEntity {		
 
 	private static final long serialVersionUID = 1L;
@@ -102,7 +104,7 @@ public class Farm extends ParentEntity {
 	@Column(name = "REVISION_NO",columnDefinition = "BIGINT(45)")
 	private Long revisionNo;
 
-	@ManyToOne
+	@ManyToOne(fetch=FetchType.EAGER)
 	@JoinColumn(name = "FARMER_ID")
 	private Farmer farmer;
 
@@ -118,7 +120,7 @@ public class Farm extends ParentEntity {
 	private CoordinatesMap plotting;
 	
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.LAZY,cascade=CascadeType.ALL)
 	@JoinColumn(name = "VILLAGE_ID")
 	private Village village;
 	

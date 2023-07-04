@@ -256,10 +256,22 @@ public interface IFarmerService {
 
 	public void removerecallingdetail(Long id, Long id2);
 	
-	public List<Object[]> executeChartQuery(String chartQuery, int dateFilter, String dateField, String sDate, String eDate, Long id, String exporterField, String groupField, String orderField);
+	public List<Object[]> executeChartQuery(String chartQuery, int dateFilter, String dateField, String sDate, String eDate, Long id, String exporterField, String groupField, String orderField,int i);
 
 	public List<Dashboard> listDashboardDataByChartDivId();
 
 	public List<ProcurementVariety> findProcurementVarietyByIds(List<Long> convertStringList);
+	
+	public Date findMaximunDateFromSprayingByFarmCropsId(Long farmcropsId);
+	
+	public List<Object[]> findListOfScoutingByplantingIds(List<Long> fcids);
+
+	public List<Object[]> getValueListByQuery(String query, Object[] param, String branchId);
+	
+	public List<Object[]> getCatalogueAuditValueByQuery(Long param);
+	
+	public List<Object[]> findProcurementProductDetailById(Long param,String crop);
+	
+	
  
 }

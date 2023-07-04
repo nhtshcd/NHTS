@@ -65,6 +65,9 @@ public class ScoutingAdapter implements ITxnAdapter {
 		String irrMet = (String) reqData.get("irrMet");
 		String area = (String) reqData.get("area");
 		String source=(String) reqData.get("source");
+		String sprayingRequired=(String) reqData.get("sprayingRequired");
+		String sctRecommendation=(String) reqData.get("sctRecommendation");
+		
 		ESESystem preferences = utilService.findPrefernceById("1");
 		String genDateFormat = preferences.getPreferences().get(ESESystem.GENERAL_DATE_FORMAT);
 		
@@ -100,7 +103,7 @@ public class ScoutingAdapter implements ITxnAdapter {
 			}
 
 			if (farmCrops != null && !ObjectUtil.isEmpty(farmCrops)) {
-				scouting.setFarmCrops(farmCrops);
+			/*	scouting.setFarmCrops(farmCrops);*/
 				scouting.setReceivedDate(DateUtil.convertStringToDate(date, DateUtil.DATABASE_DATE_FORMAT));
 				scouting.setRecommendations(recom);
 				scouting.setAreaIrrrigated(area);
@@ -120,6 +123,8 @@ public class ScoutingAdapter implements ITxnAdapter {
 				scouting.setCreatedUser(head.getAgentId());
 				scouting.setMsgNo(head.getMsgNo());
 				scouting.setBranchId(head.getBranchId());
+				scouting.setSprayingRequired(sprayingRequired);
+				scouting.setSctRecommendation(sctRecommendation);
 				scouting.setStatus(0);
 			}
 

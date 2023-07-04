@@ -114,20 +114,20 @@ font-size: 25px!important;
 	data-keyboard="false">
 	<i class="fa fa-plus" aria-hidden="true"></i>
 </button>
-<div id="slideDetailModal" class="modal fade" role="dialog">
+<div id="slideDetailModal" class="modal fade" role="dialog" >
 	<div class="modal-dialog modal-lg">
 		<!-- Modal content-->
-		<div class="modal-content">
+		<div class="modal-content" >
 			<div class="modal-header">
 				<button type="button" id="detail-close-data-btn" class="close hide"
 					data-dismiss="modal">&times;</button>
 				<h4 class="modal-title" id="detailDataTitle"></h4>
 			</div>
-			<div class="modal-body">
+			<div class="modal-body" style="overflow: auto;">
 				<table class="table ">
 					<thead>
 					</thead>
-					<tbody id="detailDataHead">
+					<tbody id="detailDataHead" style="font-weight: bold;background-color:#fff">
 					</tbody>
 					<tbody id="detailDataBody">
 					</tbody>

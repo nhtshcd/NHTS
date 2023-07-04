@@ -67,6 +67,8 @@ public class FarmerEnrollment implements ITxnAdapter {
 		String vName = (String) reqData.get("vName");
 		String city = (String) reqData.get("city");
 		String farmerCat = (String) reqData.get("fcategory");
+		String farmerCatgory = (String) reqData.get("farmerCatgory");
+		String cropVarity = (String) reqData.get("cropVarity");
 		
 		String krapin = (String) reqData.get("krapin");
 		String compName = (String) reqData.get("compName");
@@ -92,15 +94,26 @@ public class FarmerEnrollment implements ITxnAdapter {
 		if (cropCode == null || StringUtil.isEmpty(cropCode)) {
 			throw new SwitchException(ITxnErrorCodes.EMPTY_CROP_NAME);
 		}
+		
+		if (cropVarity == null || StringUtil.isEmpty(cropVarity)) {
+			throw new SwitchException(ITxnErrorCodes.EMPTY_FARM_VARIETY_CODE);
+		}
 
 		cropCategory = cropCategory != null && !cropCategory.contains(",") ? cropCategory + "," : cropCategory;
 		cropCode = cropCode != null && !cropCode.contains(",") ? cropCode + "," : cropCode;
+		cropVarity = cropVarity != null && !cropVarity.contains(",") ? cropVarity + "," : cropVarity;
+		
 		String ids = farmerService.getValueByQuery(
 				"select group_concat(id) from Procurement_Product pp where pp.code in (:param1)",
 				new Object[] { cropCategory }, ag.getBranchId());
 		String crops = farmerService.getValueByQuery(
 				"select group_concat(id) from Procurement_variety pp where pp.code in (:param1)",
 				new Object[] { cropCode }, ag.getBranchId());
+		
+		String cropVaritys = farmerService.getValueByQuery(
+				"select group_concat(id) from Procurement_grade pp where pp.code in (:param1)",
+				new Object[] { cropVarity }, ag.getBranchId());
+		
 		f.setBranchId(ag.getBranchId());
 		f.setStatus(1);
 		f.setIsActive(1l);
@@ -115,6 +128,7 @@ public class FarmerEnrollment implements ITxnAdapter {
 		f.setChildBelow(chCntFe);
 		f.setCropCategory(ids);
 		f.setCropName(crops);
+		f.setCropVariety(cropVaritys);
 		f.setEmailId(email);
 		f.setLongitude(lon);
 		f.setLatitude(lat);
@@ -126,6 +140,7 @@ public class FarmerEnrollment implements ITxnAdapter {
 		f.setOwnership(hop);
 		f.setHouse(ht);
 		f.setFarmerCat(farmerCat);
+		f.setFCat(farmerCatgory);
 		
 		f.setCompanyName(compName);
 		f.setKraPin(krapin);

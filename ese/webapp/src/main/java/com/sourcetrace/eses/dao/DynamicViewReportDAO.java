@@ -85,17 +85,17 @@ public class DynamicViewReportDAO extends ReportDAO {
 
 				}
 			});
-			
+
 			filters.entrySet().stream().filter(uu -> uu.getKey().equals("hcdFilter")).forEach(ff -> {
-				String[] vall =ff.getValue().split("##");
+				String[] vall = ff.getValue().split("##");
 				List<Criterion> crlist = new ArrayList<>();
 				final Map<String, String> filtersList = new HashMap<>();
-				Arrays.asList(vall).stream().forEach(u->{
-					filtersList.put(u.split("~")[0], u.split("~")[1].toString() + "~"
-							+ u.split("~")[3].toString() + "~"+ u.split("~")[2].toString());
-					
+				Arrays.asList(vall).stream().forEach(u -> {
+					filtersList.put(u.split("~")[0], u.split("~")[1].toString() + "~" + u.split("~")[3].toString() + "~"
+							+ u.split("~")[2].toString());
+
 				});
-				filtersList.entrySet().forEach(u ->{
+				filtersList.entrySet().forEach(u -> {
 					String cond = u.getValue().split("~")[0].trim();
 					String value = u.getValue().split("~")[1].trim();
 					Object valuee = u.getValue().split("~")[1].trim();
@@ -104,7 +104,6 @@ public class DynamicViewReportDAO extends ReportDAO {
 				});
 				criteria.add(Restrictions.or(crlist.toArray(new Criterion[crlist.size()])));
 			});
-			
 
 		}
 		String alias = (String) params.get("alias");
@@ -150,6 +149,10 @@ public class DynamicViewReportDAO extends ReportDAO {
 			List<Integer> list = Arrays.asList(value.toString().split("\\|")).stream()
 					.map(s -> Integer.parseInt(s.trim())).collect(Collectors.toList());
 			return Restrictions.in(key, list);
+		} else if (cond.equals("1") && !StringUtil.isEmpty(u.getValue().split("~")[2])
+				&& u.getValue().split("~")[2].trim().equalsIgnoreCase("6")) {
+			return Restrictions.not(Restrictions.eq(key, Integer.parseInt(value)));
+
 		} else if (cond.equals("1")) {
 			return Restrictions.eq(key, valuee);
 		} else if (cond.equals("2")) {
@@ -229,7 +232,7 @@ public class DynamicViewReportDAO extends ReportDAO {
 
 		} else if (cond.equals("10")) {
 			return Restrictions.in(key, Arrays.asList(value.toString().split(",")));
-		}else if (cond.equals("11")) {
+		} else if (cond.equals("11")) {
 			String[] dates = value.split("\\|");
 			Date startDate = null;
 			Date endDate = null;
@@ -242,14 +245,14 @@ public class DynamicViewReportDAO extends ReportDAO {
 			}
 			// =DateUtil.convertStringToDate(dates[0],"dd-MM-yyyy");
 			return Restrictions.between(key, startDate, endDate);
-		}else if (cond.equals("12")) {
+		} else if (cond.equals("12")) {
 			return Restrictions.eq(key, Long.parseLong(value));
-		}else if (cond.equals("13")) {
+		} else if (cond.equals("13")) {
 			return Restrictions.eq(key, Double.parseDouble(value));
-		}else if (cond.equals("14")) {
+		} else if (cond.equals("14")) {
 			return Restrictions.eq(key, Integer.parseInt(value));
 		}
-		
+
 		return null;
 	}
 

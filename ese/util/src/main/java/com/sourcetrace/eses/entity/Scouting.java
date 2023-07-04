@@ -25,12 +25,13 @@ import org.hibernate.annotations.Where;
 import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "scouting")
 @Getter
 @Setter
-
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class Scouting extends ParentEntity implements java.io.Serializable  {
 
 	private static final long serialVersionUID = 1L;
@@ -41,11 +42,11 @@ public class Scouting extends ParentEntity implements java.io.Serializable  {
 	@Column(name = "DATE")
 	private Date receivedDate;
 
-	@ManyToOne(fetch = FetchType.LAZY)
+	/*@ManyToOne(fetch = FetchType.LAZY)
 	@JoinColumn(name = "FARM_CROP_ID")
-	private FarmCrops farmCrops;
+	private FarmCrops farmCrops;*/
 	
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER)
 	@JoinColumn(name = "PLANTING_ID")
 	private Planting planting;
 	
@@ -88,6 +89,9 @@ public class Scouting extends ParentEntity implements java.io.Serializable  {
 	@Column(name = "Name_Of_Weeds", columnDefinition = "VARCHAR")
 	private String nameOfWeeds;
 	
+	@Column(name = "SPRAYING_REQUIRED", columnDefinition = "VARCHAR")
+	private String sprayingRequired;
+	
     @OneToMany(mappedBy = "scouting", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
 	private Set<ScoutingDetails> ScoutingDetails;
 
@@ -105,5 +109,8 @@ public class Scouting extends ParentEntity implements java.io.Serializable  {
 	
 	@Column(name = "SOURCE_OF_WATER")
 	private String sourceOfWater;
+	
+	@Column(name = "SCTRECOMMENDATION")
+	private String sctRecommendation;
 	
 }

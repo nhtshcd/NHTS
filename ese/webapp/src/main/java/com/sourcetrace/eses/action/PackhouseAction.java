@@ -17,6 +17,7 @@ import com.sourcetrace.eses.entity.Village;
 import com.sourcetrace.eses.entity.Packhouse;
 import com.sourcetrace.eses.entity.Packhouse.WarehouseTypes;
 import com.sourcetrace.eses.service.IUniqueIDGenerator;
+import com.sourcetrace.eses.util.DateUtil;
 import com.sourcetrace.eses.util.ObjectUtil;
 import com.sourcetrace.eses.util.StringUtil;
 
@@ -61,7 +62,7 @@ public class PackhouseAction extends SwitchAction {
 			return INPUT;
 		} else {
 			ware.setCreatedDate(new Date());
-			ware.setCreatedUsername(getUsername());
+			ware.setCreatedUser(getUsername());
 			ware.setBranchId(getBranchId() != null ? getBranchId() : defBranchId);
 
 			ware.setName(ware.getName());
@@ -83,6 +84,7 @@ public class PackhouseAction extends SwitchAction {
 					ware.setExporter(ex);
 				}
 			}
+			ware.setRevisionNo(DateUtil.getRevisionNumber());
 			ware.setStatus(1);
 			utilService.save(ware);
 			return REDIRECT;
@@ -162,6 +164,7 @@ public class PackhouseAction extends SwitchAction {
 				tempAgroCh.setUpdatedDate(new Date());
 				tempAgroCh.setLatitude(ware.getLatitude());
 				tempAgroCh.setLongitude(ware.getLongitude());
+				tempAgroCh.setRevisionNo(DateUtil.getRevisionNumber());
 				//tempAgroCh.setStatus(StringUtil.isEmpty(ware.getStatus()) ? 0 : ware.getStatus());
 
 				utilService.update(tempAgroCh);
@@ -194,9 +197,15 @@ public class PackhouseAction extends SwitchAction {
 			
 		
 				
-				if (ware.getCode() != null && !StringUtil.isEmpty(ware.getCode())) {
+				/*if (ware.getCode() != null && !StringUtil.isEmpty(ware.getCode())) {
 					//Packhouse packhouseCode=utilService.findWarehouseByCode(ware.getCode());
 					Packhouse packhouseCode = (Packhouse) farmerService.findObjectById("FROM Packhouse sn where sn.code=? and sn.exporter.id = ? and sn.status=1",new Object[] { ware.getCode(),ware.getExporter().getId() });
+					if (packhouseCode != null && !packhouseCode.getId().equals(ware.getId())) {
+						errorCodes.put("unique.cooperativeCode", "unique.cooperativeCode");
+					}
+				}*/
+				if (ware.getCode() != null && !StringUtil.isEmpty(ware.getCode())) {
+					Packhouse packhouseCode=utilService.findWarehouseByCode(ware.getCode());
 					if (packhouseCode != null && !packhouseCode.getId().equals(ware.getId())) {
 						errorCodes.put("unique.cooperativeCode", "unique.cooperativeCode");
 					}

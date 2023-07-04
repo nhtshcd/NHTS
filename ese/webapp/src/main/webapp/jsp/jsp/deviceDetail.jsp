@@ -58,11 +58,10 @@
 							<s:property value="device.name" />
 						</p>
 					</div>
-					
+
 					<div class="dynamic-flexItem">
 						<p class="flexItem">
-							<s:property
-								value="%{getLocaleProperty('exporter')}" />
+							<s:property value="%{getLocaleProperty('exporter')}" />
 						</p>
 						<p class="flexItem">
 							<s:property value="device.exporter.name" />
@@ -101,7 +100,106 @@
 
 
 				</div>
+				<s:if test='#session.isAdmin =="true"'>
+					<s:iterator value="ex" var="innerList">
+						<div class="aPanel audit_history">
+							<div class="formContainerWrapper ">
+								<h2>
+									<s:if
+										test="#innerList[2].toString().trim().equalsIgnoreCase('ADD')">
+										<s:property value="#innerList[0].createdUser" />
+									</s:if>
+									<s:else>
+										<s:property value="#innerList[0].updatedUser" />
+									</s:else>
+									-
 
+									<s:date name="#innerList[1].revisionDate"
+										format="dd/MM/yyyy hh:mm:ss" />
+									-
+									<s:property
+										value="%{getLocaleProperty('default'+#innerList[2])}" />
+									<div class="pull-right">
+										<a class="aCollapse "
+											href="#<s:property value="#innerList[1].id" />"><i
+											class="fa fa-chevron-right"></i></a>
+									</div>
+								</h2>
+							</div>
+							<div class="aContent dynamic-form-con"
+								id="<s:property value="#innerList[1].id" />">
+								<div class="dynamic-flexItem">
+									<p class="flexItem">
+										<s:text name="profile.device.code" />
+									</p>
+									<p class="flexItem">
+										<s:property value="device.code" />
+									</p>
+								</div>
+								<div class="dynamic-flexItem">
+									<p class="flexItem">
+										<s:text name="profile.device.serialNumber" />
+									</p>
+									<p class="flexItem">
+										<s:property value="#innerList[0].serialNumber" />
+									</p>
+								</div>
+
+								<div class="dynamic-flexItem">
+									<p class="flexItem">
+										<s:text name="profile.device.name" />
+									</p>
+									<p class="flexItem">
+										<s:property value="#innerList[0].name" />
+									</p>
+								</div>
+
+								<div class="dynamic-flexItem">
+									<p class="flexItem">
+										<s:property value="%{getLocaleProperty('exporter')}" />
+									</p>
+									<p class="flexItem">
+										<s:property value="#innerList[0].exporter.name" />
+									</p>
+								</div>
+
+
+								<div class="dynamic-flexItem">
+									<p class="flexItem">
+										<s:text name="profile.device.deviceStatus" />
+									</p>
+									<p class="flexItem">
+										<s:if test='#innerList[0].enabled'>
+											<s:text name="status.enabled" />
+										</s:if>
+										<s:else>
+											<s:text name="status.disabled" />
+										</s:else>
+									</p>
+								</div>
+
+								<div class="dynamic-flexItem">
+									<p class="flexItem">
+										<s:property value="%{getLocaleProperty('agentName')}" />
+									</p>
+									<p class="flexItem">
+										<s:if test='((agentName==null)||(agentName.equals(" ")))'>
+											<s:text name="noMapWithAgent" />&nbsp;
+							</s:if>
+										<s:else>
+											<s:property
+												value="#innerList[0].agent.personalInfo.firstName" />&nbsp; <s:property
+												value="#innerList[0].agent.personalInfo.lastName" />
+										</s:else>
+									</p>
+								</div>
+
+
+								<%-- <jsp:include page='/jsp/jsp/auditExportRegistrationDetail.jsp' /> --%>
+							</div>
+						</div>
+					</s:iterator>
+				</s:if>
 				<div class="yui-skin-sam">
 					<sec:authorize ifAllGranted="profile.device.update">
 						<span id="update" class=""><span class="first-child">
@@ -149,7 +247,7 @@
 		</div>
 	</div>
 
-	
+
 	<script type="text/javascript">
 		function resetComplete(){
 			modal.open({content: '<s:text name="unMapAgentSuccess"/>'});

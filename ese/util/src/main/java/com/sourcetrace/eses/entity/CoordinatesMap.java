@@ -1,6 +1,8 @@
 package com.sourcetrace.eses.entity;
 // Generated 23 Jun, 2020 5:09:17 PM by Hibernate Tools 5.0.6.Final
 
+import org.hibernate.envers.*;
+
 import static javax.persistence.GenerationType.IDENTITY;
 
 import java.util.Date;
@@ -23,6 +25,7 @@ import javax.persistence.TemporalType;
  */
 @Entity
 @Table(name = "COORDINATES_MAP")
+@Audited
 public class CoordinatesMap implements java.io.Serializable {
 
 	public static enum typesOFCordinates {

@@ -21,6 +21,7 @@ import com.sourcetrace.eses.entity.Farmer;
 import com.sourcetrace.eses.entity.Locality;
 import com.sourcetrace.eses.entity.Municipality;
 import com.sourcetrace.eses.entity.ParentEntity;
+import com.sourcetrace.eses.entity.Planting;
 import com.sourcetrace.eses.entity.Sorting;
 import com.sourcetrace.eses.entity.State;
 import com.sourcetrace.eses.entity.Village;
@@ -38,7 +39,7 @@ public class SortingAction extends SwitchAction {
 	private static final long serialVersionUID = 1L;
 
 	private String QUERY = "FROM Sorting s WHERE s.id=? AND s.status=?";
-	private String FARMCROPS_QUERY = "FROM FarmCrops fc WHERE fc.id=? AND fc.status=?";
+	private String FARMCROPS_QUERY = "FROM Planting fc WHERE fc.id=? AND fc.status=?";
 	private String CITY_QUERY = "FROM CityWarehouse cw WHERE cw.planting.id=? and  cw.coOperative is  null";
 	@Getter
 	@Setter
@@ -88,6 +89,10 @@ public class SortingAction extends SwitchAction {
 	@Setter
 	private String blockId;
 
+	@Getter
+	@Setter
+	List<Object[]> ex;
+
 	/**
 	 * For detail page
 	 * 
@@ -106,6 +111,8 @@ public class SortingAction extends SwitchAction {
 			JSONObject harvest = getHarvestByFarmCropsId(sorting.getPlanting().getId().toString());
 			dateHarvested = harvest.get("dateHarvested").toString();
 			qtyHarvested = harvest.get("qtyHarvested").toString();
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.Sorting", sorting.getId());
+
 			setCommand(DETAIL);
 			return DETAIL;
 		} else {
@@ -127,10 +134,10 @@ public class SortingAction extends SwitchAction {
 			request.setAttribute(HEADING, "sortingcreate");
 			return INPUT;
 		} else {
-			FarmCrops farmCrops = (FarmCrops) farmerService.findObjectById(FARMCROPS_QUERY,
-					new Object[] { sorting.getFarmCrops().getId(), 1 });
-
-			sorting.setFarmCrops(farmCrops);
+			Planting farmCrops = (Planting) farmerService.findObjectById(FARMCROPS_QUERY,
+					new Object[] { sorting.getPlanting().getId(), 1 });
+			sorting.setPlanting(farmCrops);
+			// sorting.setFarmCrops(farmCrops.getFarmCrops());
 			sorting.setQtyHarvested(Double.valueOf(qtyHarvested));
 			sorting.setQtyRejected(Double.valueOf(qtyRejected));
 			sorting.setQtyNet(Double.valueOf(netQty));
@@ -162,25 +169,30 @@ public class SortingAction extends SwitchAction {
 			qtyRejected = sorting.getQtyRejected().toString();
 			netQty = sorting.getQtyNet().toString();
 
-			setSelectedVillage(sorting.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(sorting.getFarmCrops().getFarm().getFarmer().getVillage().getId()) : "");
-			setSelectedCity(sorting.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(sorting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getId()) : "");
-			setSelectedLocality(sorting.getFarmCrops().getFarm().getFarmer().getVillage() != null
+			setSelectedVillage(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? String.valueOf(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getId())
+					: "");
+			setSelectedCity(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
 					? String.valueOf(
-							sorting.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getId())
+							sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity().getId())
 					: "");
-			setSelectedState(sorting.getFarmCrops().getFarm().getFarmer().getVillage() != null ? String.valueOf(sorting
-					.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality().getState().getId())
+			setSelectedLocality(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? String.valueOf(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity()
+							.getLocality().getId())
 					: "");
-			setSelectedCountry(
-					sorting.getFarmCrops().getFarm().getFarmer().getVillage() != null ? sorting.getFarmCrops().getFarm()
-							.getFarmer().getVillage().getCity().getLocality().getState().getCountry().getName() : "");
+			setSelectedState(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? String.valueOf(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity()
+							.getLocality().getState().getId())
+					: "");
+			setSelectedCountry(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+					? sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality()
+							.getState().getCountry().getName()
+					: "");
 			setCurrentPage(getCurrentPage());
-			setSelectedFarm(sorting.getFarmCrops().getFarm() != null
-					? String.valueOf(sorting.getFarmCrops().getFarm().getId()) : "");
-			setSelectedFarmer(sorting.getFarmCrops().getFarm() != null
-					? String.valueOf(sorting.getFarmCrops().getFarm().getFarmer().getId()) : "");
+			setSelectedFarm(sorting.getPlanting().getFarmCrops().getFarm() != null
+					? String.valueOf(sorting.getPlanting().getFarmCrops().getFarm().getId()) : "");
+			setSelectedFarmer(sorting.getPlanting().getFarmCrops().getFarm() != null
+					? String.valueOf(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getId()) : "");
 			id = null;
 			command = UPDATE;
 			request.setAttribute(HEADING, getText("sortingupdate"));
@@ -190,9 +202,10 @@ public class SortingAction extends SwitchAction {
 				Sorting oldSrot = new Sorting();
 				BeanUtils.copyProperties(oldSrot, s);
 				updateSorting(s);
-				FarmCrops farmCrops = (FarmCrops) farmerService.findObjectById(FARMCROPS_QUERY,
-						new Object[] { sorting.getFarmCrops().getId(), 1 });
-				s.setFarmCrops(farmCrops);
+				Planting farmCrops = (Planting) farmerService.findObjectById(FARMCROPS_QUERY,
+						new Object[] { sorting.getPlanting().getId(), 1 });
+				s.setPlanting(farmCrops);
+				// s.setFarmCrops(farmCrops.getFarmCrops());
 				s.setTruckType(sorting.getTruckType());
 				s.setTruckNo(sorting.getTruckNo());
 				s.setDriverName(sorting.getDriverName());
@@ -289,15 +302,16 @@ public class SortingAction extends SwitchAction {
 	public void populateValidate() throws Exception {
 		Map<String, String> errorCodes = new LinkedHashMap<>();
 		if (sorting != null) {
-			if (sorting.getFarmCrops().getFarm().getFarmer().getId() == null
-					|| StringUtil.isEmpty(sorting.getFarmCrops().getFarm().getFarmer().getId())) {
+			if (sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getId() == null
+					|| StringUtil.isEmpty(sorting.getPlanting().getFarmCrops().getFarm().getFarmer().getId())) {
 				errorCodes.put("empty.sorting.farmer", getLocaleProperty("empty.sorting.farmer"));
 			}
-			if (sorting.getFarmCrops().getFarm().getId() == null
-					|| StringUtil.isEmpty(sorting.getFarmCrops().getFarm().getId())) {
+			if (sorting.getPlanting().getFarmCrops().getFarm().getId() == null
+					|| StringUtil.isEmpty(sorting.getPlanting().getFarmCrops().getFarm().getId())) {
 				errorCodes.put("empty.sorting.farm", getLocaleProperty("empty.sorting.farm"));
 			}
-			if (sorting.getFarmCrops().getId() == null || StringUtil.isEmpty(sorting.getFarmCrops().getId())) {
+			if (sorting.getPlanting().getFarmCrops().getId() == null
+					|| StringUtil.isEmpty(sorting.getPlanting().getFarmCrops().getId())) {
 				errorCodes.put("empty.sorting.block", getLocaleProperty("empty.sorting.block"));
 			}
 			/*
@@ -311,9 +325,11 @@ public class SortingAction extends SwitchAction {
 				errorCodes.put("empty.planting", "empty.planting");
 			}
 
-			/*if (blockId == null || StringUtil.isEmpty(blockId)) {
-				errorCodes.put("empty.blockId", getLocaleProperty("empty.blockId"));
-			}*/
+			/*
+			 * if (blockId == null || StringUtil.isEmpty(blockId)) {
+			 * errorCodes.put("empty.blockId",
+			 * getLocaleProperty("empty.blockId")); }
+			 */
 
 			if (dateHarvested == null || StringUtil.isEmpty(dateHarvested)) {
 				errorCodes.put("empty.sorting.dateHarvested", getLocaleProperty("empty.sorting.dateHarvested"));
@@ -559,7 +575,7 @@ public class SortingAction extends SwitchAction {
 	public void populatBlock() {
 
 		JSONArray farmerArr = new JSONArray();
-		
+
 		LinkedList<Object> parame = new LinkedList();
 		String qry = "select distinct cw.farmcrops FROM CityWarehouse cw where cw.coOperative.id is null  and cw.harvestedWeight>0 and cw.farmcrops.farm.id=? and cw.farmcrops.status=1";
 		parame.add(Long.valueOf(selectedFarm));
@@ -568,10 +584,15 @@ public class SortingAction extends SwitchAction {
 			parame.add(Long.valueOf(getLoggedInDealer()));
 		}
 		List<FarmCrops> growerList = (List<FarmCrops>) farmerService.listObjectById(qry, parame.toArray());
-		/*String qryString = "select distinct cw.farmcrops FROM CityWarehouse cw where cw.coOperative.id is null  and cw.harvestedWeight>0 and cw.farmcrops.farm.id=? and cw.farmcrops.status=1";
-
-		List<FarmCrops> cityWareHouseList = (List<FarmCrops>) farmerService.listObjectById(qryString,
-				new Object[] { Long.valueOf(selectedFarm) });*/
+		/*
+		 * String qryString =
+		 * "select distinct cw.farmcrops FROM CityWarehouse cw where cw.coOperative.id is null  and cw.harvestedWeight>0 and cw.farmcrops.farm.id=? and cw.farmcrops.status=1"
+		 * ;
+		 * 
+		 * List<FarmCrops> cityWareHouseList = (List<FarmCrops>)
+		 * farmerService.listObjectById(qryString, new Object[] {
+		 * Long.valueOf(selectedFarm) });
+		 */
 		growerList.stream().distinct().forEach(cw -> {
 			farmerArr.add(getJSONObject(cw.getId().toString(), cw.getBlockId() + " - " + cw.getBlockName().toString()));
 		});

@@ -2,6 +2,7 @@ package com.sourcetrace.eses.action;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
@@ -89,7 +90,7 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 	@Getter
 	@Setter
 	private String dateOfSpraying;
-	
+
 	@Getter
 	@Setter
 	private String endDateOfSpraying;
@@ -124,6 +125,13 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 	@Getter
 	@Setter
 	private String selectedTradeNameId;
+	@Getter
+	@Setter
+	private String selectedPlantingId;
+
+	@Getter
+	@Setter
+	private String roleID;
 
 	/**
 	 * for insertion
@@ -173,7 +181,8 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 						.setDateOfSpraying(DateUtil.convertStringToDate(dateOfSpraying, getGeneralDateFormat()));
 			}
 			if (!StringUtil.isEmpty(endDateOfSpraying)) {
-				sprayAndFieldManagement.setEndDateSpray(DateUtil.convertStringToDate(endDateOfSpraying, getGeneralDateFormat()));
+				sprayAndFieldManagement
+						.setEndDateSpray(DateUtil.convertStringToDate(endDateOfSpraying, getGeneralDateFormat()));
 			}
 			if (!StringUtil.isEmpty(trainingStatusOfSprayOperator)) {
 				sprayAndFieldManagement.setTrainingStatusOfSprayOperator(getTrainingStatusOfSprayOperator());
@@ -183,9 +192,10 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 						DateUtil.convertStringToDate(lastDateOfCalibration, getGeneralDateFormat()));
 			}
 
-			if (selectedProduct != null && !StringUtil.isEmpty(selectedProduct)) {
-				FarmCrops fc = utilService.findFarmCropsById(Long.valueOf(selectedProduct.split("~")[0]));
-				sprayAndFieldManagement.setFarmCrops(fc);
+			if (sprayAndFieldManagement.getPlanting().getId() != null
+					&& !StringUtil.isEmpty(sprayAndFieldManagement.getPlanting().getId())) {
+				Planting fc = utilService.findPlantingById(Long.valueOf(sprayAndFieldManagement.getPlanting().getId()));
+				sprayAndFieldManagement.setPlanting(fc);
 			}
 
 			Pcbp pcbp = utilService.findPcbpById(Long.valueOf(selectedTradeNameId));
@@ -198,6 +208,14 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 			sprayAndFieldManagement.setLatitude(getLatitude());
 			sprayAndFieldManagement.setLongitude(getLongitude());
 			sprayAndFieldManagement.setDeleteStatus(sprayAndFieldManagement.getDeleteStatus());
+
+			if (!StringUtil.isEmpty(dateOfSpraying) && !StringUtil.isEmpty(sprayAndFieldManagement.getPhi())
+					&& sprayAndFieldManagement.getPhi() != null && dateOfSpraying != null) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(DateUtil.convertStringToDate(dateOfSpraying, getGeneralDateFormat()));
+				cal.add(Calendar.DATE, Integer.valueOf(sprayAndFieldManagement.getPhi()));
+				sprayAndFieldManagement.setDayOfPHIandSprayingDate(cal.getTime());
+			}
 
 			utilService.save(sprayAndFieldManagement);
 		}
@@ -216,14 +234,18 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 
 			sprayAndFieldManagement = utilService.findSprayAndFieldManagementById(Long.valueOf(id));
 
-			if (sprayAndFieldManagement.getDateOfSpraying() != null && !ObjectUtil.isEmpty(sprayAndFieldManagement.getDateOfSpraying())) {
-				setDateOfSpraying(DateUtil.convertDateToString(sprayAndFieldManagement.getDateOfSpraying(),getGeneralDateFormat()));
+			if (sprayAndFieldManagement.getDateOfSpraying() != null
+					&& !ObjectUtil.isEmpty(sprayAndFieldManagement.getDateOfSpraying())) {
+				setDateOfSpraying(DateUtil.convertDateToString(sprayAndFieldManagement.getDateOfSpraying(),
+						getGeneralDateFormat()));
 			}
-			
-			if (sprayAndFieldManagement.getEndDateSpray() != null && !ObjectUtil.isEmpty(sprayAndFieldManagement.getEndDateSpray())) {
-				setEndDateOfSpraying(DateUtil.convertDateToString(sprayAndFieldManagement.getEndDateSpray(),getGeneralDateFormat()));
+
+			if (sprayAndFieldManagement.getEndDateSpray() != null
+					&& !ObjectUtil.isEmpty(sprayAndFieldManagement.getEndDateSpray())) {
+				setEndDateOfSpraying(DateUtil.convertDateToString(sprayAndFieldManagement.getEndDateSpray(),
+						getGeneralDateFormat()));
 			}
-			
+
 			if (sprayAndFieldManagement.getTrainingStatusOfSprayOperator() != null
 					&& !ObjectUtil.isEmpty(sprayAndFieldManagement.getTrainingStatusOfSprayOperator())) {
 				setTrainingStatusOfSprayOperator(sprayAndFieldManagement.getTrainingStatusOfSprayOperator());
@@ -236,35 +258,47 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 			}
 
 			sprayAndFieldManagement.setVariety(sprayAndFieldManagement.getPlanting().getVariety().getId().toString());
-			setSelectedProduct(sprayAndFieldManagement.getFarmCrops().getId() + "~"
-					+ sprayAndFieldManagement.getPlanting().getVariety().getProcurementProduct().getId());
+			/*
+			 * setSelectedProduct(sprayAndFieldManagement.getFarmCrops().getId()
+			 * + "~" + sprayAndFieldManagement.getPlanting().getVariety().
+			 * getProcurementProduct().getId());
+			 */
 
-			setSelectedVillage(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage().getId())
+			setSelectedVillage(
+					sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+							? String.valueOf(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer()
+									.getVillage().getId())
+							: "");
+			setSelectedCity(
+					sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+							? String.valueOf(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer()
+									.getVillage().getCity().getId())
+							: "");
+			setSelectedLocality(
+					sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+							? String.valueOf(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer()
+									.getVillage().getCity().getLocality().getId())
+							: "");
+			setSelectedState(
+					sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+							? String.valueOf(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer()
+									.getVillage().getCity().getLocality().getState().getId())
+							: "");
+			setSelectedCountry(
+					sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage() != null
+							? sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getVillage()
+									.getCity().getLocality().getState().getCountry().getName()
+							: "");
+
+			setSelectedFarm(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm() != null
+					? String.valueOf(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getId()) : "");
+			setSelectedFarmer(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm() != null
+					? String.valueOf(sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getId())
 					: "");
-			setSelectedCity(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(
-							sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getId())
-					: "");
-			setSelectedLocality(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage().getCity()
-							.getLocality().getId())
-					: "");
-			setSelectedState(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? String.valueOf(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage().getCity()
-							.getLocality().getState().getId())
-					: "");
-			setSelectedCountry(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage() != null
-					? sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getVillage().getCity().getLocality()
-							.getState().getCountry().getName()
-					: "");
-			
-			setSelectedFarm(sprayAndFieldManagement.getFarmCrops().getFarm() != null ? String.valueOf(sprayAndFieldManagement.getFarmCrops().getFarm().getId()) : "");
-			setSelectedFarmer(sprayAndFieldManagement.getFarmCrops().getFarm() != null
-					? String.valueOf(sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getId()) : "");
 			sprayAndFieldManagement.setPhi(sprayAndFieldManagement.getPhi());
-			
-			setSelectedTradeNameId(sprayAndFieldManagement.getPcbp()!=null ? sprayAndFieldManagement.getPcbp().getId().toString() : " " );
+
+			setSelectedTradeNameId(sprayAndFieldManagement.getPcbp() != null
+					? sprayAndFieldManagement.getPcbp().getId().toString() : " ");
 
 			command = "update";
 			return INPUT;
@@ -276,14 +310,23 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 				FarmCrops fc = utilService.findFarmCropsById(Long.valueOf(selectedProduct.split("~")[0]));
 
 			}
-			sfManagement.setFarmCrops(sprayAndFieldManagement.getFarmCrops());
+			// sfManagement.setFarmCrops(sprayAndFieldManagement.getFarmCrops());
+
+			if (sprayAndFieldManagement.getPlanting() != null && sprayAndFieldManagement.getPlanting().getId() != null
+					&& sprayAndFieldManagement.getPlanting().getId() != null
+					&& sprayAndFieldManagement.getPlanting().getId() > 0) {
+				Planting pl = utilService.findPlantingById(Long.valueOf(sprayAndFieldManagement.getPlanting().getId()));
+				if (pl != null && !ObjectUtil.isEmpty(pl)) {
+					sfManagement.setPlanting(pl);
+				}
+			}
 
 			if (!StringUtil.isEmpty(dateOfSpraying)) {
 				sfManagement.setDateOfSpraying(DateUtil.convertStringToDate(dateOfSpraying, getGeneralDateFormat()));
 			} else {
 				sfManagement.setDateOfSpraying(null);
 			}
-			
+
 			if (!StringUtil.isEmpty(endDateOfSpraying)) {
 				sfManagement.setEndDateSpray(DateUtil.convertStringToDate(endDateOfSpraying, getGeneralDateFormat()));
 			} else {
@@ -324,6 +367,8 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 			sfManagement.setInsectTargeted(sprayAndFieldManagement.getInsectTargeted());
 			sfManagement.setUpdatedUser(getUsername());
 
+			sfManagement.setActiveIngredient(sprayAndFieldManagement.getActiveIngredient());
+			sfManagement.setRecommen(sprayAndFieldManagement.getRecommen());
 			if (selectedTradeNameId != null) {
 				Pcbp pcbp = utilService.findPcbpById(Long.valueOf(selectedTradeNameId));
 				if (pcbp != null) {
@@ -344,6 +389,15 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 				utilService.save(du);
 			}
 			sfManagement.setDeleteStatus(sprayAndFieldManagement.getDeleteStatus());
+
+			if (!StringUtil.isEmpty(dateOfSpraying) && !StringUtil.isEmpty(sfManagement.getPhi())
+					&& sfManagement.getPhi() != null && dateOfSpraying != null) {
+				Calendar cal = Calendar.getInstance();
+				cal.setTime(DateUtil.convertStringToDate(dateOfSpraying, getGeneralDateFormat()));
+				cal.add(Calendar.DATE, Integer.valueOf(sfManagement.getPhi()));
+				sfManagement.setDayOfPHIandSprayingDate(cal.getTime());
+			}
+
 			utilService.update(sfManagement);
 		}
 		return REDIRECT;
@@ -356,6 +410,10 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 	 * @return
 	 * @throws Exception
 	 */
+	@Getter
+	@Setter
+	List<Object[]> ex;
+
 	public String detail() throws Exception {
 		String view = null;
 		if (id != null && !id.equals("")) {
@@ -363,6 +421,14 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 			if (sprayAndFieldManagement == null) {
 				addActionError(NO_RECORD);
 				return REDIRECT;
+			}
+			roleID = getLoggedInRoleID();
+			ex = utilService.getAuditRecords("com.sourcetrace.eses.entity.SprayAndFieldManagement",
+					sprayAndFieldManagement.getId());
+
+			for (Object s[] : ex) {
+				SprayAndFieldManagement sss = (SprayAndFieldManagement) s[0];
+				System.out.println("======================" + sss.getPlanting().getId());
 			}
 
 			setCurrentPage(getCurrentPage());
@@ -407,53 +473,59 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 
 		if (sprayAndFieldManagement != null) {
 
-			if (sprayAndFieldManagement.getFarmCrops() == null
-					|| sprayAndFieldManagement.getFarmCrops().getFarm() == null
-					|| sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer() == null
-					|| sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getId() == null
-					|| sprayAndFieldManagement.getFarmCrops().getFarm().getFarmer().getId() <= 0) {
+			if (sprayAndFieldManagement.getPlanting() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getId() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getFarmer().getId() <= 0) {
 
 				errorCodes.put("empty.farmer", "empty.farmer");
 			}
 
-			if (sprayAndFieldManagement.getFarmCrops() == null
-					|| sprayAndFieldManagement.getFarmCrops().getFarm() == null
-					|| sprayAndFieldManagement.getFarmCrops().getFarm().getId() == null
-					|| sprayAndFieldManagement.getFarmCrops().getFarm().getId() <= 0) {
+			if (sprayAndFieldManagement.getPlanting() == null
+					| sprayAndFieldManagement.getPlanting().getFarmCrops() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getId() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getFarm().getId() <= 0) {
 
 				errorCodes.put("emptySpray.farm", "emptySpray.farm");
 			}
 
-			if (sprayAndFieldManagement.getFarmCrops() == null
-					|| sprayAndFieldManagement.getFarmCrops().getId() == null) {
+			if (sprayAndFieldManagement.getPlanting() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops() == null
+					|| sprayAndFieldManagement.getPlanting().getFarmCrops().getId() == null) {
 
 				errorCodes.put("empty.block", "empty.block");
 			}
 			if (sprayAndFieldManagement.getPlanting() == null
 					|| sprayAndFieldManagement.getPlanting().getId() == null) {
-				
+
 				errorCodes.put("empty.planting", "empty.planting");
 			}
-			Date scoutingDate =null;
+			Date scoutingDate = null;
 			if (dateOfSpraying == null || StringUtil.isEmpty(dateOfSpraying)) {
 				errorCodes.put("empty.DateOfSpraying", "empty.DateOfSpraying");
 			} else {
 
-				 scoutingDate = DateUtil.convertStringToDate(dateOfSpraying, getGeneralDateFormat());
+				scoutingDate = DateUtil.convertStringToDate(dateOfSpraying, getGeneralDateFormat());
 
-				/*FarmCrops fc = utilService.findFarmCropsById(sprayAndFieldManagement.getFarmCrops().getId());
-				if (fc != null && fc.getPlantingDate().compareTo(scoutingDate) > 0) {
-					errorCodes.put("spraying.invlid.date", "spraying.invlid.date");
-				}*/
+				/*
+				 * FarmCrops fc =
+				 * utilService.findFarmCropsById(sprayAndFieldManagement.
+				 * getFarmCrops().getId()); if (fc != null &&
+				 * fc.getPlantingDate().compareTo(scoutingDate) > 0) {
+				 * errorCodes.put("spraying.invlid.date",
+				 * "spraying.invlid.date"); }
+				 */
 				Planting fc = utilService.findPlantingById(sprayAndFieldManagement.getPlanting().getId());
 				if (fc != null && fc.getPlantingDate().compareTo(scoutingDate) > 0) {
 					errorCodes.put("spraying.invlid.date", "spraying.invlid.date");
 				}
-				
+
 			}
-			
-			
-			if (scoutingDate!=null && endDateOfSpraying != null && !StringUtil.isEmpty(endDateOfSpraying)) {
+
+			if (scoutingDate != null && endDateOfSpraying != null && !StringUtil.isEmpty(endDateOfSpraying)) {
 				Date endDate = DateUtil.convertStringToDate(endDateOfSpraying, getGeneralDateFormat());
 				if (scoutingDate.compareTo(endDate) > 0) {
 					errorCodes.put("spraying.invlid.enddate", "spraying.invlid.enddate");
@@ -465,14 +537,14 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 				errorCodes.put("empty.pcbpTradNameCha", "empty.pcbpTradNameCha");
 			}
 
-			
-			 if (sprayAndFieldManagement.getDosage() == null ||
-			 StringUtil.isEmpty(sprayAndFieldManagement.getDosage())) {
-			 errorCodes.put("empty.dosage", "empty.dosage"); } 
-			 if(sprayAndFieldManagement.getUom() == null ||
-			 StringUtil.isEmpty(sprayAndFieldManagement.getUom())) {
-			 errorCodes.put("empty.uom", "empty.uom"); }
-			
+			if (sprayAndFieldManagement.getDosage() == null
+					|| StringUtil.isEmpty(sprayAndFieldManagement.getDosage())) {
+				errorCodes.put("empty.dosage", "empty.dosage");
+			}
+			if (sprayAndFieldManagement.getUom() == null || StringUtil.isEmpty(sprayAndFieldManagement.getUom())) {
+				errorCodes.put("empty.uom", "empty.uom");
+			}
+
 			if (sprayAndFieldManagement.getNameOfOperator() == null
 					|| StringUtil.isEmpty(sprayAndFieldManagement.getNameOfOperator())) {
 				errorCodes.put("empty.NameOfOperator", "empty.NameOfOperator");
@@ -525,6 +597,10 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 				jss.put("sMdosage", pcbpVaCh.getDosage());
 				jss.put("sMphi", pcbpVaCh.getPhiIn());
 				jss.put("sMuom", pcbpVaCh.getUom());
+			}else{
+				jss.put("sMdosage", "");
+				jss.put("sMphi", "");
+				jss.put("sMuom", "");
 			}
 		}
 		sendAjaxResponse(jss);
@@ -574,26 +650,38 @@ public class SprayAndFieldManagementAction extends SwitchAction {
 
 		sendAjaxResponse(stateArr);
 	}
-/*	public void populateChamicals() throws Exception {
-		
-		JSONArray stateArr = new JSONArray();
-		if (!selectedFarmer.equalsIgnoreCase("null") && (!StringUtil.isEmpty(selectedFarmer))) {
-			FarmCrops fc = utilService.findFarmCropsById(Long.valueOf(selectedFarmer));
-			
-			if (fc != null) {
-				ProcurementGrade pg = utilService.findProcurementGradeByName(fc.getGrade().getName());
-				if (pg != null) {
-					List<Pcbp> pcbp = (List<Pcbp>) utilService.findPcbpByProcurementGradeId(pg.getId());
-					if (!ObjectUtil.isListEmpty(pcbp)) {
-						for (Pcbp pc : pcbp) {
-							stateArr.add(getJSONObject(String.valueOf(pc.getId()), pc.getTradeName()));
-						}
-					}
+	/*
+	 * public void populateChamicals() throws Exception {
+	 * 
+	 * JSONArray stateArr = new JSONArray(); if
+	 * (!selectedFarmer.equalsIgnoreCase("null") &&
+	 * (!StringUtil.isEmpty(selectedFarmer))) { FarmCrops fc =
+	 * utilService.findFarmCropsById(Long.valueOf(selectedFarmer));
+	 * 
+	 * if (fc != null) { ProcurementGrade pg =
+	 * utilService.findProcurementGradeByName(fc.getGrade().getName()); if (pg
+	 * != null) { List<Pcbp> pcbp = (List<Pcbp>)
+	 * utilService.findPcbpByProcurementGradeId(pg.getId()); if
+	 * (!ObjectUtil.isListEmpty(pcbp)) { for (Pcbp pc : pcbp) {
+	 * stateArr.add(getJSONObject(String.valueOf(pc.getId()),
+	 * pc.getTradeName())); } } } } }
+	 * 
+	 * sendAjaxResponse(stateArr); }
+	 */
+
+	public void populateRecomm() throws Exception {
+
+		if (selectedPlantingId != null && !StringUtil.isEmpty(selectedPlantingId)) {
+			if (!StringUtil.isEmpty(selectedPlantingId)) {
+				List<Object[]> farmerData = utilService.getScoutingRecomm(selectedPlantingId);
+				JSONObject jsonObj = new JSONObject();
+				if (farmerData != null && !ObjectUtil.isEmpty(farmerData)) {
+					farmerData.stream().distinct().forEach(a -> {
+						jsonObj.put("recommen", a[1] != null && !ObjectUtil.isEmpty(a[1]) ? a[1].toString() : "");
+					});
+					sendAjaxResponse(jsonObj);
 				}
 			}
 		}
-		
-		sendAjaxResponse(stateArr);
 	}
-*/
 }

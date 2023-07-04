@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.stereotype.Component;
 
 import com.sourcetrace.eses.entity.Action;
@@ -54,6 +55,8 @@ import com.sourcetrace.eses.entity.ProcurementGrade;
 import com.sourcetrace.eses.entity.ProcurementProduct;
 import com.sourcetrace.eses.entity.ProcurementVariety;
 import com.sourcetrace.eses.entity.Product;
+import com.sourcetrace.eses.entity.ProductTransfer;
+import com.sourcetrace.eses.entity.ProductTransferDetail;
 import com.sourcetrace.eses.entity.Role;
 import com.sourcetrace.eses.entity.Scouting;
 import com.sourcetrace.eses.entity.SeasonMaster;
@@ -230,8 +233,8 @@ public interface IUtilService {
 	public Vendor findVendorById(String Id);
 
 	public List<Customer> listCustomer();
-	
-	/*public List<Pcbp> listPcbp();*/
+
+	/* public List<Pcbp> listPcbp(); */
 	public List<Object[]> listPcbp();
 
 	public Customer findCustomerBycustomerId(String customerId);
@@ -351,7 +354,7 @@ public interface IUtilService {
 	public ESEAccount findAccountByProfileId(String profileId);
 
 	public Customer findCustomerById(String customerId);
-	
+
 	public Customer findCustomerByName(String customerName);
 
 	public void addProcurement(Procurement procurement);
@@ -379,6 +382,7 @@ public interface IUtilService {
 	public PackhouseIncoming findFieldStaffAvailableStock(String agentId, long productId, String tenantId);
 
 	public void updateESEAccountCashBalById(long id, double cashBalance);
+
 	public String findPrefernceByName(String enableApproved, String tenantId);
 
 	public void saveByTenantId(Object object, String tenantId);
@@ -905,11 +909,11 @@ public interface IUtilService {
 	public List<Object[]> listHarvestSeasonFromToPeriod();
 
 	public void addHarvestSeason(HarvestSeason harvestSeason);
-	
+
 	public void addCustomer(Customer customer);
 
 	public void editHarvestSeason(HarvestSeason existing);
-	
+
 	public void editCustomer(Customer customer);
 
 	public HarvestSeason findHarvestSeasonById(Long id);
@@ -991,9 +995,9 @@ public interface IUtilService {
 	public Farmer findFarmerByEmail(String email);
 
 	public List<Object[]> listExporter();
-	
+
 	public List<Object[]> listBuyer();
-	
+
 	public List<Object[]> listUOM();
 
 	List<Farmer> listFarmerName();
@@ -1025,9 +1029,9 @@ public interface IUtilService {
 	public ExporterRegistration findExproterByCompanyName(String name);
 
 	public ExporterRegistration findExportRegById(Long id);
-	
+
 	public Pcbp findPcbpById(Long id);
-	
+
 	public Pcbp findPcbpByvarietyAndChamical(Long va, Long ch);
 
 	public State listStatesById(Long id);
@@ -1038,7 +1042,7 @@ public interface IUtilService {
 	public List<ProcurementVariety> listProcurementVarietyByProcurementProductId(Long id);
 
 	public ProcurementVariety findProcurementVarietyById(Long id);
-	
+
 	public List<Pcbp> findPcbpByProcurementGradeId(Long id);
 
 	public ProcurementProduct findProcurementProductById(Long id);
@@ -1068,8 +1072,8 @@ public interface IUtilService {
 	public void editProcurementVariety(ProcurementVariety temp);
 
 	public List<ProcurementGrade> listProcurementGradeByProcurementVarietyId(Long valueOf);
-	
-	public List<ProcurementGrade> listProcurementGradeByProcurementVarietyIdGradeid(Long valueOf,String IdGrades);
+
+	public List<ProcurementGrade> listProcurementGradeByProcurementVarietyIdGradeid(Long valueOf, String IdGrades);
 
 	public ProcurementGrade findProcurementGradeByNameAndVarietyId(String gradeName, Long id);
 
@@ -1080,7 +1084,7 @@ public interface IUtilService {
 	public void editProcurementGrade(ProcurementGrade temp);
 
 	public List<ProcurementVariety> listProcurementVariety();
-	
+
 	public List<ProcurementVariety> listProcurementVarietyBasedOnCropCat(String ugandaExport);
 
 	public ProcurementProduct findProcurementProductByCode(String code);
@@ -1096,7 +1100,7 @@ public interface IUtilService {
 	public ExporterRegistration findExportByCompanyEmail(String cemail);
 
 	public Object[] findIfFarmerExist(String phno, String nid);
-	
+
 	public Object[] findIfFarmerExistForFarmer(String nid);
 
 	public FarmCrops findFarmCropsById(Long id);
@@ -1110,15 +1114,15 @@ public interface IUtilService {
 	Scouting findScoutingById(Long id);
 
 	ProcurementGrade findProcurementGradeByCode(String code);
-	
+
 	ProcurementGrade findProcurementGradeByName(String name);
-	
+
 	ProcurementVariety findProcurementVarietyByName(String name);
 
 	public List<ProcurementGrade> listProcurementGradeByProcurementVarietyIds(String procurementVariety);
 
 	public List<FarmCrops> listFarmCropByFarmId(Long id);
-	
+
 	public List<Planting> listOfPlantingByBlockId(Long id);
 
 	public FarmCrops findFarmCropByplantingfarmcode(String plantingId, String farmCode);
@@ -1137,33 +1141,34 @@ public interface IUtilService {
 
 	void updateHarvest(Harvest harvest);
 
-	public List<Packhouse> listPackhouse() ;
+	public List<Packhouse> listPackhouse();
+
 	public List<FarmCrops> listFarmCrops();
+
 	public List<CityWarehouse> listCityWareHouse();
 
 	public void saveIncoming(PackhouseIncoming packhouseIncoming);
-	
+
 	void savePacking(Packing packing);
 
 	void updatePacking(Packing packing, Map<CityWarehouse, Double> existock, Set<PackingDetail> packingDetails);
 
 	void deleteSorting(Sorting sorting);
-	
-	
+
 	void updateIncoming(PackhouseIncoming packhouseIncoming);
-	
+
 	public void removeCustomer(Customer customer);
-	
+
 	public List<ShipmentDetails> findShipmentDetailById(Long id);
 
 	void saveShipment(Shipment shipment);
-	
+
 	public Packhouse findWarehouseByCode(String code);
-	
+
 	public List<Shipment> listOfShipmentByCustomerId(long id);
 
 	public void updateShipment(Map<CityWarehouse, Double> existingstock, Shipment shipment);
-	
+
 	void deletePacking(Packing packing, Map<CityWarehouse, Double> existock);
 
 	void deleteIncoming(PackhouseIncoming incoming);
@@ -1171,7 +1176,7 @@ public interface IUtilService {
 	void deleteHarvest(Harvest harvest, Harvest oldHarvest);
 
 	CityWarehouse findCityWarehouseByFarmCrops(Long id);
-	
+
 	public User findByUsernameAndBranchId(String username, String branchId);
 
 	void updateStocks(Harvest harvest, Map<CityWarehouse, Double> existock);
@@ -1193,27 +1198,81 @@ public interface IUtilService {
 	public Integer findSprayingCount(Date stDate, Date edDate, Long loggedInDealer);
 
 	public Double findShipmentQuantity(Date stDate, Date edDate, Long loggedInDealer);
-	
+
 	public List<Object[]> listCustomerIdAndNameByExporter(Long id);
-	
-	void processExporterLic(ExporterRegistration expReg,Map<String, String> preferences);
-	
+
+	void processExporterLic(ExporterRegistration expReg, Map<String, String> preferences);
+
 	public List<Packhouse> listActivePackhouse();
-	
+
 	public Agent findAgentByProfileAndBranchIdActive(String agentId, String branchId);
-	
+
 	void processShipmentandharvest(ExporterRegistration expReg);
-	
-	void processShipmentInactive(Integer long1,List<Shipment> sh);
-	
-	void processHarvestInactive(Integer long1,List<Harvest> long2);
+
+	void processShipmentInactive(Integer long1, List<Shipment> sh);
+
+	void processHarvestInactive(Integer long1, List<Harvest> long2);
 
 	public Planting findPlantingById(Long id);
-	
+
 	public String findExporterNameById(String string, String ugandaExport);
-	
+
 	public List<Planting> listPlantingByFarmCropsId(Long id);
 
 	void deletePacking(Packing packing, Map<CityWarehouse, Double> existingstock, Set<PackingDetail> pdSet);
-	
+
+	public ProductTransfer findProductTransferById(Long id);
+
+	public List<Packhouse> listOfPackhouseByExporterId(Long exporterId);
+
+	public List<PackhouseIncoming> listOfIncomingShipmentbasedOnPackhouse(long packHouseId);
+
+	public List<ProductTransfer> listOfProductTransfer();
+
+	void saveProductTransfer(ProductTransfer productTransfer);
+
+	void updateProductTransfer(ProductTransfer productTransfer, Map<CityWarehouse, Double> existock,
+			Set<ProductTransferDetail> ptDetail);
+
+	void deleteProductTransfer(ProductTransfer productTransfer, Map<CityWarehouse, Double> existingstock,
+			Set<ProductTransferDetail> ptDetail);
+
+	void saveProductReception(ProductTransfer productTransfer);
+
+	void updateProductReception(ProductTransfer productTransfer, Map<CityWarehouse, Double> existock,
+			Set<ProductTransferDetail> ptDetail);
+
+	void deleteProductReception(ProductTransfer productTransfer, Map<CityWarehouse, Double> existingstock,
+			Set<ProductTransferDetail> ptDetail);
+
+	public List<ProductTransfer> listOfProductTransferByCityWareHouseBatches(List<String> batches);
+
+	public List<Object[]> getBuyerCountry(String id);
+
+	public List<Object[]> getScoutingRecomm(String plantingId);
+
+	public <T> List<T> getAuditRecords(String class1, Long id);
+
+	public Municipality findCityByVillageId(Long valueOf);
+
+	public Locality findLocalityByVillageId(Long valueOf);
+
+	public State findStateByVillageId(Long valueOf);
+
+	public Country findCountryByVillageId(Long valueOf);
+
+	public String findDataByTableFieldById(String table, String code, String field);
+
+	public String findObjectIdFromTableByFieldIdAndRevId(String table, String fieldValue, String audId);
+
+	public Locality findLocalityByCityId(Long valueOf);
+
+	public State findStateByCityId(Long valueOf);
+
+	public Country findCountryByCityId(Long valueOf);
+
+	public <T> List<T> getAuditRecordsWithRelations(String string, List<String> s, Long id);
+
+	void saveOrUpdatecitywarehouse(CityWarehouse obj);
+
 }

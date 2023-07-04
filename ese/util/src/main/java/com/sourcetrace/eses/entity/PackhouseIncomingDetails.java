@@ -18,11 +18,13 @@ import javax.persistence.Transient;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.envers.*;
 
 @Entity
 @Table(name = "packhouse_incoming_details")
 @Getter
 @Setter
+@Audited(targetAuditMode = RelationTargetAuditMode.NOT_AUDITED)
 public class PackhouseIncomingDetails implements Serializable, Comparable<PackhouseIncomingDetails> {
 
 	private static final long serialVersionUID = 1L;

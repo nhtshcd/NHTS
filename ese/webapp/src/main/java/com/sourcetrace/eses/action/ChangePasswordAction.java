@@ -127,7 +127,8 @@ public class ChangePasswordAction extends SwitchAction {
 
 			ESESystem es = userService.findPrefernceByOrganisationId(eUser.getBranchId());
 			Integer min = Integer.valueOf(es.getPreferences().get(ESESystem.PASSWORD_MIN_LENGTH).toString());
-			String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,100000000}$";
+			//String PASSWORD_PATTERN = "^(?=.*[0-9])(?=.*[a-z])(?=.*[A-Z])(?=.*[!@#&()–[{}]:;',?/*~$^+=<>]).{%%min%%,100000000}$";
+			String PASSWORD_PATTERN = "^(?=.*).{%%min%%,100000000}$";
 			PASSWORD_PATTERN = PASSWORD_PATTERN.replace("%%min%%",
 					es.getPreferences().get(ESESystem.PASSWORD_MIN_LENGTH).toString());
 

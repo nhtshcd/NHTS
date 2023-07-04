@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
@@ -31,10 +32,12 @@ import org.hibernate.annotations.Filters;
 import org.hibernate.annotations.ParamDef;
 
 import com.sourcetrace.eses.util.StringUtil;
+import org.hibernate.envers.*;
 
 @Entity
  @FilterDef(name = "branchFilter", parameters = @ParamDef(name = "branchIdParam", type = "string"))@Filters(@org.hibernate.annotations.Filter(name="branchFilter", condition="branch_id in ( :branchIdParam )"))
 @Table(name = "village")
+@Audited
 public class Village {
 
 	private long id;
@@ -45,9 +48,8 @@ public class Village {
 	private long revisionNo;
 	private String branchId;
 	private String seq;
-	private Set<Procurement> Procurement = new HashSet<Procurement>(0);
-	
-	/**
+
+    /**
 	 * Transient variable
 	 */
 	private List<String> branchesList;
@@ -124,7 +126,7 @@ public class Village {
 	 *
 	 * @return the city
 	 */
-	@ManyToOne(fetch = FetchType.LAZY)
+	@ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
 	@JoinColumn(name = "CITY_ID", nullable = false)
 	public Municipality getCity() {
 
@@ -237,17 +239,8 @@ public class Village {
 		this.seq = seq;
 	}
 
-	@OneToMany(fetch = FetchType.LAZY)
-	@JoinColumn(name = "id", nullable = false)
-	public Set<Procurement> getProcurement() {
-		return Procurement;
-	}
 
-	public void setProcurement(Set<Procurement> procurement) {
-		Procurement = procurement;
-	}
-	
-	@Transient
+    @Transient
 	public List<String> getBranchesList() {
 		return branchesList;
 	}
